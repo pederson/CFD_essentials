@@ -10,8 +10,8 @@ void quicksort(T1 * tosort, T2 * carry, unsigned int left, unsigned int right){
 	T2 tmp2;
 	unsigned int i=left, j=right;
 
-	pivot = tosort[(right - left)/2];
-	
+	pivot = tosort[(right - left)/2 + left + 1];
+
 	// partition part
 	if (carry != NULL){
 		while (i <= j){
@@ -37,6 +37,7 @@ void quicksort(T1 * tosort, T2 * carry, unsigned int left, unsigned int right){
 				tmp = tosort[i];
 				tosort[i] = tosort[j];
 				tosort[j] = tmp;
+			
 				i++;
 				j--;
 			}
@@ -61,6 +62,8 @@ double interp_nearest(double * points, double * values, unsigned int numpts, dou
 	// find a starting point
 	i = numpts * (eval_point - points[0])/(points[numpts-1] - points[0]);
 	min_diff = (points[i] - eval_point)*(points[i] - eval_point);
+
+cout << "Starting point: " << points[i] << " mindiff: " << min_diff << endl;
 
 	// iterate to find the closest point
 	while (cont){
@@ -160,11 +163,12 @@ double * interp_polynomial_piecewise(double * points, double * values, unsigned 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <iostream>
+
 
 int main(int argc, char * argv[]){
 	// vars
 	double * randpts, * randvals, * tosort;
+	double evalpt, nnval, linval, quadval, cubval;
 	int npts;
 
 	// user set variables
@@ -186,6 +190,16 @@ int main(int argc, char * argv[]){
 	quicksort(tosort, (int *) NULL, 0, npts-1);
 	for (int i=0; i<npts; i++){
 		cout << "unsorted: " << randpts[i] << " sorted: " << tosort[i] << endl;
+	}
+	quicksort(randpts, randvals, 0, npts-1);
+
+	// test nearest neighbor interpolation
+	cout << "testing nearest neighbor interpolation" << endl;
+	evalpt = rand()%npts + 1 + 0.4;
+	nnval = interp_nearest(randpts, randvals, npts, evalpt);
+	cout << "evalpt: " << evalpt << " nearest val: " << nnval << endl;
+	for (int i=0; i<npts; i++){
+		cout << "pts: " << randpts[i] << " vals: " << randvals[i] << endl;
 	}
 
 	return 0;
