@@ -8,12 +8,12 @@
 
 double interp_nearest(double * points, double * values, unsigned int numpts, double eval_point);
 
-double * interp_nearest_piecewise(double * points, double * values, double * eval_points,
-							unsigned int num_eval_pts);
+double * interp_nearest_piecewise(double * points, double * values, unsigned int npts, 
+							double * eval_points, unsigned int num_eval_pts);
 
 double interp_polynomial(double * points, double * values, unsigned int degree, double eval_point);
 
-double * interp_polynomial_piecewise(double * points, double * values, unsigned int degree,
+double * interp_polynomial_piecewise(double * points, double * values, unsigned int npts, unsigned int degree,
 							double * eval_points, unsigned int num_eval_pts);
 
 #endif

@@ -63,8 +63,6 @@ double interp_nearest(double * points, double * values, unsigned int numpts, dou
 	i = numpts * (eval_point - points[0])/(points[numpts-1] - points[0]);
 	min_diff = (points[i] - eval_point)*(points[i] - eval_point);
 
-cout << "Starting point: " << points[i] << " mindiff: " << min_diff << endl;
-
 	// iterate to find the closest point
 	while (cont){
 		// check the current point for the bounds
@@ -104,18 +102,28 @@ cout << "Starting point: " << points[i] << " mindiff: " << min_diff << endl;
 	return values[i];
 }
 
-double * interp_nearest_piecewise(double * points, double * values, double * eval_points,
-							unsigned int num_eval_pts){
+double * interp_nearest_piecewise(double * points, double * values, unsigned int numpts,
+								double * eval_points, unsigned int num_eval_pts){
 	// declare vars
-	double * interp_vals;
+	double * interp_vals, * sortpoints, * sortvalues;
 
 	// check the input points
+	// no repeats in "points" 
 
 	// sort the input points in ascending order and carry the index
-
-	// sort the values by the index
+	sortpoints = new double[numpts];
+	sortvalues = new double[numpts];
+	for (int i=0; i<numpts; i++){
+		sortpoints[i] = points[i];
+		sortvalues[i] = values[i];
+	}
+	quicksort(sortpoints, sortvalues, 0, numpts-1);
 
 	// evaluate the nearest neighbor for each eval point
+	interp_vals = new double[num_eval_pts];
+	for (int i=0; i<num_eval_pts; i++){
+		interp_vals[i] = interp_nearest(sortpoints, sortvalues, numpts, eval_points[i]);
+	}
 
 
 	return interp_vals;
@@ -140,17 +148,22 @@ double interp_polynomial(double * points, double * values, unsigned int degree, 
 
 }
 
-double * interp_polynomial_piecewise(double * points, double * values, unsigned int degree,
+double * interp_polynomial_piecewise(double * points, double * values, unsigned int numpts, unsigned int degree,
 							double * eval_points, unsigned int num_eval_pts){
-	// declare vars
-	double * interp_vals;
+	// declare vars 
+	double * interp_vals, * sortpoints, * sortvalues;
 
 	// check the input to make sure it has the correct number of inpoint points and values for 
 	// the requested piecewise polynomial
 
 	// sort the input points in ascending order and carry the index
-
-	// sort the values by the index
+	sortpoints = new double[numpts];
+	sortvalues = new double[numpts];
+	for (int i=0; i<numpts; i++){
+		sortpoints[i] = points[i];
+		sortvalues[i] = values[i];
+	}
+	quicksort(sortpoints, sortvalues, 0, numpts-1);
 
 	// evaluate each evaluation point for the given degree... give a pointer to 
 	// the first of the interpolation points
@@ -167,7 +180,7 @@ double * interp_polynomial_piecewise(double * points, double * values, unsigned 
 
 int main(int argc, char * argv[]){
 	// vars
-	double * randpts, * randvals, * tosort;
+	double * randpts, * randvals, * tosort, * nnvals, *evalpts;
 	double evalpt, nnval, linval, quadval, cubval;
 	int npts;
 
@@ -178,9 +191,11 @@ int main(int argc, char * argv[]){
 	srand(time(NULL));
 	randpts = new double[npts];
 	randvals = new double[npts];
+	evalpts = new double[npts];
 	for (int i=0; i<npts; i++){
 		randpts[i] = rand()%npts + 1;
 		randvals[i] = rand()%20 - 10;
+		evalpts[i] = rand()%(npts-3) + double(rand()%10)/10.0 + 2;
 	}
 
 	// test quicksort
@@ -201,6 +216,32 @@ int main(int argc, char * argv[]){
 	for (int i=0; i<npts; i++){
 		cout << "pts: " << randpts[i] << " vals: " << randvals[i] << endl;
 	}
+
+	// test the nearest neighbor piecewise interpolation
+	cout << "testing nearest neighbor piecewise interpolation" << endl;
+	nnvals = interp_nearest_piecewise(randpts, randvals, npts, evalpts, npts);
+	for (int i=0; i<npts; i++){
+		cout << "evalpt: " << evalpts[i] << " nnval: " << nnvals[i] << endl;
+	} 
+
+	// test linear interpolation
+	cout << "testing linear interpolation" << endl;
+	evalpt = double(rand()%(10))/10.0 + randpts[0];
+	linval = interp_polynomial(randpts, randvals, 1, evalpt);
+	cout << "randpts: " << randpts[0] << "  " << randpts[1] << endl;
+	cout << "randvals: " << randvals[0] << "  " << randvals[1] << endl;
+	cout << "evalpt: " << evalpt << " linval: " << linval << endl;
+
+	// test quadratic interpolation
+	cout << "testing quadratic interpolation" << endl;
+	evalpt = double(rand()%(10))/10.0 + randpts[0];
+	quadval = interp_polynomial(randpts, randvals, 3, evalpt);
+	cout << "randpts: " << randpts[0] << "  " << randpts[1] << "  " << randpts[2] << endl;
+	cout << "randvals: " << randvals[0] << "  " << randvals[1] << "  " << randvals[2] << endl;
+	cout << "evalpt: " << evalpt << " quadval: " << quadval << endl;
+
+	// test polynomial piecewise interpolation
+
 
 	return 0;
 }
