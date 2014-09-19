@@ -2,7 +2,7 @@
 
 using namespace std;
 
-//#define _TEST_INTERPOLATE_
+#define _TEST_INTERPOLATE_
 
 template <typename T1, typename T2>
 void quicksort(T1 * tosort, T2 * carry, unsigned int left, unsigned int right){
@@ -171,6 +171,25 @@ double * interp_polynomial_piecewise(double * points, double * values, unsigned 
 	return interp_vals;
 }
 
+double * chebyshev(unsigned int N, double min_val, double max_val){
+    // declare vars
+    double * chebyvals;
+    
+    //loop over values
+    chebyvals = new double[N];
+    for (unsigned int i=0; i<N; i++){
+     chebyvals[i] = -cos(i*3.14159265359/(N-1));
+    }
+    
+    // scale the output
+    if (min_val != -1.0 || max_val != 1.0){
+        for (unsigned int i=0; i<N; i++){
+            chebyvals[i] = (chebyvals[i]+1.0)*(max_val - min_val)/2.0 + min_val;
+        }
+    }
+    
+    return chebyvals;
+}
 #ifdef _TEST_INTERPOLATE_
 
 #include <stdio.h>
@@ -180,7 +199,7 @@ double * interp_polynomial_piecewise(double * points, double * values, unsigned 
 
 int main(int argc, char * argv[]){
 	// vars
-	double * randpts, * randvals, * tosort, * nnvals, *evalpts;
+	double * randpts, * randvals, * tosort, * nnvals, *evalpts, * cheby;
 	double evalpt, nnval, linval, quadval, cubval;
 	int npts;
 
@@ -242,6 +261,12 @@ int main(int argc, char * argv[]){
 
 	// test polynomial piecewise interpolation
 
+ // test chebyshev
+ cout << "testing chebyshev" << endl;
+ cheby = chebyshev(npts);
+ for (int i=0; i<npts; i++){
+        cout << "cheby: " << cheby[i] << endl;
+    }
 
 	return 0;
 }
