@@ -171,6 +171,8 @@ double * interp_polynomial_piecewise(double * points, double * values, unsigned 
 	return interp_vals;
 }
 
+// returns chebyshev points on the interval min_val to max_val 
+// the default is from -1 to 1 if the interval values are not specified
 double * chebyshev(unsigned int N, double min_val, double max_val){
     // declare vars
     double * chebyvals;
