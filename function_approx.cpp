@@ -1,6 +1,6 @@
 #include "function_approx.hpp"
 
-#define _TEST_
+//#define _TEST_
 
 #define PI 3.14159265359
 
