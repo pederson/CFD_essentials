@@ -14,5 +14,10 @@ class Mesh{
 		std::list(std::vector<int>) neighbors;
 }
 
+// define classes for regular and unstructured grids here
+
+
+// unstructured cell transformation here
+
 
 #endif
