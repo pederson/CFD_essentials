@@ -1,10 +1,27 @@
+/************************************************************************************//**
+ * \file function_approx.cpp
+ * 
+ * File filled with necessary code for function approximation
+ *
+ ***************************************************************************************/
+
 #include "function_approx.hpp"
 
 //#define _TEST_
 
 #define PI 3.14159265359
 
-double * cheby_basis(double (*function_handle)(double), unsigned int M){
+/************************************************************************************//**
+ * \brief Determine coefficients of a Chebyshev basis function
+ * 
+ *  This function calculates the coefficients of Chebyshev basis functions
+ *  where bk = -cos(k*x)
+ *
+ *  \param function_handle : handle to real function to be approximated
+ *  \param M : the number of basis functions to use
+ *
+ ***************************************************************************************/
+double * basis_cheby(double (*function_handle)(double), unsigned int M){
 	// declare vars
 	unsigned int *ki;
 	double * si, *ak;
@@ -41,6 +58,45 @@ double * cheby_basis(double (*function_handle)(double), unsigned int M){
 	return ak;
 }
 
+/************************************************************************************//**
+ * \brief Determine coefficients of a piecewise linear basis using lagrange polynomials
+ * 
+ *  This function calculates the coefficients of linear lagrange polynomical basis functions
+ *  where bk = delta_function(xk)
+ *
+ *  \param function_handle : handle to real function to be approximated
+ *  \param M : the number of basis functions to use
+ *
+ ***************************************************************************************/
+double * basis_lagrange_poly(double (*function_handle)(double), unsigned int M){
+	// declare vars
+	unsigned int *ak;
+	double * xi;
+
+	// initialize all x values
+	xi = new double[M+1];
+	for (unsigned int i=0; i<M+1; i++) xi[i] = i*2.0/M - 1.0;
+
+	// the ak values are just the values of the function at the standard points
+	ak = new double[M+1];
+	for (unsigned int i=0; i<M+1; i++) ak[i] = function_handle(xi[i]);
+
+	// delete stuff
+	delete[] xi;
+
+	return ak;
+}
+
+/************************************************************************************//**
+ * \brief Evaluate approximate values using a Chebyshev function approximation
+ * 
+ *  This function takes x values from [-1, 1] and approximates the function values at 
+ *  these points by using Chebyshev basis functions. 
+ *
+ *  \param function_handle : handle to real function to be approximated
+ *  \param M : the number of basis functions to use
+ *
+ ***************************************************************************************/
 double * approx_cheby(double (*function_handle)(double), unsigned int M, double * eval_points, unsigned int N_eval_pts){
 	// declare vars
 	unsigned int *ki;
@@ -52,7 +108,7 @@ double * approx_cheby(double (*function_handle)(double), unsigned int M, double 
 	for (unsigned int i=0; i<M+1; i++) ki[i] = i;
 
 	// get the ak coefficients
-	ak = cheby_basis(function_handle, M);
+	ak = basis_cheby(function_handle, M);
 	for (unsigned int i=0; i<M+1; i++) std::cout << "ak[i]: " << ak[i] << std::endl;
 	
 	// evaluate input points

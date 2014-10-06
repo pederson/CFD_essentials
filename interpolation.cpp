@@ -1,9 +1,29 @@
+/************************************************************************************//**
+ * \file interpolation.cpp
+ * 
+ * File filled with necessary code for interpolation
+ *
+ ***************************************************************************************/
+
 #include "interpolation.hpp"
 
 using namespace std;
 
 #define _TEST_INTERPOLATE_
 
+/************************************************************************************//**
+ * \brief Templated quicksort that works with a NULL carry
+ * 
+ *  This function implements the quicksort algorithm and can be used with 
+ *  a NULL or non-NULL carry. The best idea for a carry is an index that 
+ *  tracks the sort. Sorts from least to greatest
+ *
+ *  \param tosort : pointer to the array to be sorted
+ *  \param carry : pointer to an array to be sorted alongside "tosort". can be NULL
+ *  \param left : left-most index to sort. Should be 0 if sorting the entire array
+ *  \param right : right-most index to sort. Should be Npts-1 if sorting the entire array
+ *
+ ***************************************************************************************/
 template <typename T1, typename T2>
 void quicksort(T1 * tosort, T2 * carry, unsigned int left, unsigned int right){
 	T1 pivot, tmp;
@@ -51,6 +71,17 @@ void quicksort(T1 * tosort, T2 * carry, unsigned int left, unsigned int right){
 	return;
 }
 
+/************************************************************************************//**
+ * \brief Nearest neighbor interpolation
+ * 
+ *  This function interpolates evaluation function by finding the nearest neighbor
+ *
+ *  \param points : x points
+ *  \param values : function values at the given x points
+ *  \param numpts : number of points in "points" and "values"
+ *  \param eval_point : single point to be evaluated
+ *
+ ***************************************************************************************/
 double interp_nearest(double * points, double * values, unsigned int numpts, double eval_point){
 	// This assumes that the points are sorted in increasing order
 
@@ -102,6 +133,18 @@ double interp_nearest(double * points, double * values, unsigned int numpts, dou
 	return values[i];
 }
 
+/************************************************************************************//**
+ * \brief Piecewise nearest neighbor interpolation
+ * 
+ *  This function interpolates evaluation function by finding the nearest neighbor
+ *
+ *  \param points : x points
+ *  \param values : function values at the given x points
+ *  \param numpts : number of points in "points" and "values"
+ *  \param eval_points : array of points to be evaluated
+ *  \param num_eval_pts : number of points in "eval_points"
+ *
+ ***************************************************************************************/
 double * interp_nearest_piecewise(double * points, double * values, unsigned int numpts,
 								double * eval_points, unsigned int num_eval_pts){
 	// declare vars
@@ -129,6 +172,17 @@ double * interp_nearest_piecewise(double * points, double * values, unsigned int
 	return interp_vals;
 }
 
+/************************************************************************************//**
+ * \brief Polynomial interpolation
+ * 
+ *  This function interpolates evaluation function by using an interpolating polynomial
+ *
+ *  \param points : x points
+ *  \param values : function values at the given x points
+ *  \param degree : degree of the polynomial that you would like to create. There MUST be degree+1 points and values
+ *  \param eval_point : single point to be evaluated
+ *
+ ***************************************************************************************/
 double interp_polynomial(double * points, double * values, unsigned int degree, double eval_point){
 	double interp_val=0.0, term=1.0;
 
@@ -148,6 +202,19 @@ double interp_polynomial(double * points, double * values, unsigned int degree, 
 
 }
 
+/************************************************************************************//**
+ * \brief Piecewise polynomial interpolation
+ * 
+ *  This function interpolates evaluation function by using piecewise polynomials
+ *
+ *  \param points : x points
+ *  \param values : function values at the given x points
+ *  \param numpts : number of points in "points" and "values"
+ *  \param degree : degree of polynomials to use
+ *  \param eval_points : points to be evaluated using the interpolation
+ *  \param num_eval_pts : number of points in "eval_points"
+ *
+ ***************************************************************************************/
 double * interp_polynomial_piecewise(double * points, double * values, unsigned int numpts, unsigned int degree,
 							double * eval_points, unsigned int num_eval_pts){
 	// declare vars 
@@ -171,6 +238,17 @@ double * interp_polynomial_piecewise(double * points, double * values, unsigned 
 	return interp_vals;
 }
 
+/************************************************************************************//**
+ * \brief Chebyshev spaced points
+ * 
+ *  Returns Chebyshev points on the interval [min_val, max_val]. The default is [-1, 1] 
+ *  if the interval values are not specified
+ *
+ *  \param N : number of points desired
+ *  \param min_val : minimum value returned. Default -1
+ *  \param max_val : maximum value returned. Default +1
+ *
+ ***************************************************************************************/
 // returns chebyshev points on the interval min_val to max_val 
 // the default is from -1 to 1 if the interval values are not specified
 double * chebyshev(unsigned int N, double min_val, double max_val){

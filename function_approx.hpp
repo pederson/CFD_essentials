@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <math.h>
 
-double * cheby_basis(double (*function_handle)(double), unsigned int M);
+double * basis_cheby(double (*function_handle)(double), unsigned int M);
+
+double * basis_lagrange_poly(double (*function_handle)(double), unsigned int M);
 
 double * approx_cheby(double (*function_handle)(double), unsigned int M, double * eval_points, unsigned int N_eval_pts);
 
