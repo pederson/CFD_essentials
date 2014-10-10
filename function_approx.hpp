@@ -5,10 +5,25 @@
 #include <stdlib.h>
 #include <math.h>
 
-double * basis_cheby(double (*function_handle)(double), unsigned int M);
+class FuncApprox{
+public:
 
-double * basis_lagrange_poly(double (*function_handle)(double), unsigned int M);
+  // constructor
+  FuncApprox();
 
-double * approx_cheby(double (*function_handle)(double), unsigned int M, double * eval_points, unsigned int N_eval_pts);
+  // copy constructor
 
+  // destructor
+  ~FuncApprox();
+
+  double * basis_cheby(double (*function_handle)(double), unsigned int M);
+
+  double * basis_lagrange_poly(double (*function_handle)(double), unsigned int M);
+
+  double * cheby(double (*function_handle)(double), unsigned int M, double * eval_points, unsigned int N_eval_pts);
+
+protected:
+
+private:
+}
 #endif

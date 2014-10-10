@@ -11,6 +11,15 @@
 
 #define PI 3.14159265359
 
+FuncApprox::FuncApprox(){
+
+}
+
+FuncApprox::~FuncApprox(){
+
+}
+
+
 /************************************************************************************//**
  * \brief Determine coefficients of a Chebyshev basis function
  * 
@@ -21,7 +30,7 @@
  *  \param M : the number of basis functions to use
  *
  ***************************************************************************************/
-double * basis_cheby(double (*function_handle)(double), unsigned int M){
+double * FuncApprox::basis_cheby(double (*function_handle)(double), unsigned int M){
 	// declare vars
 	unsigned int *ki;
 	double * si, *ak;
@@ -68,7 +77,7 @@ double * basis_cheby(double (*function_handle)(double), unsigned int M){
  *  \param M : the number of basis functions to use
  *
  ***************************************************************************************/
-double * basis_lagrange_poly(double (*function_handle)(double), unsigned int M){
+double * FuncApprox::basis_lagrange_poly(double (*function_handle)(double), unsigned int M){
 	// declare vars
 	unsigned int *ak;
 	double * xi;
@@ -97,7 +106,7 @@ double * basis_lagrange_poly(double (*function_handle)(double), unsigned int M){
  *  \param M : the number of basis functions to use
  *
  ***************************************************************************************/
-double * approx_cheby(double (*function_handle)(double), unsigned int M, double * eval_points, unsigned int N_eval_pts){
+double * FuncApprox::cheby(double (*function_handle)(double), unsigned int M, double * eval_points, unsigned int N_eval_pts){
 	// declare vars
 	unsigned int *ki;
 	double *ak, *values;

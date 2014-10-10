@@ -5,10 +5,22 @@
 #include <stdlib.h>
 #include <iostream>
 
-double integrate_trapezoid(double (*function_handle)(double), double x_start, double x_end, double h);
+class Integrator{
+public:
 
-double integrate_simpson(double (*function_handle)(double), double x_start, double x_end, double h);
+  //constructor
+  Integrator();
+
+  // copy constructor
 
 
+  // destructor
+  ~Integrator();
 
+double trapezoid(double (*function_handle)(double), double x_start, double x_end, double h);
+
+double simpson(double (*function_handle)(double), double x_start, double x_end, double h);
+
+
+}
 #endif

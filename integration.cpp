@@ -1,7 +1,11 @@
 
 #include "integration.hpp"
 
-double integrate_trapezoid(double (*function_handle)(double), double x_start, double x_end, double h){
+Integrator::Integrator{
+
+}
+
+double Integrator::trapezoid(double (*function_handle)(double), double x_start, double x_end, double h){
 	// declare vars
 	double value = 0.0;
 	unsigned int nsteps = (unsigned int) ((x_end - x_start)/h);
@@ -16,7 +20,7 @@ double integrate_trapezoid(double (*function_handle)(double), double x_start, do
 	return value;
 }
 
-double integrate_simpson(double (*function_handle)(double), double x_start, double x_end, double h){
+double Integrator::simpson(double (*function_handle)(double), double x_start, double x_end, double h){
 	// declare vars
 	double value = 0.0;
         unsigned int ninter = (unsigned int) ((x_end - x_start)/h);

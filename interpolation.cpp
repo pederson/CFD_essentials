@@ -11,6 +11,14 @@ using namespace std;
 
 #define _TEST_INTERPOLATE_
 
+Interpolator::Interpolator(){
+
+}
+
+Interpolator::~Interpolator(){
+
+}
+
 /************************************************************************************//**
  * \brief Templated quicksort that works with a NULL carry
  * 
@@ -82,7 +90,7 @@ void quicksort(T1 * tosort, T2 * carry, unsigned int left, unsigned int right){
  *  \param eval_point : single point to be evaluated
  *
  ***************************************************************************************/
-double interp_nearest(double * points, double * values, unsigned int numpts, double eval_point){
+double Interpolator::nearest(double * points, double * values, unsigned int numpts, double eval_point){
 	// This assumes that the points are sorted in increasing order
 
 	// declare vars
@@ -145,7 +153,7 @@ double interp_nearest(double * points, double * values, unsigned int numpts, dou
  *  \param num_eval_pts : number of points in "eval_points"
  *
  ***************************************************************************************/
-double * interp_nearest_piecewise(double * points, double * values, unsigned int numpts,
+double * Interpolator::nearest_piecewise(double * points, double * values, unsigned int numpts,
 								double * eval_points, unsigned int num_eval_pts){
 	// declare vars
 	double * interp_vals, * sortpoints, * sortvalues;
@@ -183,7 +191,7 @@ double * interp_nearest_piecewise(double * points, double * values, unsigned int
  *  \param eval_point : single point to be evaluated
  *
  ***************************************************************************************/
-double interp_polynomial(double * points, double * values, unsigned int degree, double eval_point){
+double Interpolator::polynomial(double * points, double * values, unsigned int degree, double eval_point){
 	double interp_val=0.0, term=1.0;
 
 	// there should be degree + 1 points and values
@@ -215,7 +223,7 @@ double interp_polynomial(double * points, double * values, unsigned int degree, 
  *  \param num_eval_pts : number of points in "eval_points"
  *
  ***************************************************************************************/
-double * interp_polynomial_piecewise(double * points, double * values, unsigned int numpts, unsigned int degree,
+double * Interpolator::polynomial_piecewise(double * points, double * values, unsigned int numpts, unsigned int degree,
 							double * eval_points, unsigned int num_eval_pts){
 	// declare vars 
 	double * interp_vals, * sortpoints, * sortvalues;
@@ -251,7 +259,7 @@ double * interp_polynomial_piecewise(double * points, double * values, unsigned 
  ***************************************************************************************/
 // returns chebyshev points on the interval min_val to max_val 
 // the default is from -1 to 1 if the interval values are not specified
-double * chebyshev(unsigned int N, double min_val, double max_val){
+double * Interpolator::chebyshev(unsigned int N, double min_val, double max_val){
     // declare vars
     double * chebyvals;
     
