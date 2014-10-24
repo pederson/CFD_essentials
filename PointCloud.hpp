@@ -3,8 +3,10 @@
 
 #include <fstream>
 #include <iostream>
+
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <sys/mman.h>
 
@@ -46,14 +48,21 @@ public:
   unsigned char *classification;
   rgb48 * RGB;
 
+  void printSummary();
+  void calcExtents();
+
+  void add_intensity();
+  void add_classification();
+  void add_gpstime();
+  void add_RGB();  
 
   static PointCloud * readLas(char * filename, unsigned int byte_offset=0);
-  void writeLas(char * filename);
 
 protected:
 
 private:
 
+  void writeLas(char * filename);
   
 }
 

@@ -31,6 +31,8 @@ PointCloud * PointCloud::readLas(char * filename, unsigned int byte_offset){
   double x_scale, y_scale, z_scale, x_offset, y_offset, z_offset;
   double x_min, y_min, z_min, x_max, y_max, z_max, dummy_8;
   int fd;
+  PointCloud * cloud;
+  void * lasmap;
 
   // open the file
   ifstream lasfile;
@@ -100,17 +102,37 @@ PointCloud * PointCloud::readLas(char * filename, unsigned int byte_offset){
     cout << "Error opening file in readLas" << endl;
     throw -1;
   }
-  lasmap = mmap(NULL, point_record_bytes*pt_count + point_offset, PROT_READ, MAP_PRIVATE, fd, point_offset);
+  lasmap = mmap(NULL, point_record_bytes*pt_count, PROT_READ, MAP_PRIVATE, fd, point_offset);
   if (lasmap == MAP_FAILED){
     cout << "Failed to map las file" << endl;
     throw -1;
-  }
-  close(fd);
-  
+  }  
 
+  // initialize point cloud
+  cloud = new PointCloud(pt_count);
 
   // do a switch for point record format and memcpy the points
+  switch (point_format_id){
+    case 0:
+      // initialize array of structs
+      las_pt_0 *laspts = new las_pt_0[pt_count];
 
+      // copy from memory map into array of structs
+      memcpy(laspts, lasmap, point_record_bytes*pt_count);
+
+      // loop over structs to extract the points 
+    case 1:
+      yes
+    case 2:
+      yes
+    case 3:
+      yes
+    case 4:
+      yes
+    case 5:
+      yes
+    default:
+      cout << "this should not be possible" << endl;
 
   // unmap the data
 
