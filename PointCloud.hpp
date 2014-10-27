@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
 
 #include <sys/mman.h>
 
@@ -30,16 +31,19 @@
 //  - create/destroy data vectors
 
 
-#pragma pack(1)
+#pragma pack(push,1)
 struct rgb48{
   unsigned short R;
   unsigned short G;
   unsigned short B;
-}
+};
 #pragma pack(pop)
 
 class PointCloud{
 public:
+
+  PointCloud(unsigned int numpts=0);
+  ~PointCloud();
 
   double *x, *y, *z, *gpstime;
   double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -63,10 +67,10 @@ protected:
 private:
 
   void writeLas(char * filename);
-  
-}
 
-#pragma pack(1)
+};
+
+#pragma pack(push,1)
 struct las_pt_0{
   long X;
   long Y;
@@ -77,7 +81,7 @@ struct las_pt_0{
   char Scan_Angle_Rank;
   unsigned char User_Data;
   unsigned short Point_Source_ID;
-}
+};
 
 struct las_pt_1{
   long X;
@@ -90,7 +94,7 @@ struct las_pt_1{
   unsigned char User_Data;
   unsigned short Point_Source_ID;
   double GPSTime;
-}
+};
 
 struct las_pt_2{
   long X;
@@ -105,7 +109,7 @@ struct las_pt_2{
   unsigned short Red;
   unsigned short Green;
   unsigned short Blue;
-}
+};
 
 struct las_pt_3{
   long X;
@@ -121,7 +125,7 @@ struct las_pt_3{
   unsigned short Red;
   unsigned short Green;
   unsigned short Blue;
-}
+};
 
 struct las_pt_4{
   long X;
@@ -141,7 +145,7 @@ struct las_pt_4{
   float X_t;
   float Y_t;
   float Z_t;
-}
+};
 
 struct las_pt_5{
   long X;
@@ -164,7 +168,7 @@ struct las_pt_5{
   float X_t;
   float Y_t;
   float Z_t;
-}
+};
 #pragma pack(pop)
 
 #endif

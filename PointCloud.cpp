@@ -1,5 +1,5 @@
 // this is a placeholder for the PointCloud class
-
+#define _TEST_
 // it should hold the following elements (at least):
 //  - x,y,z,intensity
 //  - return number
@@ -42,6 +42,54 @@ PointCloud::~PointCloud(){
   if (RGB != NULL) delete[] RGB;
 }
 
+void PointCloud::printSummary(){
+  cout << "Point Cloud Summary:" << endl;
+  cout << "  pointcount: " << pointcount << endl;
+  cout << "  existing fields: x" << endl;
+  cout << "                   y" << endl;
+  cout << "                   z" << endl;
+  if (gpstime !=NULL) cout << "                   gpstime" << endl;
+  if (intensity !=NULL) cout << "                   intensity" << endl;
+  if (classification !=NULL) cout << "                   classification" << endl;
+  if (RGB !=NULL) cout << "                   RGB" << endl;
+  cout << "  data extents:" << endl;
+  cout << "       x:[" << xmin << ", " << xmax << "]" << endl;
+  cout << "       y:[" << ymin << ", " << ymax << "]" << endl;
+  cout << "       z:[" << zmin << ", " << zmax << "]" << endl;
+}
+
+void PointCloud::calcExtents(){
+  xmin = x[0]; xmax = x[0]; ymin = y[0]; ymax = y[0]; zmin = z[0]; zmax = z[0];
+  for (unsigned int i=1; i<pointcount; i++){
+    if (x[i] < xmin) xmin = x[i];
+    else if (x[i] > xmax) xmax = x[i];
+    if (y[i] < ymin) ymin = y[i];
+    else if (y[i] > ymax) ymax = y[i];
+    if (z[i] < zmin) zmin = z[i];
+    else if (z[i] > zmax) zmax = z[i];
+  }
+}
+
+void PointCloud::add_intensity(){
+  if (intensity != NULL) cout << "intensity already exists!" << endl;
+  else intensity = new unsigned short[pointcount];
+}
+
+void PointCloud::add_classification(){
+  if (classification != NULL) cout << "classification already exists!" << endl;
+  else classification = new unsigned char[pointcount];
+}
+
+void PointCloud::add_gpstime(){
+  if (gpstime != NULL) cout << "gpstime already exists!" << endl;
+  else gpstime = new double[pointcount];
+}
+
+void PointCloud::add_RGB(){
+  if (RGB != NULL) cout << "RGB already exists!" << endl;
+  else RGB = new rgb48[pointcount];
+}
+
 PointCloud * PointCloud::readLas(char * filename, unsigned int byte_offset){
   // define vars
   bool fieldexist=false;
@@ -55,54 +103,57 @@ PointCloud * PointCloud::readLas(char * filename, unsigned int byte_offset){
   int fd;
   PointCloud * cloud;
   void * lasmap;
+  size_t res;
 
   // open the file
-  ifstream lasfile;
-  lasfile.open(filename);
+  FILE * fid;
+  fid = fopen(filename, "rb");
   
   // move to byte_offset
-  lasfile.seekg(byte_offset);
+  fseek(fid, byte_offset, SEEK_SET);
 
   // check LASF signature
-  lasfile.read(signature, 4); // "LASF" signature
+  res = fread(&signature, 4, 1, fid); // "LASF" signature
+
+  cout << "signature: " << signature[0] << signature[1] << signature[2] << signature[3] << endl;
 
   // collect header info
-  lasfile.read(&dummy_2, 2); 		// File Source ID
-  lasfile.read(&dummy_2, 2); 		// Global Encoding
-  lasfile.read(&dummy_4, 4); 		// Project ID - GUID data 1
-  lasfile.read(&dummy_2, 2); 		// Project ID - GUID data 2
-  lasfile.read(&dummy_2, 2); 		// Project ID - GUID data 3
-  lasfile.read(&dummy_8, 8); 		// Project ID - GUID data 4
-  lasfile.read(&ver_major, 1); 		// Version Major
-  lasfile.read(&ver_minor, 1); 		// Version Minor
-  for (int i=0; i<32; i++) lasfile.read(&dummy_1, 1); // System Identifier
-  for (int i=0; i<32; i++) lasfile.read(&dummy_1, 1); // Generating Software
-  lasfile.read(&dummy_2, 2); 		// File Creation Day of Year
-  lasfile.read(&dummy_2, 2); 		// File Creation Year
-  lasfile.read(&header_size, 2); 	// Header Size
-  lasfile.read(&point_offset, 4); 	// Offset to Point Data
-  lasfile.read(&dummy_4, 4); 		// Number of Variable Length Records
-  lasfile.read(&point_format_id, 1);	// Point Data Format ID
-  lasfile.read(&point_record_bytes, 2);	// Point Data Record Length
-  lasfile.read(&pt_count, 4);		// Number of point records
-  for (int i=0; i<7; i++) lasfile.read(&dummy_4, 4); // Number of points by return
-  lasfile.read(&x_scale, 8);		// X Scale Factor
-  lasfile.read(&y_scale, 8);		// Y Scale Factor
-  lasfile.read(&z_scale, 8);		// Z Scale Factor
-  lasfile.read(&x_offset, 8);		// X Offset
-  lasfile.read(&y_offset, 8);		// Y Offset
-  lasfile.read(&z_offset, 8);		// Z Offset
-  lasfile.read(&x_max, 8);		// X Max
-  lasfile.read(&x_min, 8);		// X Min
-  lasfile.read(&y_max, 8);		// Y Max
-  lasfile.read(&y_min, 8);		// Y Min
-  lasfile.read(&z_max, 8);		// Z Max
-  lasfile.read(&z_min, 8);		// Z Min
+  res = fread(&dummy_2, 2, 1, fid); 		// File Source ID
+  res = fread(&dummy_2, 2, 1, fid); 		// Global Encoding
+  res = fread(&dummy_4, 4, 1, fid); 		// Project ID - GUID data 1
+  res = fread(&dummy_2, 2, 1, fid); 		// Project ID - GUID data 2
+  res = fread(&dummy_2, 2, 1, fid); 		// Project ID - GUID data 3
+  res = fread(&dummy_8, 8, 1, fid); 		// Project ID - GUID data 4
+  res = fread(&ver_major, 1, 1, fid); 	// Version Major
+  res = fread(&ver_minor, 1, 1, fid);   // Version Minor
+  for (int i=0; i<32; i++) res = fread(&dummy_1, 1, 1, fid); // System Identifier
+  for (int i=0; i<32; i++) res = fread(&dummy_1, 1, 1, fid); // Generating Software
+  res = fread(&dummy_2, 2, 1, fid); 		// File Creation Day of Year
+  res = fread(&dummy_2, 2, 1, fid); 		// File Creation Year
+  res = fread(&header_size, 2, 1, fid); // Header Size
+  res = fread(&point_offset, 4, 1, fid);// Offset to Point Data
+  res = fread(&dummy_4, 4, 1, fid); 		// Number of Variable Length Records
+  res = fread(&point_format_id, 1, 1, fid);	// Point Data Format ID
+  res = fread(&point_record_bytes, 2, 1, fid);	// Point Data Record Length
+  res = fread(&pt_count, 4, 1, fid);		// Number of point records
+  for (int i=0; i<7; i++) res = fread(&dummy_4, 4, 1, fid); // Number of points by return
+  res = fread(&x_scale, 8, 1, fid);		  // X Scale Factor
+  res = fread(&y_scale, 8, 1, fid);		  // Y Scale Factor
+  res = fread(&z_scale, 8, 1, fid);		  // Z Scale Factor
+  res = fread(&x_offset, 8, 1, fid);		// X Offset
+  res = fread(&y_offset, 8, 1, fid);		// Y Offset
+  res = fread(&z_offset, 8, 1, fid);		// Z Offset
+  res = fread(&x_max, 8, 1, fid);		    // X Max
+  res = fread(&x_min, 8, 1, fid);		    // X Min
+  res = fread(&y_max, 8, 1, fid);		    // Y Max
+  res = fread(&y_min, 8, 1, fid);		    // Y Min
+  res = fread(&z_max, 8, 1, fid);		    // Z Max
+  res = fread(&z_min, 8, 1, fid);		    // Z Min
 
   // read projection info from Variable Length Records (VLRs)
 
   // close the file
-  lasfile.close();
+  fclose(fid);
 
   // check the version number and alert the user if it is not fully supported
   if (ver_minor > 2 || ver_major > 1){
@@ -120,13 +171,19 @@ PointCloud * PointCloud::readLas(char * filename, unsigned int byte_offset){
     throw -1;
   }
 
+  cout << "LAS version " << int(ver_major) << "." << int(ver_minor) << endl;
+  cout << "point format id: " << int(point_format_id) << endl;
+  cout << "bytes in point record: " << point_record_bytes << endl;
+  cout << "pointcount: " << pt_count << endl;
+  cout << "xmax: " << x_max << " xmin: " << x_min << endl;
+
   // memory map the point data
   fd = open(filename, O_RDONLY);
   if (fd == -1){
     cout << "Error opening file in readLas" << endl;
     throw -1;
   }
-  lasmap = mmap(NULL, point_record_bytes*pt_count, PROT_READ, MAP_PRIVATE, fd, point_offset);
+  lasmap = mmap(NULL, point_record_bytes*pt_count + point_offset, PROT_READ, MAP_PRIVATE, fd, 0);
   if (lasmap == MAP_FAILED){
     cout << "Failed to map las file" << endl;
     throw -1;
@@ -147,131 +204,137 @@ PointCloud * PointCloud::readLas(char * filename, unsigned int byte_offset){
   switch (point_format_id){
     case 0:
       // initialize array of structs
-      las_pt_0 *laspts = new las_pt_0[pt_count];
+      las_pt_0 *laspts0;
+      laspts0 = new las_pt_0[pt_count];
 
       // copy from memory map into array of structs
-      memcpy(laspts, lasmap, point_record_bytes*pt_count);
+      memcpy(laspts0, &lasmap[point_offset], point_record_bytes*pt_count);
 
       // loop over structs to extract the points
       for (unsigned int i=0; i<pt_count; i++){
-        cloud->x[i] = double(laspts[i]->X)*x_scale + x_offset; 		// X
-        cloud->y[i] = double(laspts[i]->Y)*y_scale + y_offset;		// Y
-        cloud->z[i] = double(laspts[i]->Z)*z_Scale + z_offset;		// Z
-        cloud->intensity[i] = laspts[i]->Intensity;			// Intensity
-        cloud->classification[i] = laspts[i]->Classification;		// Classification
+        cloud->x[i] = double(laspts0[i].X)*x_scale + x_offset; 		// X
+        cloud->y[i] = double(laspts0[i].Y)*y_scale + y_offset;		// Y
+        cloud->z[i] = double(laspts0[i].Z)*z_scale + z_offset;		// Z
+        cloud->intensity[i] = laspts0[i].Intensity;			// Intensity
+        cloud->classification[i] = laspts0[i].Classification;		// Classification
       }
 
-      delete[] laspts;
+      delete[] laspts0;
 
     case 1:
       // initialize array of structs
-      las_pt_1 *laspts = new las_pt_1[pt_count];
+      las_pt_1 *laspts1;
+      laspts1 = new las_pt_1[pt_count];
 
       // copy from memory map into array of structs
-      memcpy(laspts, lasmap, point_record_bytes*pt_count);
+      memcpy(laspts1, &lasmap[point_offset], point_record_bytes*pt_count);
 
       cloud->add_gpstime();
       // loop over structs to extract the points
       for (unsigned int i=0; i<pt_count; i++){
-        cloud->x[i] = double(laspts[i].X)*x_scale + x_offset;    // X
-        cloud->y[i] = double(laspts[i].Y)*y_scale + y_offset;    // Y
-        cloud->z[i] = double(laspts[i].Z)*z_Scale + z_offset;    // Z
-        cloud->intensity[i] = laspts[i].Intensity;                // Intensity
-        cloud->classification[i] = laspts[i].Classification;      // Classification
-        cloud->gpstime[i] = laspts[i].GPSTime;
+        cloud->x[i] = double(laspts1[i].X)*x_scale + x_offset;    // X
+        cloud->y[i] = double(laspts1[i].Y)*y_scale + y_offset;    // Y
+        cloud->z[i] = double(laspts1[i].Z)*z_scale + z_offset;    // Z
+        cloud->intensity[i] = laspts1[i].Intensity;                // Intensity
+        cloud->classification[i] = laspts1[i].Classification;      // Classification
+        cloud->gpstime[i] = laspts1[i].GPSTime;
       }
 
-      delete[] laspts;
+      delete[] laspts1;
 
     case 2:
       // initialize array of structs
-      las_pt_2 *laspts = new las_pt_2[pt_count];
+      las_pt_2 *laspts2;
+      laspts2 = new las_pt_2[pt_count];
 
       // copy from memory map into array of structs
-      memcpy(laspts, lasmap, point_record_bytes*pt_count);
+      memcpy(laspts2, &lasmap[point_offset], point_record_bytes*pt_count);
 
       cloud->add_RGB();
       // loop over structs to extract the points
       for (unsigned int i=0; i<pt_count; i++){
-        cloud->x[i] = double(laspts[i].X)*x_scale + x_offset;    // X
-        cloud->y[i] = double(laspts[i].Y)*y_scale + y_offset;    // Y
-        cloud->z[i] = double(laspts[i].Z)*z_Scale + z_offset;    // Z
-        cloud->intensity[i] = laspts[i].Intensity;                // Intensity
-        cloud->classification[i] = laspts[i].Classification;      // Classification
-        cloud->RGB[i].R = laspts[i].Red;
-        cloud->RGB[i].G = laspts[i].Green;
-        cloud->RGB[i].B = laspts[i].Blue;
+        cloud->x[i] = double(laspts2[i].X)*x_scale + x_offset;    // X
+        cloud->y[i] = double(laspts2[i].Y)*y_scale + y_offset;    // Y
+        cloud->z[i] = double(laspts2[i].Z)*z_scale + z_offset;    // Z
+        cloud->intensity[i] = laspts2[i].Intensity;                // Intensity
+        cloud->classification[i] = laspts2[i].Classification;      // Classification
+        cloud->RGB[i].R = laspts2[i].Red;
+        cloud->RGB[i].G = laspts2[i].Green;
+        cloud->RGB[i].B = laspts2[i].Blue;
       }
 
-      delete[] laspts;
+      delete[] laspts2;
 
     case 3:
       // initialize array of structs
-      las_pt_3 *laspts = new las_pt_3[pt_count];
+      las_pt_3 *laspts3;
+      laspts3 = new las_pt_3[pt_count];
 
       // copy from memory map into array of structs
-      memcpy(laspts, lasmap, point_record_bytes*pt_count);
+      memcpy(laspts3, &lasmap[point_offset], point_record_bytes*pt_count);
 
       cloud->add_gpstime();
       cloud->add_RGB();
       // loop over structs to extract the points
       for (unsigned int i=0; i<pt_count; i++){
-        cloud->x[i] = double(laspts[i].X)*x_scale + x_offset;    // X
-        cloud->y[i] = double(laspts[i].Y)*y_scale + y_offset;    // Y
-        cloud->z[i] = double(laspts[i].Z)*z_Scale + z_offset;    // Z
-        cloud->intensity[i] = laspts[i].Intensity;                // Intensity
-        cloud->classification[i] = laspts[i].Classification;      // Classification
-        cloud->gpstime[i] = laspts[i].GPSTime;
-        cloud->RGB[i].R = laspts[i].Red;
-        cloud->RGB[i].G = laspts[i].Green;
-        cloud->RGB[i].B = laspts[i].Blue;
+        cloud->x[i] = double(laspts3[i].X)*x_scale + x_offset;    // X
+        cloud->y[i] = double(laspts3[i].Y)*y_scale + y_offset;    // Y
+        cloud->z[i] = double(laspts3[i].Z)*z_scale + z_offset;    // Z
+        cloud->intensity[i] = laspts3[i].Intensity;                // Intensity
+        cloud->classification[i] = laspts3[i].Classification;      // Classification
+        cloud->gpstime[i] = laspts3[i].GPSTime;
+        cloud->RGB[i].R = laspts3[i].Red;
+        cloud->RGB[i].G = laspts3[i].Green;
+        cloud->RGB[i].B = laspts3[i].Blue;
       }
 
-      delete[] laspts;
+      delete[] laspts3;
 
     case 4:
       // initialize array of structs
-      las_pt_4 *laspts = new las_pt_4[pt_count];
+      las_pt_4 *laspts4;
+      laspts4 = new las_pt_4[pt_count];
 
       // copy from memory map into array of structs
-      memcpy(laspts, lasmap, point_record_bytes*pt_count);
+      memcpy(laspts4, &lasmap[point_offset], point_record_bytes*pt_count);
 
       cloud->add_gpstime();
       // loop over structs to extract the points
       for (unsigned int i=0; i<pt_count; i++){
-        cloud->x[i] = double(laspts[i].X)*x_scale + x_offset;    // X
-        cloud->y[i] = double(laspts[i].Y)*y_scale + y_offset;    // Y
-        cloud->z[i] = double(laspts[i].Z)*z_Scale + z_offset;    // Z
-        cloud->intensity[i] = laspts[i].Intensity;                // Intensity
-        cloud->classification[i] = laspts[i].Classification;      // Classification
-        cloud->gpstime[i] = laspts[i].GPSTime;
+        cloud->x[i] = double(laspts4[i].X)*x_scale + x_offset;    // X
+        cloud->y[i] = double(laspts4[i].Y)*y_scale + y_offset;    // Y
+        cloud->z[i] = double(laspts4[i].Z)*z_scale + z_offset;    // Z
+        cloud->intensity[i] = laspts4[i].Intensity;                // Intensity
+        cloud->classification[i] = laspts4[i].Classification;      // Classification
+        cloud->gpstime[i] = laspts4[i].GPSTime;
       }
 
-      delete[] laspts;
+      delete[] laspts4;
 
     case 5:
       // initialize array of structs
-      las_pt_5 *laspts = new las_pt_5[pt_count];
+      las_pt_5 *laspts5;
+      laspts5 = new las_pt_5[pt_count];
 
       // copy from memory map into array of structs
-      memcpy(laspts, lasmap, point_record_bytes*pt_count);
+      memcpy(laspts5, &lasmap[point_offset], point_record_bytes*pt_count);
 
       cloud->add_gpstime();
       cloud->add_RGB();
       // loop over structs to extract the points
       for (unsigned int i=0; i<pt_count; i++){
-        cloud->x[i] = double(laspts[i].X)*x_scale + x_offset;    // X
-        cloud->y[i] = double(laspts[i].Y)*y_scale + y_offset;    // Y
-        cloud->z[i] = double(laspts[i].Z)*z_Scale + z_offset;    // Z
-        cloud->intensity[i] = laspts[i].Intensity;                // Intensity
-        cloud->classification[i] = laspts[i].Classification;      // Classification
-        cloud->gpstime[i] = laspts[i].GPSTime;
-        cloud->RGB[i].R = laspts[i].Red;
-        cloud->RGB[i].G = laspts[i].Green;
-        cloud->RGB[i].B = laspts[i].Blue;
+        cloud->x[i] = double(laspts5[i].X)*x_scale + x_offset;    // X
+        cloud->y[i] = double(laspts5[i].Y)*y_scale + y_offset;    // Y
+        cloud->z[i] = double(laspts5[i].Z)*z_scale + z_offset;    // Z
+        cloud->intensity[i] = laspts5[i].Intensity;                // Intensity
+        cloud->classification[i] = laspts5[i].Classification;      // Classification
+        cloud->gpstime[i] = laspts5[i].GPSTime;
+        cloud->RGB[i].R = laspts5[i].Red;
+        cloud->RGB[i].G = laspts5[i].Green;
+        cloud->RGB[i].B = laspts5[i].Blue;
       }
 
-      delete[] laspts;
+      delete[] laspts5;
 
     default:
       cout << "this should not be possible" << endl;
@@ -311,5 +374,25 @@ PointCloud * PointCloud::readLas(char * filename, unsigned int byte_offset){
 }
 
 void PointCloud::writeLas(char * filename){
-
+  cout << "writing not quite supported yet" << endl;
 }
+
+
+#ifdef _TEST_
+
+int main(int argc, char * argv[]){
+  // declare vars
+  PointCloud * cloud;
+
+  // take one command line argument as the las file name and read it
+  cloud = PointCloud::readLas(argv[1]);
+
+  // output summary info
+  cloud->printSummary();
+
+  // delete stuff
+  delete cloud;
+
+  return 0;
+}
+#endif
