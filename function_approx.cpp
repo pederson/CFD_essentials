@@ -11,14 +11,62 @@
 
 #define PI 3.14159265359
 
-FuncApprox::FuncApprox(){
+ using namespace std;
 
+FuncApprox::FuncApprox(){
+  num_basis = 0;
+  a_coeff = NULL;
 }
 
 FuncApprox::~FuncApprox(){
-
+  if (a_coeff != NULL) delete[] a_coeff;
 }
 
+/************************************************************************************//**
+ * \brief Evaluate basis if it has already been calculated
+ * 
+ *
+ *  \param xvals : x values to evaluate
+ *  \param npts : number of points contained in xvals
+ *
+ ***************************************************************************************/
+double * FuncApprox::evaluate_basis(double *xvals, unsigned int npts){
+	// declare vars
+	double * output;
+
+	// check to make sure basis coefficients exist
+	if (a_coeff == NULL){
+		cout << "Must create a basis before evaluating it" << endl;
+		throw -1;
+	}
+
+	output = new double[npts];
+	for (unsigned int i=0; i<npts; i++) output[i] = 0.0;
+
+	// evaluate basis for each point
+	for (unsigned int i=0; i<npts; i++){
+    	for (unsigned int j=0; j<num_basis; j++){
+    		switch (basis_type){
+    			case CONSTANT:
+
+    			case LINEAR:
+
+    			case QUADRATIC:
+
+    			case CHEBYSHEV:
+
+    				output[i] += -cos(j*xvals[i]);
+
+    			case LAGRANGE_POLY:
+
+    			default:
+    				cout << "shouldn't ever get here" << endl;
+    		}
+    	}
+	}
+
+	return output;
+}
 
 /************************************************************************************//**
  * \brief Determine coefficients of a Chebyshev basis function
@@ -30,7 +78,7 @@ FuncApprox::~FuncApprox(){
  *  \param M : the number of basis functions to use
  *
  ***************************************************************************************/
-double * FuncApprox::basis_cheby(double (*function_handle)(double), unsigned int M){
+void FuncApprox::basis_cheby(double (*function_handle)(double), unsigned int M){
 	// declare vars
 	unsigned int *ki;
 	double * si, *ak;
@@ -44,8 +92,8 @@ double * FuncApprox::basis_cheby(double (*function_handle)(double), unsigned int
 	ki = new unsigned int[M];
 	for (unsigned int i=0; i<M+1; i++) ki[i] = i;
 
-	for (unsigned int i=0; i<M+1; i++) std::cout << "si: " << si[i] << " f(-c(si)): " << function_handle(-cos(si[i])) << std::endl;
-	std::cout << "first term: " << -(function_handle(-1.0) + function_handle(1.0))/2.0 << std::endl;
+	for (unsigned int i=0; i<M+1; i++) cout << "si: " << si[i] << " f(-c(si)): " << function_handle(-cos(si[i])) << std::endl;
+	cout << "first term: " << -(function_handle(-1.0) + function_handle(1.0))/2.0 << std::endl;
 	// evaluate the ak coefficients by the trapezoid rule
 	ak = new double[M+1];
 	for (unsigned int i=0; i<M+1; i++) ak[i] = 0.0;
@@ -64,7 +112,12 @@ double * FuncApprox::basis_cheby(double (*function_handle)(double), unsigned int
 	delete[] si;
 	delete[] ki;
 
-	return ak;
+	// set member data 
+	basis_type = CHEBYSHEV;
+	num_basis = M;
+	a_coeff = ak;
+
+	return;
 }
 
 /************************************************************************************//**
@@ -77,10 +130,9 @@ double * FuncApprox::basis_cheby(double (*function_handle)(double), unsigned int
  *  \param M : the number of basis functions to use
  *
  ***************************************************************************************/
-double * FuncApprox::basis_lagrange_poly(double (*function_handle)(double), unsigned int M){
+void FuncApprox::basis_lagrange_poly(double (*function_handle)(double), unsigned int M){
 	// declare vars
-	unsigned int *ak;
-	double * xi;
+	double * xi, *ak;
 
 	// initialize all x values
 	xi = new double[M+1];
@@ -93,7 +145,12 @@ double * FuncApprox::basis_lagrange_poly(double (*function_handle)(double), unsi
 	// delete stuff
 	delete[] xi;
 
-	return ak;
+    // set member data 
+	basis_type = LAGRANGE_POLY;
+	num_basis = M;
+	a_coeff = ak;
+
+	return;
 }
 
 /************************************************************************************//**
@@ -118,7 +175,7 @@ double * FuncApprox::cheby(double (*function_handle)(double), unsigned int M, do
 
 	// get the ak coefficients
 	ak = basis_cheby(function_handle, M);
-	for (unsigned int i=0; i<M+1; i++) std::cout << "ak[i]: " << ak[i] << std::endl;
+	for (unsigned int i=0; i<M+1; i++) cout << "ak[i]: " << ak[i] << endl;
 	
 	// evaluate input points
 	for (unsigned int i=0; i<N_eval_pts; i++){

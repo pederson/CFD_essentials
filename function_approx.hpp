@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <math.h>
 
-enum Basis{CHEBYSHEV = 0, LAGRANGE_POLY=1, CONSTANT=2, LINEAR=3, QUADRATIC=4};
+#include <omp.h>
+
+enum Basis{CONSTANT=0, LINEAR=1, QUADRATIC=2, CHEBYSHEV = 3, LAGRANGE_POLY=4};
 
 class FuncApprox{
 public:
@@ -13,23 +15,25 @@ public:
   // constructor
   FuncApprox();
 
-  // copy constructor
-
   // destructor
   ~FuncApprox();
 
   // member data
+  Basis basis_type; 
   unsigned int num_basis;
   double *a_coeff;
 
   // member functions
-  double * basis_cheby(double (*function_handle)(double), unsigned int M);
+  double evaluate_basis(double *xvals, unsigned int npts);
 
-  double * basis_lagrange_poly(double (*function_handle)(double), unsigned int M);
+protected:
+
+  void basis_cheby(double (*function_handle)(double), unsigned int M);
+
+  void basis_lagrange_poly(double (*function_handle)(double), unsigned int M);
 
   double * cheby(double (*function_handle)(double), unsigned int M, double * eval_points, unsigned int N_eval_pts);
 
-protected:
 
 private:
 };

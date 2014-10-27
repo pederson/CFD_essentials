@@ -8,19 +8,18 @@
 class Integrator{
 public:
 
-  //constructor
-  Integrator();
+  
+  Integrator();		//constructor
+  
+  ~Integrator();	// destructor
 
-  // copy constructor
+  double trapezoid(double (*function_handle)(double), double x_start, double x_end, double h);
 
+  double simpson(double (*function_handle)(double), double x_start, double x_end, double h);
 
-  // destructor
-  ~Integrator();
+protected:
 
-double trapezoid(double (*function_handle)(double), double x_start, double x_end, double h);
+private:
 
-double simpson(double (*function_handle)(double), double x_start, double x_end, double h);
-
-
-}
+};
 #endif

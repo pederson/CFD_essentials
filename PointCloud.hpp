@@ -52,21 +52,24 @@ public:
   unsigned char *classification;
   rgb48 * RGB;
 
-  void printSummary();
-  void calcExtents();
+  void print_summary();
+  void calc_extents();
 
   void add_intensity();
   void add_classification();
   void add_gpstime();
   void add_RGB();  
 
-  static PointCloud * readLas(char * filename, unsigned int byte_offset=0);
+  PointCloud * subset(bool *keep);
+  PointCloud * subset(unsigned int * keep_inds, unsigned int keep_count);
+
+  static PointCloud * read_LAS(char * filename, unsigned int byte_offset=0);
 
 protected:
 
 private:
 
-  void writeLas(char * filename);
+  void write_LAS(char * filename);
 
 };
 

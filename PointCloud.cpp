@@ -42,7 +42,7 @@ PointCloud::~PointCloud(){
   if (RGB != NULL) delete[] RGB;
 }
 
-void PointCloud::printSummary(){
+void PointCloud::print_summary(){
   cout << "Point Cloud Summary:" << endl;
   cout << "  pointcount: " << pointcount << endl;
   cout << "  existing fields: x" << endl;
@@ -58,7 +58,7 @@ void PointCloud::printSummary(){
   cout << "       z:[" << zmin << ", " << zmax << "]" << endl;
 }
 
-void PointCloud::calcExtents(){
+void PointCloud::calc_extents(){
   xmin = x[0]; xmax = x[0]; ymin = y[0]; ymax = y[0]; zmin = z[0]; zmax = z[0];
   for (unsigned int i=1; i<pointcount; i++){
     if (x[i] < xmin) xmin = x[i];
@@ -90,7 +90,7 @@ void PointCloud::add_RGB(){
   else RGB = new rgb48[pointcount];
 }
 
-PointCloud * PointCloud::readLas(char * filename, unsigned int byte_offset){
+PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
   // define vars
   bool fieldexist=false;
   char signature[4];
@@ -373,7 +373,7 @@ PointCloud * PointCloud::readLas(char * filename, unsigned int byte_offset){
   return cloud;
 }
 
-void PointCloud::writeLas(char * filename){
+void PointCloud::write_LAS(char * filename){
   cout << "writing not quite supported yet" << endl;
 }
 
@@ -385,10 +385,10 @@ int main(int argc, char * argv[]){
   PointCloud * cloud;
 
   // take one command line argument as the las file name and read it
-  cloud = PointCloud::readLas(argv[1]);
+  cloud = PointCloud::read_LAS(argv[1]);
 
   // output summary info
-  cloud->printSummary();
+  cloud->print_summary();
 
   // delete stuff
   delete cloud;
