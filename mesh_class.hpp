@@ -13,6 +13,22 @@ struct Node{
   unsigned int index; 		// index of point within x,y,z data
   unsigned int num_neighbors;	// number of neighbors
   std::vector<unsigned int> neighbor_index;		// index of neighbor point within x,y,z data
+
+  // physical properties
+  double epsilon; // relative dielectric constant
+  double mu; // relative permissivity constant
+};
+
+// cell class for finite volume methods
+class Cell{
+public:
+  unsigned int num_vertices;
+  std::vector<unsigned int> vertices;
+
+protected:
+
+private:
+
 };
 
 class Mesh{
@@ -20,6 +36,9 @@ public:
 
   Mesh();		// constructor
   ~Mesh();		// destructor
+
+  create_regular_grid(unsigned int num_nodes_x, unsigned int num_nodes_y, 
+                      unsigned int num_nodes_z); // create a regular grid of points and store it in the mesh
 
 
 protected:

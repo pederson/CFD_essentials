@@ -50,7 +50,7 @@ public:
   void construct_convex(std::vector<Point> allpts);
   void construct_convex(double * x, double * y, unsigned int numpoints);
 
-  void printSummary();
+  bool contains_point(Point query);
 
 
 
