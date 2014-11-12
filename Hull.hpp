@@ -8,6 +8,7 @@
 #include <stack>
 
 enum HullType{CONVEX=0, CONCAVE=1};
+enum Orient{CW=0, CCW=1};
 
 class Point{
   friend class Hull;
@@ -21,6 +22,8 @@ public:
   ~Point();
 
   static int dist(Point p1, Point p2);
+
+  void print();
 
 private:
   // data members
@@ -37,26 +40,30 @@ public:
   // destructor
   ~Hull();
 
+  // member functions
   void print_summary();
   void calc_extents();
 
-  // data members
-  std::vector<unsigned int> inds; // optional: indices from which the points came
-  std::vector<Point> hull_points; // ordered points that make up the hull
-  HullType type;
-  double xmin, xmax, ymin, ymax;
-
-  // member functions
   void construct_convex(std::vector<Point> allpts);
   void construct_convex(double * x, double * y, unsigned int numpoints);
 
   bool contains_point(Point query);
+
+  Hull * Union(Hull * other_Hull);
+  Hull * Intersect(Hull * other_Hull);
 
 
 
 protected:
 
 private:
+
+  // data members
+  std::vector<unsigned int> inds; // optional: indices from which the points came
+  std::vector<Point> hull_points; // ordered points that make up the hull
+  HullType type;
+  Orient direction; // direction of ordering (CCW or CW)
+  double xmin, xmax, ymin, ymax;
 
   static Point next_to_top(std::stack<Point> &S);
   static int swap(Point &p1, Point &p2);

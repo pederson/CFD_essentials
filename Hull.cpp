@@ -1,6 +1,6 @@
 #include "Hull.hpp"
 
-#define _TEST_
+//#define _TEST_
 
 using namespace std;
 
@@ -31,6 +31,11 @@ int Point::dist(Point p1, Point p2){
   return (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y) + (p1.z-p2.z)*(p1.z-p2.z);
 }
 
+void Point::print(){
+  cout << "x: " << x << ", y: " << y << ", z: " << z << endl;
+  return;
+}
+
 Hull::Hull(){
 
 }
@@ -41,12 +46,12 @@ Hull::~Hull(){
 }
 
 void Hull::print_summary(){
+  cout << "Hull summary:" << endl;
   if (hull_points.size() < 1) {
     cout << "Hull is empty!" << endl;
     return;
   }
 
-  cout << "Hull summary:" << endl;
   cout << "  type: ";
   if (type==CONVEX) cout << "CONVEX" << endl;
   else if (type==CONCAVE) cout << "CONCAVE" << endl;
@@ -99,38 +104,53 @@ void Hull::construct_convex(vector<Point> allpts){
   // before p2 in sorted output if p2 has larger polar angle (in CCW
   // direction) than p1
   p0 = allpts[0];
-  cout << "about to enter qsort" << endl;
+  //p0.print();
+  //for (int i=0; i<allpts.size(); i++) allpts[i].print();
+  //cout << "about to enter qsort" << sizeof(Point) << endl;
   qsort(&allpts[1], allpts.size()-1, sizeof(Point), Hull::compare);
 
-  cout << "finished qsort" << endl;
+  //cout << "finished qsort" << endl;
+  //for (int i=0; i<allpts.size(); i++) allpts[i].print();
   //create an empty stack and push first three points to it
   stack<Point> S;
   S.push(allpts[0]);
   S.push(allpts[1]);
   S.push(allpts[2]);
 
-  cout << "about to process remaining" << endl;
-
+  //cout << "about to process remaining" << endl;
+  int orient_val;
   // process remaining n-3 points
   for (int i=3; i<allsize; i++){
     // keep removing top while the angle formed by points next to top, 
     // top, and points[i] makes a non-left turn
-    cout << "i: " << i << endl;
+    //cout << "i: " << i << endl;
 
-    while (orientation(next_to_top(S), S.top(), allpts[i]) != 2) S.pop();
+    orient_val = orientation(next_to_top(S), S.top(), allpts[i]);
+    while (orient_val != 2 ){
+      if (orient_val == 0) break;
+      //cout << "size of S: " << S.size() << endl;
+      //cout << "gonna pop from S" << endl;
+      S.pop();
+      //S.top().print();
+      orient_val = orientation(next_to_top(S), S.top(), allpts[i]);
+    } 
+    //if (orient_val == 0) S.pop();
 
-    cout << "made it to the push" << endl;
+    //cout << "made it to the push" << endl;
     S.push(allpts[i]);
   }
-  cout << "finished processing" << endl;
 
+  //cout << "finished processing stack has " << S.size() << " points" << endl;
+  
   // now stack has the output points...move it into the member data
   hull_points.resize(S.size());
-  for (int i=0; i<S.size(); i++){
+  int numstack = S.size();
+  for (int i=0; i<numstack; i++){
     hull_points[i] = S.top();
     S.pop();
   }
   type = CONVEX;
+  direction = CW;
 
   calc_extents();
 
@@ -148,20 +168,18 @@ void Hull::construct_convex(double * x, double * y, unsigned int numpoints){
   }
 
   // send it to the core function
-
-  cout << "about to enter core function " << endl;
-
   construct_convex(setpts);
 
   return;
 }
 
 Point Hull::next_to_top(stack<Point> &S){
+  //cout << "about to do next to top" ;
   Point p = S.top();
   S.pop();
   Point res = S.top();
   S.push(p);
-  cout << "next to top succeeded" << endl;
+  //cout << "next to top succeeded" << endl;
   return res;
 }
 
@@ -172,12 +190,18 @@ int Hull::swap(Point &p1, Point &p2){
 }
 
 int Hull::orientation(Point p, Point q, Point r){
-  int val = (q.y - p.y)*(r.x - q.x) - (q.x - p.x)*(r.y - q.y);
-
-  cout << "orientation succeeded" << endl;
+  double val = (q.y - p.y)*(r.x - q.x) - (q.x - p.x)*(r.y - q.y);
+  
+  /*
+  p.print();
+  q.print();
+  r.print();
+  cout << "orientation succeeded... val is " << val << endl;
+  */
+  
 
   if (val == 0) return 0; // collinear
-  return (val > 0)? 1: 2; // clockwise or counterclockwise
+  return (val > 0)? 1: 2; // 1=clockwise (right turn) or 2=counterclockwise
 }
 
 int Hull::compare(const void *vp1, const void *vp2){
@@ -186,6 +210,7 @@ int Hull::compare(const void *vp1, const void *vp2){
 
   // find orientation
   int o = orientation(p0, *p1, *p2);
+  if (p0.x == p1->x && p0.x == p2->x) return (Point::dist(p0, *p2) >= Point::dist(p0, *p1))? 1 : -1;
   if (o == 0) return (Point::dist(p0, *p2) >= Point::dist(p0, *p1))? -1 : 1;
 
   return (o == 2)? -1: 1;
@@ -198,7 +223,7 @@ int Hull::compare(const void *vp1, const void *vp2){
 int main(int argc, char * argv[]){
   // declare vars
   double *setx, *sety;
-  unsigned int N=20;
+  unsigned int N=31;
   double space=1.0/double(N);
   Hull * testhull = new Hull();
 
@@ -213,7 +238,7 @@ int main(int argc, char * argv[]){
     }
   }
 
-  cout << "got here" << endl;
+  cout << "about to construct hull" << endl;
 
   // create a convex hull
   testhull->construct_convex(setx, sety, N*N);
@@ -223,6 +248,8 @@ int main(int argc, char * argv[]){
 
   // output summary
   testhull->print_summary();
+
+  //for (unsigned int i=0; i<testhull->hull_points.size(); i++) testhull->hull_points[i].print();
 
   delete testhull;
 
