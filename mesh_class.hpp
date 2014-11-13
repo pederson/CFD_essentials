@@ -65,12 +65,35 @@ public:
   double get_offset_y();
   double get_offset_z();
 
+  double set_offset_x();
+  double set_offset_y();
+  double set_offset_z();
+
+  double get_xmin();
+  void set_xmin(double x_min);
+  double get_ymin();
+  void set_ymin(double y_min);
+  double get_zmin();
+  void set_zmin(double z_min);
+  double get_xmax();
+  void set_xmax(double x_max);
+  double get_ymax();
+  void set_ymax(double y_max);
+  double get_zmax();
+  void set_zmax(double z_max);
+
+  // node access and manipulation
   Node * get_node_ptr(unsigned int i);
+  void add_node(Node * new_node); // add node and add neighbor connections
+  //void remove_node(unsigned int i); // remove node and delete neighbor connections
 
 
-  static Mesh* create_regular_grid(double res, unsigned int num_nodes_x, unsigned int num_nodes_y = 1, 
+  // grid generation and refinement
+  static Mesh * create_regular_grid(double res, unsigned int num_nodes_x, unsigned int num_nodes_y = 1, 
                       unsigned int num_nodes_z = 1); // create a regular grid of points and store it in the mesh
-  static Mesh* create_unstructured_tri_simple();
+  //static Mesh * create_regular_grid(unsigned int N, double xmin, double xmax, double ymin=0.0, double ymax=0.0
+  //                    double zmin=0.0, double zmax=0.0);
+  static Mesh * create_unstructured_tri_simple();
 
 protected:
 
