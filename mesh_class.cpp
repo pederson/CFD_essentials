@@ -4,7 +4,12 @@ using namespace std;
 
 #define _TEST_
 
+//DYLAN_TODO: Use a std::map instead of vectors to associate and add/delete data
+
 Node::Node(){
+  x = 0;
+  y = 0; 
+  z = 0;
 
 }
 
@@ -50,9 +55,9 @@ void Mesh::print_summary(){
   else cout << "UNKNOWN" << endl;
   cout << "  num_dims: " << num_dims << endl;
   cout << "  num_nodes: " << mesh_nodes.size() << endl;
-  cout << "  x extents: [" << xmin << ", " << xmax << "]" << endl;
-  cout << "  y extents: [" << ymin << ", " << ymax << "]" << endl;
-  cout << "  z extents: [" << zmin << ", " << zmax << "]" << endl;
+  cout << "  x extents: [" << xmin + x_offset << ", " << xmax + x_offset << "]" << endl;
+  cout << "  y extents: [" << ymin + y_offset << ", " << ymax + y_offset << "]" << endl;
+  cout << "  z extents: [" << zmin + z_offset << ", " << zmax + z_offset << "]" << endl;
 
   return;
 }
@@ -167,11 +172,39 @@ Node * Mesh::get_node_ptr(unsigned int i){
 
 void Mesh::add_node(Node * new_node){
   mesh_nodes.push_back(new_node);
+
+  // check that the new node doesn't exceed the mins and maxs
+  if (new_node->x < xmin) xmin = new_node->x;
+  else if (new_node->x > xmax) xmax = new_node->x;
+  if (new_node->y < ymin) ymin = new_node->y;
+  else if (new_node->y > ymax) ymax = new_node->y;
+  if (new_node->z < zmin) zmin = new_node->z;
+  else if (new_node->z > zmax) zmax = new_node->z;
+
   return;
 }
 
+//DYLAN_TODO : this doesn't actually delete the nodes... it should
 void Mesh::remove_node(unsigned int i){
-  
+  // declare vars
+  unsigned int nneighbs, nneighb_j;
+
+  // delete neighbor associations to this point
+  nneighbs = mesh_nodes[i]->neighbor_index.size();
+  for (unsigned int j=0; j<nneighbs; j++){
+    // search for this association
+    nneighb_j = mesh_nodes[mesh_nodes[i]->neighbor_index[j]]->neighbor_index.size();
+    for (unsigned int k=0; k<nneighb_j; k++){
+      if (mesh_nodes[mesh_nodes[i]->neighbor_index[j]]->neighbor_index[k] == i){
+        mesh_nodes[mesh_nodes[i]->neighbor_index[j]]->neighbor_index.erase(mesh_nodes[mesh_nodes[i]->neighbor_index[j]]->neighbor_index.begin());
+        break;
+      }
+    }
+  }
+
+  // delete the node
+  //delete mesh_nodes[i]; // this is commented out temporarily because it is deleted upon destroying the object
+
   return;
 }
 
@@ -265,8 +298,18 @@ Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned 
 
 int main(int argc, char * argv[]){
 
+  // test creation of a regular mesh
   Mesh * mesh_reg_1d = Mesh::create_regular_grid(0.1, 100, 50);
   mesh_reg_1d->print_summary();
+
+  // test the node addition
+  mesh_reg_1d->add_node(new Node);
+  mesh_reg_1d->print_summary();
+
+  // test the node deletion
+  mesh_reg_1d->remove_node(100);
+  mesh_reg_1d->print_summary();
+
 
   cout << "about to delete mesh" << endl;
   delete mesh_reg_1d;

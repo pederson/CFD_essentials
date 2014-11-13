@@ -61,13 +61,14 @@ public:
   unsigned int get_num_nodes();
   void set_num_nodes(unsigned int number_of_nodes);
   void set_offsets(double x_off, double y_off = 0, double z_off = 0);
+
   double get_offset_x();
   double get_offset_y();
   double get_offset_z();
 
-  double set_offset_x();
-  double set_offset_y();
-  double set_offset_z();
+  void set_offset_x(double offset_x);
+  void set_offset_y(double offset_y);
+  void set_offset_z(double offset_z);
 
   double get_xmin();
   void set_xmin(double x_min);
@@ -85,7 +86,7 @@ public:
   // node access and manipulation
   Node * get_node_ptr(unsigned int i);
   void add_node(Node * new_node); // add node and add neighbor connections
-  //void remove_node(unsigned int i); // remove node and delete neighbor connections
+  void remove_node(unsigned int i); // remove node and delete neighbor connections
 
 
   // grid generation and refinement
