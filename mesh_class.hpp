@@ -109,7 +109,9 @@ private:
 
   //unsigned int * core_group; // which core does this node belong to (for parallel processing)
 
-  std::vector<Node *> mesh_nodes; // contains pointers to Node structures as a list (so that the mesh is refinable)
+  unsigned int map_inds_max;
+  std::vector<unsigned int> node_keys; // contains keys to the nodes
+  std::map<unsigned int, Node *> mesh_nodes; // contains pointers to Node structures as a list (so that the mesh is refinable)
 };
 
 

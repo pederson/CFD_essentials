@@ -34,16 +34,16 @@ Mesh::Mesh(){
 
 Mesh::~Mesh(){
   if (mesh_nodes.size() > 0){
-    unsigned int nnodes = mesh_nodes.size();
+    unsigned int nnodes = node_keys.size();
     for (unsigned int i=0; i<nnodes; i++) {
-      delete mesh_nodes[i];
+      delete mesh_nodes.at(node_keys[i]);
     }
   }
 }
 
 void Mesh::print_summary(){
   cout << "Mesh Summary: " << endl;
-  if (mesh_nodes.size() == 0){
+  if (node_keys.size() == 0){
     cout << "  Mesh is empty!" << endl;
     return;
   }
