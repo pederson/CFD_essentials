@@ -100,21 +100,18 @@ public:
                       unsigned int num_nodes_z = 1); // create a regular grid of points and store it in the mesh
   static Mesh * create_regular_grid(double res, double xmin, double xmax, double ymin=0.0, double ymax=0.0,
                       double zmin=0.0, double zmax=0.0);
-  static Mesh * create_unstructured_tri_simple();
+  //static Mesh * create_unstructured_tri_simple();
 
 protected:
 
 private:
+  // auxillary information
   MeshType mesh_type;
   unsigned int num_dims;
-  //unsigned int num_nodes; // number of nodes in the mesh
-  //double *x, *y, *z; // the coordinates of each node (y and z optional)
   double x_offset, y_offset, z_offset;
   double xmin, xmax, ymin, ymax, zmin, zmax;
-  //bool *boundary; // flag for boundary points
 
-  //unsigned int * core_group; // which core does this node belong to (for parallel processing)
-
+  // nodes and keys
   std::vector<unsigned int> node_keys; // contains keys to the nodes
   std::map<unsigned int, Node *> mesh_nodes; // contains pointers to Node structures as a list (so that the mesh is refinable)
 };

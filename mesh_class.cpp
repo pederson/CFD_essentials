@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#define _TEST_
+//#define _TEST_
 
 Node::Node(){
   x = 0;
@@ -72,6 +72,25 @@ void Mesh::print_summary(){
   cout << "  x extents: [" << xmin + x_offset << ", " << xmax + x_offset << "]" << endl;
   cout << "  y extents: [" << ymin + y_offset << ", " << ymax + y_offset << "]" << endl;
   cout << "  z extents: [" << zmin + z_offset << ", " << zmax + z_offset << "]" << endl;
+
+  return;
+}
+
+void Mesh::calc_extents(){
+  // declare vars
+  Node * this_node;
+  this_node = mesh_nodes.at(node_keys.at(0));
+
+  xmax = this_node->x; xmin = this_node->x; ymax = this_node->y; ymin = this_node->y; zmax = this_node->z; zmin = this_node->z;
+  for (unsigned int i=1; i<node_keys.size(); i++){
+    this_node = mesh_nodes.at(node_keys.at(i));
+    if (this_node->x > xmax) xmax = this_node->x;
+    if (this_node->x < xmin) xmin = this_node->x;
+    if (this_node->y > ymax) ymax = this_node->y;
+    if (this_node->y < ymin) ymin = this_node->y;
+    if (this_node->z > zmax) zmax = this_node->z;
+    if (this_node->z < zmin) zmin = this_node->z;
+  }
 
   return;
 }
@@ -397,8 +416,19 @@ Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned 
           node_spawn->z = double(k)*res;
 
           // boundaries
-          if (i == 0 || j == 0 || k == 0 || i == num_nodes_x-1 || j == num_nodes_y-1 || k == num_nodes_z-1) node_spawn->boundary = true;
-          else node_spawn->boundary = false;
+          if (i == 0 || j == 0 || k == 0 || i == num_nodes_x-1 || j == num_nodes_y-1 || k == num_nodes_z-1){
+            node_spawn->boundary = true;
+          }
+          else{
+            node_spawn->boundary = false;
+
+            node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+            node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+            node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+            node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+            node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+            node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+          }
         }
       }
     }
