@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <map>
 
 enum MeshType{REGULAR=0, UNSTRUCTURED_TRI=1, UNSTRUCTURED_QUAD=2};
 
@@ -15,17 +16,20 @@ public:
   Node();
   ~Node();
 
+  unsigned int key; // key associated with this node
+
   double x, y, z; 
   bool boundary;
-  //unsigned int index; 		// index of point within x,y,z data
-  //unsigned int num_neighbors;	// number of neighbors
-  std::vector<unsigned int> neighbor_index;		// index of neighbor point within x,y,z data
+
+  std::vector<unsigned int> neighbor_keys;		// keys of neighbor points
 
   unsigned int core_group;
 
   // physical properties
   double epsilon; // relative dielectric constant
   double mu; // relative permittivity constant
+
+  void print_summary();
 
 protected:
 
@@ -52,6 +56,7 @@ public:
   ~Mesh();		// destructor
 
   void print_summary();
+  void calc_extents();
 
   // member data accessors
   MeshType get_mesh_type();
@@ -84,16 +89,17 @@ public:
   void set_zmax(double z_max);
 
   // node access and manipulation
-  Node * get_node_ptr(unsigned int i);
+  Node * get_node_ptr(unsigned int key);
+  unsigned int get_node_key(unsigned int i);
   void add_node(Node * new_node); // add node and add neighbor connections
-  void remove_node(unsigned int i); // remove node and delete neighbor connections
+  void remove_node(unsigned int key); // remove node and delete neighbor connections
 
 
   // grid generation and refinement
   static Mesh * create_regular_grid(double res, unsigned int num_nodes_x, unsigned int num_nodes_y = 1, 
                       unsigned int num_nodes_z = 1); // create a regular grid of points and store it in the mesh
-  //static Mesh * create_regular_grid(unsigned int N, double xmin, double xmax, double ymin=0.0, double ymax=0.0
-  //                    double zmin=0.0, double zmax=0.0);
+  static Mesh * create_regular_grid(double res, double xmin, double xmax, double ymin=0.0, double ymax=0.0,
+                      double zmin=0.0, double zmax=0.0);
   static Mesh * create_unstructured_tri_simple();
 
 protected:
@@ -109,7 +115,6 @@ private:
 
   //unsigned int * core_group; // which core does this node belong to (for parallel processing)
 
-  unsigned int map_inds_max;
   std::vector<unsigned int> node_keys; // contains keys to the nodes
   std::map<unsigned int, Node *> mesh_nodes; // contains pointers to Node structures as a list (so that the mesh is refinable)
 };

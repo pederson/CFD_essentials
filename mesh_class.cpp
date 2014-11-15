@@ -4,17 +4,30 @@ using namespace std;
 
 #define _TEST_
 
-//DYLAN_TODO: Use a std::map instead of vectors to associate and add/delete data
-
 Node::Node(){
   x = 0;
   y = 0; 
   z = 0;
 
+  boundary = false;
+  core_group = 0;
+  epsilon = 1.0;
+  mu = 1.0;
 }
 
 Node::~Node(){
   
+}
+
+void Node::print_summary(){
+  cout << "Node Summary: " << endl;
+  cout << "  key: " << key << endl;
+  cout << "  x: " << x << " y: " << y << " z: " << z << endl;
+  cout << "  On boundary?: " << (boundary? "true":"false") << endl;
+  cout << "  # of neighbors: " << neighbor_keys.size() << endl;
+  for (unsigned int i=0; i<neighbor_keys.size(); i++) cout << "    neighbor key: " << neighbor_keys.at(i) << endl;
+
+  return;
 }
 
 //******************************************************************************************************
@@ -33,10 +46,10 @@ Mesh::Mesh(){
 }
 
 Mesh::~Mesh(){
-  if (mesh_nodes.size() > 0){
+  if (node_keys.size() > 0){
     unsigned int nnodes = node_keys.size();
     for (unsigned int i=0; i<nnodes; i++) {
-      delete mesh_nodes.at(node_keys[i]);
+      delete mesh_nodes.at(node_keys.at(i));
     }
   }
 }
@@ -54,7 +67,8 @@ void Mesh::print_summary(){
   else if (mesh_type==UNSTRUCTURED_QUAD) cout << "UNSTRUCTURED QUAD" << endl;
   else cout << "UNKNOWN" << endl;
   cout << "  num_dims: " << num_dims << endl;
-  cout << "  num_nodes: " << mesh_nodes.size() << endl;
+  cout << "  last key: " << node_keys.back() << endl;
+  cout << "  num_nodes: " << node_keys.size() << endl;
   cout << "  x extents: [" << xmin + x_offset << ", " << xmax + x_offset << "]" << endl;
   cout << "  y extents: [" << ymin + y_offset << ", " << ymax + y_offset << "]" << endl;
   cout << "  z extents: [" << zmin + z_offset << ", " << zmax + z_offset << "]" << endl;
@@ -85,11 +99,28 @@ unsigned int Mesh::get_num_nodes(){
 }
 
 void Mesh::set_num_nodes(unsigned int number_of_nodes){
-  unsigned int begin_size = mesh_nodes.size();
-  mesh_nodes.resize(number_of_nodes);
+  unsigned int new_key, begin_size;
+
+  if (number_of_nodes < node_keys.size()){
+    cout << "ERROR: cannot set a number of nodes smaller than current size" << endl;
+    throw -1;
+  }
+
+  begin_size = node_keys.size();
+  
+  // generate new keys
+  if (begin_size == 0) new_key = 0;
+  else new_key = node_keys.back() + 1;
+  node_keys.resize(number_of_nodes);
 
   // create new Node objects and put them in the mesh_nodes list
-  for (unsigned int i=begin_size; i<number_of_nodes; i++) mesh_nodes[i] = new Node();
+  for (unsigned int i=begin_size; i<number_of_nodes; i++){
+    node_keys.at(i) = new_key;
+    mesh_nodes[new_key] = new Node();
+    mesh_nodes.at(new_key)->key = new_key;
+
+    new_key++;
+  }
   return;
 }
 
@@ -166,12 +197,20 @@ void Mesh::set_zmax(double z_max){
   return;
 }
 
-Node * Mesh::get_node_ptr(unsigned int i){
-  return mesh_nodes[i];
+Node * Mesh::get_node_ptr(unsigned int key){
+  return mesh_nodes.at(key);
+}
+
+unsigned int Mesh::get_node_key(unsigned int i){
+  return node_keys.at(i);
 }
 
 void Mesh::add_node(Node * new_node){
-  mesh_nodes.push_back(new_node);
+  unsigned int new_key;
+  new_key = node_keys.back()+1;
+  node_keys.push_back(new_key);
+  mesh_nodes[new_key] = new_node;
+  mesh_nodes.at(new_key)->key = new_key;
 
   // check that the new node doesn't exceed the mins and maxs
   if (new_node->x < xmin) xmin = new_node->x;
@@ -184,26 +223,37 @@ void Mesh::add_node(Node * new_node){
   return;
 }
 
-//DYLAN_TODO : this doesn't actually delete the nodes... it should
-void Mesh::remove_node(unsigned int i){
+void Mesh::remove_node(unsigned int key){
   // declare vars
-  unsigned int nneighbs, nneighb_j;
+  unsigned int nneighbs, nneighb_j, i;
+
+  i = key;
 
   // delete neighbor associations to this point
-  nneighbs = mesh_nodes[i]->neighbor_index.size();
-  for (unsigned int j=0; j<nneighbs; j++){
+  nneighbs = mesh_nodes.at(i)->neighbor_keys.size();
+  for (unsigned int j=0; j<nneighbs; j++){ // for each neighbor
     // search for this association
-    nneighb_j = mesh_nodes[mesh_nodes[i]->neighbor_index[j]]->neighbor_index.size();
-    for (unsigned int k=0; k<nneighb_j; k++){
-      if (mesh_nodes[mesh_nodes[i]->neighbor_index[j]]->neighbor_index[k] == i){
-        mesh_nodes[mesh_nodes[i]->neighbor_index[j]]->neighbor_index.erase(mesh_nodes[mesh_nodes[i]->neighbor_index[j]]->neighbor_index.begin());
+    nneighb_j = mesh_nodes.at(mesh_nodes.at(i)->neighbor_keys.at(j))->neighbor_keys.size();
+    for (unsigned int k=0; k<nneighb_j; k++){ // search through neighbor keys
+      if (mesh_nodes.at(mesh_nodes.at(i)->neighbor_keys.at(j))->neighbor_keys.at(k) == i){
+        mesh_nodes.at(mesh_nodes.at(i)->neighbor_keys.at(j))->neighbor_keys.erase(mesh_nodes.at(mesh_nodes.at(i)->neighbor_keys.at(j))->neighbor_keys.begin() + k);
         break;
       }
     }
   }
 
   // delete the node
-  //delete mesh_nodes[i]; // this is commented out temporarily because it is deleted upon destroying the object
+  delete mesh_nodes.at(i); // this is commented out temporarily because it is deleted upon destroying the object
+  mesh_nodes.erase(i);
+
+  // delete the key
+  for (unsigned int j=0; j<node_keys.size(); j++){
+    if (node_keys.at(j) == key){
+      node_keys.erase(node_keys.begin() + j);
+      break;
+    }
+  }
+
 
   return;
 }
@@ -231,18 +281,25 @@ Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned 
     mesh_out->set_xmax(double(num_nodes_x-1)*res);
 
     for (unsigned int i=0; i<nodes_total; i++){
+
+      // overall index
       glob_idx = i;
       node_spawn = mesh_out->get_node_ptr(glob_idx);
       node_spawn->x = double(i)*res;
-      node_spawn->boundary = false;
-      
+
+      // set neighbors and boundaries
+      if (i == 0 || i == num_nodes_x-1){
+        node_spawn->boundary = true;
+        if (i==0) node_spawn->neighbor_keys.push_back(i+1);
+        else node_spawn->neighbor_keys.push_back(i-1);
+      } 
+      else{
+        node_spawn->boundary = false;
+        node_spawn->neighbor_keys.push_back(i+1);
+        node_spawn->neighbor_keys.push_back(i-1);
+      }
     }
 
-    // boundaries
-    node_spawn = mesh_out->get_node_ptr(0);
-    node_spawn->boundary = true;
-    node_spawn = mesh_out->get_node_ptr(mesh_out->get_num_nodes()-1);
-    node_spawn->boundary = true;
   }
   else if (num_nodes_z == 1){ // x and y points only
 
@@ -259,10 +316,68 @@ Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned 
         node_spawn->y = double(j)*res;
 
         // boundaries
-        if (i == 0 || j == 0 || i == num_nodes_x-1 || j == num_nodes_y-1) node_spawn->boundary = true;
-        else node_spawn->boundary = false;
+        if (i == 0 || j == 0 || i == num_nodes_x-1 || j == num_nodes_y-1){
+          node_spawn->boundary = true;
+
+          if (i==0){
+            if (j==0){
+              node_spawn->neighbor_keys.push_back(i*num_nodes_y + j+1); // top
+              node_spawn->neighbor_keys.push_back((i+1)*num_nodes_y + j); // right
+            }
+            else if(j==num_nodes_y){
+              node_spawn->neighbor_keys.push_back(i*num_nodes_y + j-1); // bottom
+              node_spawn->neighbor_keys.push_back((i+1)*num_nodes_y + j); // right
+            }
+            else{
+              node_spawn->neighbor_keys.push_back(i*num_nodes_y + j+1); // top
+              node_spawn->neighbor_keys.push_back(i*num_nodes_y + j-1); // bottom
+              node_spawn->neighbor_keys.push_back((i+1)*num_nodes_y + j); // right
+            }
+
+          }
+          else if (i==num_nodes_x){
+            if (j==0){
+              node_spawn->neighbor_keys.push_back(i*num_nodes_y + j+1); // top
+              node_spawn->neighbor_keys.push_back((i-1)*num_nodes_y + j); // left
+            }
+            else if(j==num_nodes_y){
+              node_spawn->neighbor_keys.push_back(i*num_nodes_y + j-1); // bottom
+              node_spawn->neighbor_keys.push_back((i-1)*num_nodes_y + j); // left
+            }
+            else{
+              node_spawn->neighbor_keys.push_back(i*num_nodes_y + j+1); // top
+              node_spawn->neighbor_keys.push_back(i*num_nodes_y + j-1); // bottom
+              node_spawn->neighbor_keys.push_back((i-1)*num_nodes_y + j); // left
+            }
+
+          }
+          else{
+            if (j==0){
+              node_spawn->neighbor_keys.push_back(i*num_nodes_y + j+1); // top
+              node_spawn->neighbor_keys.push_back((i-1)*num_nodes_y + j); // left
+              node_spawn->neighbor_keys.push_back((i+1)*num_nodes_y + j); // right
+            }
+            else if(j==num_nodes_y){
+              node_spawn->neighbor_keys.push_back(i*num_nodes_y + j-1); // bottom
+              node_spawn->neighbor_keys.push_back((i-1)*num_nodes_y + j); // left
+              node_spawn->neighbor_keys.push_back((i+1)*num_nodes_y + j); // right
+            }
+          }
+        }
+        else {
+          node_spawn->boundary = false;
+
+          node_spawn->neighbor_keys.push_back(i*num_nodes_y + j+1); // top
+          node_spawn->neighbor_keys.push_back(i*num_nodes_y + j-1); // bottom
+          node_spawn->neighbor_keys.push_back((i-1)*num_nodes_y + j); // left
+          node_spawn->neighbor_keys.push_back((i+1)*num_nodes_y + j); // right
+        }
       }
     }
+
+    // take care of neighbors for boundaries
+    // four corners
+
   }
   else{ // x, y, and z points
 
@@ -292,27 +407,60 @@ Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned 
   return mesh_out;
 }
 
+Mesh * Mesh::create_regular_grid(double res, double xmin, double xmax, double ymin, double ymax,
+                      double zmin, double zmax){
+  unsigned int num_nodes_x, num_nodes_y, num_nodes_z;
+  Mesh * mesh_out;
+
+  num_nodes_x = (unsigned int)((xmax-xmin)/res);
+  num_nodes_y = (unsigned int)((ymax-ymin)/res);
+  num_nodes_z = (unsigned int)((ymax-ymin)/res);
+
+  mesh_out = create_regular_grid(res, num_nodes_x, num_nodes_y, num_nodes_z);
+
+  return mesh_out;
+}
+
 //*************************************************************************************************************
 
 #ifdef _TEST_
 
 int main(int argc, char * argv[]){
 
+  // test constructor
+  cout << "testing mesh constructor..." << flush;
+  Mesh * mymesh = new Mesh();
+  cout << "succeeded" << endl;
+
+  // test num nodes setting
+  cout << "testing node setting..." << flush;
+  mymesh->set_num_nodes(100);
+  cout << "succeeded" << endl;
+
+
   // test creation of a regular mesh
-  Mesh * mesh_reg_1d = Mesh::create_regular_grid(0.1, 100, 50);
+  cout << "testing regular grid creation..." << flush;
+  Mesh * mesh_reg_1d = Mesh::create_regular_grid(0.1, 100);
+  cout << "succeeded" << endl;
   mesh_reg_1d->print_summary();
+  mesh_reg_1d->get_node_ptr(50)->print_summary();
 
   // test the node addition
+  cout << "testing node insertion..." << flush;
   mesh_reg_1d->add_node(new Node);
+  cout << "succeeded" << endl;
   mesh_reg_1d->print_summary();
 
   // test the node deletion
+  cout << "testing node deletion..." << flush;
   mesh_reg_1d->remove_node(100);
+  cout << "succeeded" << endl;
   mesh_reg_1d->print_summary();
 
 
-  cout << "about to delete mesh" << endl;
+  cout << "testing mesh deletion..." << flush;
   delete mesh_reg_1d;
+  cout << "succeeded" << endl;
 
   return 0;
 }
