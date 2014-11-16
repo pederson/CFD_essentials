@@ -1,8 +1,15 @@
+/************************************************************************************//**
+ * \file function_approx.cpp
+ * 
+ * File filled with necessary code for function approximation
+ *
+ ***************************************************************************************/
+
 #include "mesh_class.hpp"
 
-using namespace std;
+ #define _TEST_
 
-//#define _TEST_
+using namespace std;
 
 Node::Node(){
   x = 0;
@@ -19,6 +26,10 @@ Node::~Node(){
   
 }
 
+/************************************************************************************//**
+ * \brief Print a brief summary of Node values
+ * 
+ ***************************************************************************************/
 void Node::print_summary(){
   cout << "Node Summary: " << endl;
   cout << "  key: " << key << endl;
@@ -54,6 +65,10 @@ Mesh::~Mesh(){
   }
 }
 
+/************************************************************************************//**
+ * \brief Print a brief summary of Mesh values
+ * 
+ ***************************************************************************************/
 void Mesh::print_summary(){
   cout << "Mesh Summary: " << endl;
   if (node_keys.size() == 0){
@@ -76,6 +91,10 @@ void Mesh::print_summary(){
   return;
 }
 
+/************************************************************************************//**
+ * \brief Recalculate x,y,z extents of the node data
+ *
+ ***************************************************************************************/
 void Mesh::calc_extents(){
   // declare vars
   Node * this_node;
@@ -117,6 +136,15 @@ unsigned int Mesh::get_num_nodes(){
   return mesh_nodes.size();
 }
 
+/************************************************************************************//**
+ * \brief Set the number of nodes in the mesh
+ * 
+ *  If the number of nodes is larger than the current number, it will
+ *  allocate new nodes up to the new number. Otherwise it will throw an error
+ *
+ *  \param number_of_nodes : number of nodes to extend to
+ *
+ ***************************************************************************************/
 void Mesh::set_num_nodes(unsigned int number_of_nodes){
   unsigned int new_key, begin_size;
 
@@ -216,14 +244,35 @@ void Mesh::set_zmax(double z_max){
   return;
 }
 
+/************************************************************************************//**
+ * \brief Return a pointer to node, given a key
+ * 
+ *
+ *  \param key : key to the desired node pointer
+ *
+ ***************************************************************************************/
 Node * Mesh::get_node_ptr(unsigned int key){
   return mesh_nodes.at(key);
 }
 
+/************************************************************************************//**
+ * \brief Return the key to a node, given its index
+ * 
+ *
+ *  \param i : index of key within all keys
+ *
+ ***************************************************************************************/
 unsigned int Mesh::get_node_key(unsigned int i){
   return node_keys.at(i);
 }
 
+/************************************************************************************//**
+ * \brief Insert a new node and automatically generate a new key for it
+ * 
+ *
+ *  \param new_node : node to insert (can be a "new Node()")
+ *
+ ***************************************************************************************/
 void Mesh::add_node(Node * new_node){
   unsigned int new_key;
   new_key = node_keys.back()+1;
@@ -242,6 +291,13 @@ void Mesh::add_node(Node * new_node){
   return;
 }
 
+/************************************************************************************//**
+ * \brief Remove a node and it's neighbor connections if you know its key
+ * 
+ *
+ *  \param key : key of Node to remove
+ *
+ ***************************************************************************************/
 void Mesh::remove_node(unsigned int key){
   // declare vars
   unsigned int nneighbs, nneighb_j, i;
@@ -277,6 +333,16 @@ void Mesh::remove_node(unsigned int key){
   return;
 }
 
+/************************************************************************************//**
+ * \brief Create a 1d, 2d, or 3d regular grid
+ * 
+ *
+ *  \param res : resolution of the grid
+ *  \param num_nodes_x : number of nodes in x direction
+ *  \param num_nodes_y : number of nodes in y direction
+ *  \param num_nodes_z : number of nodes in z direction
+ *
+ ***************************************************************************************/
 Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
                       unsigned int num_nodes_z){
   // declare vars
@@ -437,6 +503,16 @@ Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned 
   return mesh_out;
 }
 
+/************************************************************************************//**
+ * \brief Create a 1d, 2d, or 3d regular grid, given the bounds
+ * 
+ *
+ *  \param res : resolution of the grid
+ *  \param xmin : min x value
+ *  \param ymin : min y value
+ *  \param zmin : min z value
+ *
+ ***************************************************************************************/
 Mesh * Mesh::create_regular_grid(double res, double xmin, double xmax, double ymin, double ymax,
                       double zmin, double zmax){
   unsigned int num_nodes_x, num_nodes_y, num_nodes_z;
@@ -466,7 +542,6 @@ int main(int argc, char * argv[]){
   cout << "testing node setting..." << flush;
   mymesh->set_num_nodes(100);
   cout << "succeeded" << endl;
-
 
   // test creation of a regular mesh
   cout << "testing regular grid creation..." << flush;
