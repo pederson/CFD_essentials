@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include <sys/mman.h>
 
@@ -75,9 +76,9 @@ private:
 
 #pragma pack(push,1)
 struct las_pt_0{
-  long X;
-  long Y;
-  long Z;
+  unsigned int X;
+  unsigned int Y;
+  unsigned int Z;
   unsigned short Intensity;
   unsigned char Return_Info;
   unsigned char Classification;
@@ -87,9 +88,9 @@ struct las_pt_0{
 };
 
 struct las_pt_1{
-  long X;
-  long Y;
-  long Z;
+  unsigned int X;
+  unsigned int Y;
+  unsigned int Z;
   unsigned short Intensity;
   unsigned char Return_Info;
   unsigned char Classification;
@@ -100,9 +101,9 @@ struct las_pt_1{
 };
 
 struct las_pt_2{
-  long X;
-  long Y;
-  long Z;
+  unsigned int X;
+  unsigned int Y;
+  unsigned int Z;
   unsigned short Intensity;
   unsigned char Return_Info;
   unsigned char Classification;
@@ -115,9 +116,9 @@ struct las_pt_2{
 };
 
 struct las_pt_3{
-  long X;
-  long Y;
-  long Z;
+  unsigned int X;
+  unsigned int Y;
+  unsigned int Z;
   unsigned short Intensity;
   unsigned char Return_Info;
   unsigned char Classification;
@@ -131,9 +132,9 @@ struct las_pt_3{
 };
 
 struct las_pt_4{
-  long X;
-  long Y;
-  long Z;
+  unsigned int X;
+  unsigned int Y;
+  unsigned int Z;
   unsigned short Intensity;
   unsigned char Return_Info;
   unsigned char Classification;
@@ -151,9 +152,9 @@ struct las_pt_4{
 };
 
 struct las_pt_5{
-  long X;
-  long Y;
-  long Z;
+  unsigned int X;
+  unsigned int Y;
+  unsigned int Z;
   unsigned short Intensity;
   unsigned char Return_Info;
   unsigned char Classification;
