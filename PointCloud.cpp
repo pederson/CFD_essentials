@@ -115,7 +115,7 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
   fseek(fid, 0L, SEEK_END);
   size_t sz = ftell(fid);
   fseek(fid, 0L, SEEK_SET);
-  cout << "the file is " << sz << " bytes long" << endl;
+  //cout << "the file is " << sz << " bytes long" << endl;
   
   // move to byte_offset
   fseek(fid, byte_offset, SEEK_SET);
@@ -123,7 +123,7 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
   // check LASF signature
   res = fread(&signature, 4, 1, fid); // "LASF" signature
 
-  cout << "signature: " << signature[0] << signature[1] << signature[2] << signature[3] << endl;
+  //cout << "signature: " << signature[0] << signature[1] << signature[2] << signature[3] << endl;
 
   // collect header info
   res = fread(&dummy_2, 2, 1, fid); 		// File Source ID
@@ -160,10 +160,13 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
   res = fread(&z_min, 8, 1, fid);		    // Z Min
 
   // verify that the number of points match up
-  cout << "we have mapped" << point_offset + point_record_bytes*pt_count << " bytes" << endl;
-  cout << "the file should have " << (sz-point_offset)/point_record_bytes << " points" << endl;
+  //cout << "we have mapped" << point_offset + point_record_bytes*pt_count << " bytes" << endl;
+  //cout << "the file should have " << (sz-point_offset)/point_record_bytes << " points" << endl;
   unsigned int realsize = (sz-point_offset - byte_offset)/point_record_bytes;
-  if (pt_count != realsize) cout << "YEAAAARRRRGGHHH" << endl;
+  if (pt_count != realsize){
+    cout << "ERROR: byte count doesn't match up with reported point count" << endl;
+    throw -1;
+  }
 
   // read projection info from Variable Length Records (VLRs)
 
@@ -186,6 +189,7 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
     throw -1;
   }
 
+  /*
   cout << "LAS version " << int(ver_major) << "." << int(ver_minor) << endl;
   cout << "point format id: " << int(point_format_id) << endl;
   cout << "bytes in point record: " << point_record_bytes << endl;
@@ -196,21 +200,9 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
   cout << "xmax: " << x_max << " xmin: " << x_min << endl;
   cout << "ymax: " << y_max << " ymin: " << y_min << endl;
   cout << "zmax: " << z_max << " zmin: " << z_min << endl;
+  */
 
-  // memory map the point data
-  fd = open(filename, O_RDONLY);
-  if (fd < 0){
-    cout << "Error opening file in readLas" << endl;
-    throw -1;
-  }
-  lseek(fd, 0, SEEK_SET);
-  lasmap = (char *)mmap(NULL, point_offset + point_record_bytes*pt_count, PROT_READ, MAP_PRIVATE, fd, 0);
-  if (lasmap == MAP_FAILED){
-    cout << "Failed to map las file" << endl;
-    throw -1;
-  }  
-
-  // initialize point cloud
+// initialize point cloud
   cloud = new PointCloud(pt_count);
   cloud->add_intensity();
   cloud->add_classification();
@@ -222,6 +214,20 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
   cloud->zmax = z_max;
 
 
+  // memory map the point data
+  fd = open(filename, O_RDONLY);
+  if (fd < 0){
+    cout << "Error opening file in readLas" << endl;
+    throw -1;
+  }
+  lseek(fd, byte_offset, SEEK_SET);
+  lasmap = (char *)mmap(NULL, point_offset + point_record_bytes*pt_count, PROT_READ, MAP_PRIVATE, fd, 0);
+  if (lasmap == MAP_FAILED){
+    cout << "Failed to map las file" << endl;
+    throw -1;
+  }  
+
+
   // do a switch for point record format and memcpy the points
   switch (point_format_id)
   {
@@ -230,12 +236,12 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
       las_pt_0 *laspts0;
       laspts0 = new las_pt_0[pt_count];
 
-      cout << "about to memcpy " << sizeof(las_pt_0)*pt_count << " " << " " << point_record_bytes*pt_count << endl;
+      //cout << "about to memcpy " << sizeof(las_pt_0)*pt_count << " " << " " << point_record_bytes*pt_count << endl;
 
       // copy from memory map into array of structs
       memcpy(laspts0, &lasmap[point_offset], point_record_bytes*pt_count);
 
-      cout << "about to extract points" << endl;
+      //cout << "about to extract points" << endl;
       // loop over structs to extract the points
       for (unsigned int i=0; i<pt_count; i++){
         cloud->x[i] = double(laspts0[i].X)*x_scale + x_offset; 		// X
@@ -246,7 +252,7 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
       }
 
       delete[] laspts0;
-      cout << "successfully deleted" << endl;
+      //cout << "successfully deleted" << endl;
       break;
 
     case 1:
@@ -276,11 +282,11 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
       las_pt_2 *laspts2;
       laspts2 = new las_pt_2[pt_count];
 
-      cout << "about to memcpy" << sizeof(las_pt_2)*pt_count << " " << " " << point_record_bytes*pt_count << endl;
+      //cout << "about to memcpy" << sizeof(las_pt_2)*pt_count << " " << " " << point_record_bytes*pt_count << endl;
       // copy from memory map into array of structs
-      memcpy(laspts2, &lasmap[point_offset], point_record_bytes*realsize);
+      memcpy(laspts2, &lasmap[point_offset], point_record_bytes*pt_count);
 
-      cout << "about to copy stuff" << endl;
+      //cout << "about to copy stuff" << endl;
       cloud->add_RGB();
       // loop over structs to extract the points
       for (unsigned int i=0; i<pt_count; i++){
@@ -376,13 +382,15 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
   }
 
   // unmap the data
-    cout << "trying to unmap" << endl;
+    //cout << "trying to unmap" << endl;
 
   if (munmap(lasmap, point_offset + point_record_bytes*pt_count) < 0){
     cout << "ruh roh! problem unmapping LAS file" << endl;
     throw -1;
   }
-  cout << "finished unmapping" << endl;
+  close(fd);
+  //cout << "finished unmapping" << endl;
+  
 
   // check to see intensity and classification contain actual info
   for (unsigned int i=0; i<pt_count; i++){

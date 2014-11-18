@@ -76,9 +76,9 @@ private:
 
 #pragma pack(push,1)
 struct las_pt_0{
-  unsigned int X;
-  unsigned int Y;
-  unsigned int Z;
+  int X;
+  int Y;
+  int Z;
   unsigned short Intensity;
   unsigned char Return_Info;
   unsigned char Classification;
@@ -88,9 +88,9 @@ struct las_pt_0{
 };
 
 struct las_pt_1{
-  unsigned int X;
-  unsigned int Y;
-  unsigned int Z;
+  int X;
+  int Y;
+  int Z;
   unsigned short Intensity;
   unsigned char Return_Info;
   unsigned char Classification;
@@ -101,9 +101,9 @@ struct las_pt_1{
 };
 
 struct las_pt_2{
-  unsigned int X;
-  unsigned int Y;
-  unsigned int Z;
+  int X;
+  int Y;
+  int Z;
   unsigned short Intensity;
   unsigned char Return_Info;
   unsigned char Classification;
@@ -116,9 +116,9 @@ struct las_pt_2{
 };
 
 struct las_pt_3{
-  unsigned int X;
-  unsigned int Y;
-  unsigned int Z;
+  int X;
+  int Y;
+  int Z;
   unsigned short Intensity;
   unsigned char Return_Info;
   unsigned char Classification;
@@ -132,9 +132,9 @@ struct las_pt_3{
 };
 
 struct las_pt_4{
-  unsigned int X;
-  unsigned int Y;
-  unsigned int Z;
+  int X;
+  int Y;
+  int Z;
   unsigned short Intensity;
   unsigned char Return_Info;
   unsigned char Classification;
@@ -143,8 +143,8 @@ struct las_pt_4{
   unsigned short Point_Source_ID;
   double GPSTime;
   unsigned char WaveP_Desc_Idx;
-  unsigned long long WaveP_Byte_Offset;
-  unsigned long WaveP_Size;
+  unsigned long WaveP_Byte_Offset;
+  unsigned int WaveP_Size;
   float WaveF_Location;
   float X_t;
   float Y_t;
@@ -152,9 +152,9 @@ struct las_pt_4{
 };
 
 struct las_pt_5{
-  unsigned int X;
-  unsigned int Y;
-  unsigned int Z;
+  int X;
+  int Y;
+  int Z;
   unsigned short Intensity;
   unsigned char Return_Info;
   unsigned char Classification;
@@ -166,8 +166,8 @@ struct las_pt_5{
   unsigned short Green;
   unsigned short Blue;
   unsigned char WaveP_Desc_Idx;
-  unsigned long long WaveP_Byte_Offset;
-  unsigned long WaveP_Size;
+  unsigned long WaveP_Byte_Offset;
+  unsigned int WaveP_Size;
   float WaveF_Location;
   float X_t;
   float Y_t;
