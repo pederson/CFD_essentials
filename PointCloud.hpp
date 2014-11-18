@@ -47,7 +47,7 @@ public:
   ~PointCloud();
 
   double *x, *y, *z, *gpstime;
-  double xmin, xmax, ymin, ymax, zmin, zmax;
+  double xmin, xmax, ymin, ymax, zmin, zmax, gpst_min, gpst_max;
   unsigned int pointcount;
   unsigned short *intensity;
   unsigned char *classification;

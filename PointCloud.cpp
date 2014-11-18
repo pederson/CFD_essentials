@@ -9,14 +9,14 @@
 //  - pointcount
 
 // and it should have the following functions (at least):
-//  - read LAS file
+//  - read LAS file (DONE)
 //  - write LAS file
 //  - read ascii delimited x,y,z,i,c
 //  - write ascii delimited x,y,z,i,c
-//  - print a summary of data
-//  - recalculate the x,y,z extents
+//  - print a summary of data (DONE)
+//  - recalculate the x,y,z extents (DONE)
 //  - conversion to/from ECEF/latlon/UTM
-//  - create/destroy data vectors
+//  - create/destroy data vectors (DONE)
 #include "PointCloud.hpp"
 
 using namespace std;
@@ -30,6 +30,9 @@ PointCloud::PointCloud(unsigned int numpts){
   intensity = NULL;
   classification = NULL;
   RGB = NULL;
+
+  xmin = 0; xmax = 0; ymin = 0; ymax = 0; zmin = 0; zmax = 0;
+  gpst_min = 0; gpst_max = 0;
 }
 
 PointCloud::~PointCloud(){
@@ -56,10 +59,14 @@ void PointCloud::print_summary(){
   cout << "       x:[" << xmin << ", " << xmax << "]" << endl;
   cout << "       y:[" << ymin << ", " << ymax << "]" << endl;
   cout << "       z:[" << zmin << ", " << zmax << "]" << endl;
+  if (gpstime != NULL) cout << "       gpstime:[" << gpst_min << ", " << gpst_max << "]" << endl;
+
+  return;
 }
 
 void PointCloud::calc_extents(){
-  xmin = x[0]; xmax = x[0]; ymin = y[0]; ymax = y[0]; zmin = z[0]; zmax = z[0];
+  xmin = x[0]; xmax = x[0]; ymin = y[0]; ymax = y[0];
+  zmin = z[0]; zmax = z[0];
   for (unsigned int i=1; i<pointcount; i++){
     if (x[i] < xmin) xmin = x[i];
     else if (x[i] > xmax) xmax = x[i];
@@ -67,6 +74,13 @@ void PointCloud::calc_extents(){
     else if (y[i] > ymax) ymax = y[i];
     if (z[i] < zmin) zmin = z[i];
     else if (z[i] > zmax) zmax = z[i];
+  }
+  if (gpstime != NULL){
+    gpst_min = gpstime[0]; gpst_max = gpstime[0];
+    for (unsigned int i=1; i<pointcount; i++){
+      if (gpstime[i] < gpst_min) gpst_min = gpstime[i];
+      else if (gpstime[i] > gpst_max) gpst_max = gpstime[i];
+    }
   }
 
   return;
@@ -163,9 +177,10 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
   //cout << "we have mapped" << point_offset + point_record_bytes*pt_count << " bytes" << endl;
   //cout << "the file should have " << (sz-point_offset)/point_record_bytes << " points" << endl;
   unsigned int realsize = (sz-point_offset - byte_offset)/point_record_bytes;
-  if (pt_count != realsize){
-    cout << "ERROR: byte count doesn't match up with reported point count" << endl;
-    throw -1;
+  if (pt_count > realsize){
+    cout << "WARNING: byte count doesn't match up with reported point count" << endl;
+    cout << "WARNING: proceeding with calculated byte count" << endl;
+    pt_count = realsize;
   }
 
   // read projection info from Variable Length Records (VLRs)
@@ -273,6 +288,8 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
         cloud->classification[i] = laspts1[i].Classification;      // Classification
         cloud->gpstime[i] = laspts1[i].GPSTime;
       }
+      cloud->gpst_min = cloud->gpstime[0];
+      cloud->gpst_max = cloud->gpstime[pt_count-1];
 
       delete[] laspts1;
       break;
@@ -325,6 +342,8 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
         cloud->RGB[i].G = laspts3[i].Green;
         cloud->RGB[i].B = laspts3[i].Blue;
       }
+      cloud->gpst_min = cloud->gpstime[0];
+      cloud->gpst_max = cloud->gpstime[pt_count-1];
 
       delete[] laspts3;
       break;
@@ -347,6 +366,8 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
         cloud->classification[i] = laspts4[i].Classification;      // Classification
         cloud->gpstime[i] = laspts4[i].GPSTime;
       }
+      cloud->gpst_min = cloud->gpstime[0];
+      cloud->gpst_max = cloud->gpstime[pt_count-1];
 
       delete[] laspts4;
       break;
@@ -373,6 +394,8 @@ PointCloud * PointCloud::read_LAS(char * filename, unsigned int byte_offset){
         cloud->RGB[i].G = laspts5[i].Green;
         cloud->RGB[i].B = laspts5[i].Blue;
       }
+      cloud->gpst_min = cloud->gpstime[0];
+      cloud->gpst_max = cloud->gpstime[pt_count-1];
 
       delete[] laspts5;
       break;
@@ -423,12 +446,107 @@ void PointCloud::write_LAS(char * filename){
   cout << "writing not quite supported yet" << endl;
 }
 
+PointCloud * PointCloud::subset(bool * keep){
+  // declare vars
+  unsigned int subset_count=0, ct;
+  PointCloud * cloud_subset;
+
+  for (unsigned int i=0; i<pointcount; i++){
+    if (keep[i] == true) subset_count++;
+  }
+
+  cloud_subset = new PointCloud(subset_count);
+
+  // copy x, y, z data
+  ct=0;
+  for (unsigned int i=0; i<pointcount; i++){
+    if (keep[i]){
+      cloud_subset->x[ct] = x[i];
+      cloud_subset->y[ct] = y[i];
+      cloud_subset->z[ct] = z[i];
+      ct++;
+    }
+  }
+
+  // copy intensity data
+  ct=0;
+  if (intensity != NULL){
+    cloud_subset->add_intensity();
+    for (unsigned int i=0; i<pointcount; i++){
+      if (keep[i]){
+        cloud_subset->intensity[ct] = intensity[i];
+        ct++;
+      }
+    }
+  }
+
+  // copy classification data
+  ct=0;
+  if (classification != NULL){
+    cloud_subset->add_classification();
+    for (unsigned int i=0; i<pointcount; i++){
+      if (keep[i]){
+        cloud_subset->classification[ct] = classification[i];
+        ct++;
+      }
+    }
+  }
+
+  // copy gpstime data
+  ct=0;
+  if (gpstime != NULL){
+    cloud_subset->add_gpstime();
+    for (unsigned int i=0; i<pointcount; i++){
+      if (keep[i]){
+        cloud_subset->gpstime[ct] = gpstime[i];
+        ct++;
+      }
+    }
+  }
+
+  // copy RGB data
+  ct=0;
+  if (RGB != NULL){
+    cloud_subset->add_RGB();
+    for (unsigned int i=0; i<pointcount; i++){
+      if (keep[i]){
+        cloud_subset->RGB[ct].R = RGB[i].R;
+        cloud_subset->RGB[ct].G = RGB[i].G;
+        cloud_subset->RGB[ct].B = RGB[i].B;
+        ct++;
+      }
+    }
+  }
+
+  cloud_subset->calc_extents();
+
+  return cloud_subset;
+}
+
+PointCloud * PointCloud::subset(unsigned int * keep_inds, unsigned int keep_count){
+  // declare vars
+  bool * keep;
+  PointCloud * cloud_subset;
+
+  keep = new bool[pointcount];
+
+  for (unsigned int i=0; i<pointcount; i++) keep[i] = false;
+  for (unsigned int j=0; j<keep_count; j++) keep[keep_inds[j]] = true;
+
+  cloud_subset = subset(keep);
+
+  delete[] keep;
+
+  return cloud_subset;
+}
+
 
 #ifdef _TEST_
 
 int main(int argc, char * argv[]){
   // declare vars
-  PointCloud * cloud;
+  PointCloud * cloud, * cloud_sub;
+  unsigned int * keep_inds;
 
   // take one command line argument as the las file name and read it
   cloud = PointCloud::read_LAS(argv[1]);
@@ -439,8 +557,18 @@ int main(int argc, char * argv[]){
   cloud->calc_extents();
   cloud->print_summary();
 
+  // test the subset function
+  keep_inds = new unsigned int[4];
+  keep_inds[0] = 1;
+  keep_inds[1] = 100;
+  keep_inds[2] = 200;
+  keep_inds[3] = 300;
+  cloud_sub = cloud->subset(keep_inds, 4);
+  cloud_sub->print_summary();
+
   // delete stuff
   delete cloud;
+  delete cloud_sub;
 
   return 0;
 }
