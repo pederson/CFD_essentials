@@ -1,6 +1,8 @@
 #ifndef _VISUALIXER_H
 #define _VISUALIXER_H
 
+#include <iostream>
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -26,6 +28,8 @@ public:
 
 	visualixer();
 	~visualixer();
+
+	virtual void onRun();
 	
 	void draw_test_triangle();
 
@@ -61,5 +65,7 @@ class geometry_visualixer{
 int init_resources(void);
 void onDisplay();
 void free_resources();
+
+void renderScene(void);
 
 #endif

@@ -93,7 +93,7 @@ int init_resources(void)
 	#ifdef GL_ES_VERSION_2_0
 	"#version 100\n"  // OpenGL ES 2.0
 	#else
-	"#version 120\n"  // OpenGL 2.1
+	"#version 130\n"  // OpenGL 3.0
 	#endif
 	"attribute vec2 coord2d;                  "
 	"void main(void) {                        "
@@ -111,7 +111,7 @@ int init_resources(void)
 	// Fragment shader (fills in the empty space between points)
 	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
 	const char *fs_source =
-	"#version 120           \n"
+	"#version 130           \n"
 	"void main(void) {        "
 	"  gl_FragColor[0] = 0.0; "
 	"  gl_FragColor[1] = 0.0; "
@@ -185,53 +185,40 @@ void free_resources()
   /* FILLED IN LATER */
 }
 
+void renderScene(void) {
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glBegin(GL_TRIANGLES);
+		glVertex3f(-0.5,-0.5,0.0);
+		glVertex3f(0.5,0.0,0.0);
+		glVertex3f(0.0,0.5,0.0);
+	glEnd();
+
+    glutSwapBuffers();
+}
+
 int main(int argc, char * argv[]){
 	// declare vars
 	//visualixer * glwindow = new visualixer();
-
-	/*
-		glutInit(&argc, argv);
-		glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-		glutCreateWindow("red 3D lighted cube");
-		printf("GL_VERSION = %s\n",glGetString(GL_VERSION) ); // GL_VERSION = 2.1.2 NVIDIA 195.36.24 
-		return 0; 
-	*/
-
-	/*
-	char *version = NULL;
-	char *vendor = NULL;
-	char *renderer = NULL;
-	char *extensions = NULL;
-	GLuint idWindow = 0;
-	int	glutVersion;
-
-	glutInit(&argc, argv);
-	glutInitWindowSize(1,1);
-	glutInitDisplayMode(GLUT_RGBA);
-	idWindow = glutCreateWindow(PROGRAM);
-	glutHideWindow();
-
-	glutVersion = glutGet(0x01FC);
-	version =     (char*)glGetString(GL_VERSION);
-	vendor =      (char*)glGetString(GL_VENDOR);
-	renderer =    (char*)glGetString(GL_RENDERER);
-	extensions =  (char*)glGetString(GL_EXTENSIONS);
-
-	printf("GLUT=%d\nVERSION=%s\nVENDOR=%s\nRENDERER=%s\nEXTENSIONS=%s\n",
-	glutVersion,version,vendor,renderer,extensions);
-
-	glutDestroyWindow(idWindow);
-	return(0);
-	*/
-	
 	
 	glutInit(&argc, argv);
-	glutInitContextVersion(2,0);
-	glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE|GLUT_DEPTH);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+	glutInitContextVersion(2, 0);
+	glutInitWindowPosition(200, 100);
 	glutInitWindowSize(640, 480);
+	glutCreateWindow("Dylan's window FUCK YEAH");
 
+	/*
+	// register callbacks
+	glutDisplayFunc(renderScene);
+	// enter GLUT event processing cycle
+	glutMainLoop();
+	return 1;
+	*/
+	
 	// Extension wrangler initialising //
-	glewExperimental = GL_TRUE;
+	//glewExperimental = GL_TRUE;
 	GLenum glew_status = glewInit();
 	if ( glew_status != GLEW_OK)
 	{
@@ -245,14 +232,15 @@ int main(int argc, char * argv[]){
 	if (init_resources())
 	{
 		// We can display it if everything goes OK 
-		glutDisplayFunc(onDisplay);
+		//glutDisplayFunc(onDisplay);
+		cout << "im rendering" << endl;
+		glutDisplayFunc(renderScene);
 		glutMainLoop();
 	}
+	cout << "i didn't render" << flush;
 
 	// If the program exits in the usual way,
 	// free resources and exit with a success 
 	free_resources();
 	return EXIT_SUCCESS;
-	
-	
 }
