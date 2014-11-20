@@ -35,8 +35,8 @@ public:
 	~visualixer();
 
 	// getters and setters
-	char * get_window_name();
-	void set_window_name(char * w_name);
+	virtual char * get_window_name();
+	virtual void set_window_name(char * w_name);
 	//float * get_color_ramp(ColorRamp vcolor);
 	//void set_color_ramp(char * cramp);
 	//void cycle_color_ramp();
@@ -52,7 +52,8 @@ public:
 	//virtual void OnMouseMove(int x, int y);
 	//virtual void onLeftMouseDrag(int x, int y);
 	//virtual void onMouseWheel(int new_wheel_number, int new_direction, int x, int y);
-	//virtual void onKeyDown(int new_key, char cAscii);
+	
+	//virtual void onKeyDownl(int new_key, char cAscii);
 	//virtual void onKeyUp(int new_key, char cAscii);
 	//virtual void Repaint();
 	virtual void SetFullscreen(bool bFullscreen);
@@ -87,7 +88,7 @@ private:
 //*********** here are derived classes ****************
 
 // viewing point clouds
-class cloud_visualixer : public visualixer{
+class cloud_visualixer{
 
 };
 

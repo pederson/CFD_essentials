@@ -63,16 +63,19 @@ bool visualixer::MainLoop(){
 }
 
 void visualixer::onExit(){
-
-}
-
-void visualixer::OnKeyDown(int new_key, char cAscii){
-	if (cAscii == 27){ // ESC
-		cout << "teehee" << endl;
-		//this->Close();
-	}
 	return;
 }
+
+/*
+void visualixer::OnKeyDown(int new_key, char cAscii){
+	//if (cAscii == 27){ // ESC
+	//	cout << "teehee" << endl;
+	//	//this->Close();
+	//}
+	return;
+}
+*/
+
 
 void visualixer::SetFullscreen(bool bFullscreen){
 	if (bFullscreen){
