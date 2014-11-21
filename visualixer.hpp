@@ -33,7 +33,7 @@ class visualixer{
 public:
 
 	visualixer();
-	~visualixer();
+	virtual ~visualixer();
 
 	// getters and setters
 	virtual char * get_window_name();
@@ -46,6 +46,7 @@ public:
 	// running the visualixer
 	virtual void run();
 
+
 protected:
 	int glut_window_number; // window number
 	bool visualixer_active; // is the window currently drawn?
@@ -53,6 +54,7 @@ protected:
 	char * window_name;
 	float * color_ramp;
 	float window_centroid[3];
+
 
 	// rendering and user interaction
 	virtual void onIdle(void);
@@ -63,7 +65,7 @@ protected:
 	virtual void onMouseClick(int button, int updown, int x, int y);
 	//virtual void onMouseDown(int button, int x, int y);
 	//virtual void onMouseUp(int button, int x, int y);
-	virtual void OnMouseMove(int x, int y);
+	//virtual void OnMouseMove(int x, int y);
 	//virtual void onLeftMouseDrag(int x, int y);
 	virtual void onMouseWheel(int new_wheel_number, int new_direction, int x, int y);
 	//virtual void onKeyDown(int new_key, char cAscii);
@@ -76,13 +78,13 @@ protected:
 	virtual void Show();
 	virtual void Close();
 
+
 	bool MainLoop();
 
-	
+
+	virtual void run_test_triangle();
 
 private:
-
-	void run_test_triangle();
 
 	// callback functions for glut functions
 	static void sClose(void);
@@ -108,7 +110,7 @@ public:
 };
 
 // viewing a mesh
-class mesh_visualixer{
+class mesh_visualixer : public visualixer{
 
 };
 

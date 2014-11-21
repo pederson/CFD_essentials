@@ -1,4 +1,4 @@
-#include "visualixer.hpp"
+#include "./visualixer.hpp"
 
 using namespace std;
 
@@ -60,13 +60,15 @@ void visualixer::onMouseClick(int button, int updown, int x, int y){
 	cout << "mouse click" << endl;
 }
 
-void visualixer::onMouseMove(int x, int y){
-	cout << "mouse move" << endl;
-}
-
 void visualixer::onMouseWheel(int wheel_number, int direction, int x, int y){
 	cout << "mouse wheel" << endl;
 }
+
+/*
+void visualixer::onMouseMove(int x, int y){
+	cout << "mouse move" << endl;
+}
+*/
 
 
 void visualixer::onInit(){
@@ -80,11 +82,11 @@ void visualixer::onInit(){
 	glutDisplayFunc(sDisplay); //check
 	glutReshapeFunc(sReshape); //check
 	glutMouseFunc(sMouseClick); //check
-	glutMotionFunc(sMouseMove); // check...not sure what it does though
-	glutMouseWheelFunc(sMouseWheel); // check...not tested
-	glutCloseFunc(sClose);
+	glutMotionFunc(sMouseMove); 
+	glutMouseWheelFunc(sMouseWheel); // check...but returns a mouse click for some reason
+	//glutCloseFunc(sClose);
 	glutKeyboardFunc(sKeyDown);
-	glutKeyboardUpFunc(sKeyUp);
+	//glutKeyboardUpFunc(sKeyUp); // not sure if this even exists
 	//glutSpecialFunc(sSpecial); // sets special keyboard callback (F and arrow keys)
 	glutIdleFunc(sIdle); //check
 	return;
@@ -193,7 +195,7 @@ void visualixer::sMouseMove(int x, int y){
 
 	for (unsigned int i=0; i<_vInstances.size(); i++){
 		if (_vInstances.at(i)->glut_window_number == current_window){
-			_vInstances.at(i)->onMouseMove(x, y);
+			//_vInstances.at(i)->onMouseMove(x, y);
 			return;
 		}
 	}
@@ -202,7 +204,7 @@ void visualixer::sMouseMove(int x, int y){
 
 void visualixer::sKeyUp(unsigned char key, int x, int y){
 	int current_window = glutGetWindow();
-	cout << "Pressed Key with unsigned char: " << key << endl;
+	cout << "Released Key with unsigned char: " << key << endl;
 
 	for (unsigned int i=0; i<_vInstances.size(); i++){
 		if (_vInstances.at(i)->glut_window_number == current_window){
@@ -283,61 +285,20 @@ int main(int argc, char * argv[]){
 
 	// test the base class
 	visualixer * mywindow = new visualixer();
+	cout << "about to run" << endl;
 	mywindow->run();
+	cout << "about to delete mywindow" << endl;
 	delete mywindow;
+
+	cout << "numero dos" << endl;
 
 	// test the point cloud viewer
 	cloud_visualixer * mycvis = new cloud_visualixer();
 	mycvis->run();
 	delete mycvis;
 
-	// test the point cloud viewer
+	// test the mesh viewer
 
 	return 0;
 	
-	/*
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-	glutInitContextVersion(2, 0);
-	glutInitWindowPosition(200, 100);
-	glutInitWindowSize(640, 480);
-	glutCreateWindow("Dylan's window");
-	*/
-
-	/*
-	// register callbacks
-	glutDisplayFunc(renderScene);
-	// enter GLUT event processing cycle
-	glutMainLoop();
-	return 1;
-	*/
-	
-	/*
-	// Extension wrangler initialising //
-	//glewExperimental = GL_TRUE;
-	GLenum glew_status = glewInit();
-	if ( glew_status != GLEW_OK)
-	{
-		//fprintf(stderr, "There was an error\n" );
-		fprintf(stderr, "Error in glewInit: %s\n", glewGetErrorString(glew_status));
-		return EXIT_FAILURE;
-	}
-
-	// When all init functions run without errors,
-	//the program can initialise the resources //
-	if (init_resources())
-	{
-		// We can display it if everything goes OK 
-		//glutDisplayFunc(onDisplay);
-		cout << "im rendering" << endl;
-		glutDisplayFunc(renderScene);
-		glutMainLoop();
-	}
-	cout << "i didn't render" << flush;
-
-	// If the program exits in the usual way,
-	// free resources and exit with a success 
-	free_resources();
-	return EXIT_SUCCESS;
-	*/
 }
