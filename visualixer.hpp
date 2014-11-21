@@ -58,27 +58,38 @@ public:
 
 protected:
 	int glut_window_number; // window number
-	bool visualixer_active; // is the window currently drawn?
-	bool lock_rotation; // lock mouse rotations?
 	char * window_name;
 	float * color_ramp;
 	float window_centroid[3];
 
+	// status data
+	bool visualixer_active; // is the window currently drawn?
+	bool left_mouse_engaged; // is the left mouse button clicked?
+	bool middle_mouse_engaged; // is the middle mouse button clicked?
+	bool right_mouse_engaged; // is the right mouse button clicked?
+	bool lock_rotation; // lock mouse rotations?
+	bool lock_pan; // lock mouse panning
+
+	
+
 
 	// rendering and user interaction
-	virtual void onIdle(void);
+	virtual void onIdle();
 	//virtual void onRender(void); // intended for use with sDisplay
 	virtual void onReshape(int new_width, int new_height);
-	virtual void onInit(void);
-	virtual void onExit(void);
+	virtual void onInit();
+	virtual void onExit();
+	virtual void onMouseAction(int button, int updown, int x, int y);
 	virtual void onMouseClick(int button, int updown, int x, int y);
-	//virtual void onMouseDown(int button, int x, int y);
-	//virtual void onMouseUp(int button, int x, int y);
-	//virtual void OnMouseMove(int x, int y);
-	//virtual void onLeftMouseDrag(int x, int y);
+	virtual void onMouseClickDrag(int x, int y);
+	virtual void onMouseLeftDrag(int x, int y);
+	virtual void onMouseRightDrag(int x, int y);
+	//virtual void onMouseScrollDown(int button, int x, int y);
+	//virtual void onMouseScrollUp(int button, int x, int y);
 	virtual void onMouseWheel(int new_wheel_number, int new_direction, int x, int y);
-	//virtual void onKeyDown(int new_key, char cAscii);
-	//virtual void onKeyUp(int new_key, char cAscii);
+	virtual void onKeyDown(unsigned char key, int x, int y);
+	virtual void onKeyUp(unsigned char key, int x, int y);
+	//virtual void onKeyboardDown(unsigned char key, int x, int y);
 
 
 	//virtual void Repaint();
@@ -96,15 +107,17 @@ protected:
 private:
 
 	// callback functions for glut functions
-	static void sClose(void);
+	static void sClose();
 	static void sReshape(int w, int h);
-	static void sDisplay(void);
-	static void sMouseClick(int button, int updown, int x, int y);
+	static void sDisplay();
+	static void sMouseAction(int button, int updown, int x, int y);
 	static void sMouseWheel(int wheel_number, int direction, int x, int y);
-	static void sMouseMove(int x, int y);
+	static void sMouseClickDrag(int x, int y);
 	static void sKeyUp(unsigned char key, int x, int y);
 	static void sKeyDown(unsigned char key, int x, int y);
-	static void sIdle(void);
+	static void sSpecialKeyUp(int key, int x, int y);
+	static void sSpecialKeyDown(int key, int x, int y);
+	static void sIdle();
 
 };
 

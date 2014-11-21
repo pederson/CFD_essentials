@@ -3,8 +3,8 @@
 using namespace std;
 
 // this contains definitions for the openGL visualizer widget
-// basically just a placeholder and reminder for now,
-// but the visualizer should be able to:
+// 
+// the visualizer should be able to:
 //  - visualize flow in 2d and 3d and move around in it
 //  - visualize the geometry in 2d and 3d and move around in it
 //  - visualize and interact with point clouds
@@ -56,19 +56,57 @@ void visualixer::onReshape(int new_width, int new_height){
 	cout << "reshaping" << endl;
 }
 
+void visualixer::onMouseAction(int button, int updown, int x, int y){
+	if (button == MOUSE_SCROLL_UP || button == MOUSE_SCROLL_DOWN ){
+		onMouseWheel(button, updown, x, y);
+	}
+	else if (button == MOUSE_LEFT_BUTTON || button == MOUSE_MIDDLE_BUTTON || button == MOUSE_RIGHT_BUTTON){
+		onMouseClick(button, updown, x, y);
+	}
+	else cout << "Mouse button not recognized" << endl;
+}
+
 void visualixer::onMouseClick(int button, int updown, int x, int y){
-	cout << "mouse click" << endl;
+	bool state;
+	if (updown == GLUT_DOWN) state = true;
+	else if(updown == GLUT_UP) state = false;
+	else cout << "unknown mouse state" << endl;
+
+	switch (button){
+		case MOUSE_LEFT_BUTTON :
+			left_mouse_engaged = state;
+			cout << "left mouse click " << (state? "on":"off") << endl;
+			break;
+		case MOUSE_MIDDLE_BUTTON :
+			middle_mouse_engaged = state;
+			cout << "middle mouse click " << (state? "on":"off")  << endl;
+			break;
+		case MOUSE_RIGHT_BUTTON :
+			right_mouse_engaged = state;
+			cout << "right mouse click " << (state? "on":"off")  << endl;
+			break;
+		otherwise :
+			cout << "unknown mouse button" << endl;
+	}
 }
 
 void visualixer::onMouseWheel(int wheel_number, int direction, int x, int y){
 	cout << "mouse wheel" << endl;
 }
 
-/*
-void visualixer::onMouseMove(int x, int y){
-	cout << "mouse move" << endl;
+void visualixer::onMouseClickDrag(int x, int y){
+	if (left_mouse_engaged) onMouseLeftDrag(x, y);
+	else if (right_mouse_engaged) onMouseRightDrag(x, y);
+	else cout << "dragging middle mouse button" << endl;
 }
-*/
+
+void visualixer::onMouseLeftDrag(int x, int y){
+	cout << "dragging left mouse button" << endl;
+}
+
+void visualixer::onMouseRightDrag(int x, int y){
+	cout << "dragging right mouse button" << endl;
+}
 
 
 void visualixer::onInit(){
@@ -81,13 +119,14 @@ void visualixer::onInit(){
 	// define callbacks (static functions required)
 	glutDisplayFunc(sDisplay); //check
 	glutReshapeFunc(sReshape); //check
-	glutMouseFunc(sMouseClick); //check
-	glutMotionFunc(sMouseMove); 
-	glutMouseWheelFunc(sMouseWheel); // check...but returns a mouse click for some reason
+	glutMouseFunc(sMouseAction); //check
+	glutMotionFunc(sMouseClickDrag); // check
+	//glutMouseWheelFunc(sMouseWheel); // unsure if this works... can live without it
 	//glutCloseFunc(sClose);
-	glutKeyboardFunc(sKeyDown);
-	//glutKeyboardUpFunc(sKeyUp); // not sure if this even exists
-	//glutSpecialFunc(sSpecial); // sets special keyboard callback (F and arrow keys)
+	glutKeyboardFunc(sKeyDown); // check
+	glutKeyboardUpFunc(sKeyUp); // check
+	glutSpecialFunc(sSpecialKeyDown); // check // sets special keyboard callback (F and arrow keys)
+	glutSpecialUpFunc(sSpecialKeyUp); // check // sets special keyboard release callback
 	glutIdleFunc(sIdle); //check
 	return;
 }
@@ -102,16 +141,16 @@ void visualixer::onExit(){
 	return;
 }
 
-/*
-void visualixer::OnKeyDown(int new_key, char cAscii){
-	//if (cAscii == 27){ // ESC
-	//	cout << "teehee" << endl;
-	//	//this->Close();
-	//}
+
+void visualixer::onKeyDown(unsigned char key, int x, int y){
+	cout << "Pressed Key with unsigned char : " << key << endl;
 	return;
 }
-*/
 
+void visualixer::onKeyUp(unsigned char key, int x, int y){
+	cout << "Released Key with unsigned char: " << key << endl;
+	return;
+}
 
 void visualixer::SetFullscreen(bool bFullscreen){
 	if (bFullscreen){
@@ -146,7 +185,7 @@ void visualixer::run_test_triangle(){
 	return;
 }
 
-void visualixer::sClose(void){
+void visualixer::sClose(){
 
 }
 
@@ -162,20 +201,16 @@ void visualixer::sReshape(int w, int h){
 	return;
 }
 
-void visualixer::sDisplay(void){
+void visualixer::sDisplay(){
 
 }
 
-void visualixer::sMouseClick(int button, int updown, int x, int y){
+void visualixer::sMouseAction(int button, int updown, int x, int y){
 	int current_window = glutGetWindow();
-	if (button == MOUSE_SCROLL_UP || button == MOUSE_SCROLL_DOWN ){
-		cout << "mouse scroll" << endl;
-		return;
-	}
-
+	
 	for (unsigned int i=0; i<_vInstances.size(); i++){
 		if (_vInstances.at(i)->glut_window_number == current_window){
-			_vInstances.at(i)->onMouseClick(button, updown, x, y);
+			_vInstances.at(i)->onMouseAction(button, updown, x, y);
 			return;
 		}
 	}
@@ -194,12 +229,12 @@ void visualixer::sMouseWheel(int wheel_number, int direction, int x, int y){
 	return;
 }
 
-void visualixer::sMouseMove(int x, int y){
+void visualixer::sMouseClickDrag(int x, int y){
 	int current_window = glutGetWindow();
 
 	for (unsigned int i=0; i<_vInstances.size(); i++){
 		if (_vInstances.at(i)->glut_window_number == current_window){
-			//_vInstances.at(i)->onMouseMove(x, y);
+			_vInstances.at(i)->onMouseClickDrag(x, y);
 			return;
 		}
 	}
@@ -208,11 +243,11 @@ void visualixer::sMouseMove(int x, int y){
 
 void visualixer::sKeyUp(unsigned char key, int x, int y){
 	int current_window = glutGetWindow();
-	cout << "Released Key with unsigned char: " << key << endl;
-
+	//cout << "Pressed Key with unsigned char: " << key << endl;
+	
 	for (unsigned int i=0; i<_vInstances.size(); i++){
 		if (_vInstances.at(i)->glut_window_number == current_window){
-			//_vInstances.at(i)->onKeyUp(key, x, y);
+			_vInstances.at(i)->onKeyUp(key, x, y);
 			return;
 		}
 	}
@@ -221,18 +256,44 @@ void visualixer::sKeyUp(unsigned char key, int x, int y){
 
 void visualixer::sKeyDown(unsigned char key, int x, int y){
 	int current_window = glutGetWindow();
-	cout << "Pressed Key with unsigned char: " << key << endl;
+	//cout << "Pressed Key with unsigned char: " << key << endl;
 
 	for (unsigned int i=0; i<_vInstances.size(); i++){
 		if (_vInstances.at(i)->glut_window_number == current_window){
-			//_vInstances.at(i)->onKeyDown(key, x, y);
+			_vInstances.at(i)->onKeyDown(key, x, y);
 			return;
 		}
 	}
 	return;
 }
 
-void visualixer::sIdle(void){
+void visualixer::sSpecialKeyUp(int key, int x, int y){
+	int current_window = glutGetWindow();
+	cout << "Released Special Key " << endl;
+
+	for (unsigned int i=0; i<_vInstances.size(); i++){
+		if (_vInstances.at(i)->glut_window_number == current_window){
+			//_vInstances.at(i)->onSpecialKeyUp(key, x, y);
+			return;
+		}
+	}
+	return;
+}
+
+void visualixer::sSpecialKeyDown(int key, int x, int y){
+	int current_window = glutGetWindow();
+	cout << "Pressed Special Key " << endl;
+
+	for (unsigned int i=0; i<_vInstances.size(); i++){
+		if (_vInstances.at(i)->glut_window_number == current_window){
+			//_vInstances.at(i)->onSpecialKeyDown(key, x, y);
+			return;
+		}
+	}
+	return;
+}
+
+void visualixer::sIdle(){
 	int current_window = glutGetWindow();
 
 	for (unsigned int i=0; i<_vInstances.size(); i++){
