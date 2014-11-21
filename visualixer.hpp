@@ -55,15 +55,15 @@ protected:
 	float window_centroid[3];
 
 	// rendering and user interaction
-	//virtual void onIdle(void);
-	//virtual void onRender(void);
-	//virtual void onReshape(int new_width, int new_height);
+	virtual void onIdle(void);
+	//virtual void onRender(void); // intended for use with sDisplay
+	virtual void onReshape(int new_width, int new_height);
 	virtual void onInit(void);
 	virtual void onExit(void);
 	virtual void onMouseClick(int button, int updown, int x, int y);
 	//virtual void onMouseDown(int button, int x, int y);
 	//virtual void onMouseUp(int button, int x, int y);
-	//virtual void OnMouseMove(int x, int y);
+	virtual void OnMouseMove(int x, int y);
 	//virtual void onLeftMouseDrag(int x, int y);
 	virtual void onMouseWheel(int new_wheel_number, int new_direction, int x, int y);
 	//virtual void onKeyDown(int new_key, char cAscii);

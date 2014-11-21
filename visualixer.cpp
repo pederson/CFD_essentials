@@ -48,15 +48,21 @@ void visualixer::run(){
 	return;
 }
 
+void visualixer::onIdle(){
+	cout << "idling \r" << flush;
+}
+
+void visualixer::onReshape(int new_width, int new_height){
+	cout << "reshaping" << endl;
+}
+
 void visualixer::onMouseClick(int button, int updown, int x, int y){
 	cout << "mouse click" << endl;
 }
 
-/*
 void visualixer::onMouseMove(int x, int y){
 	cout << "mouse move" << endl;
 }
-*/
 
 void visualixer::onMouseWheel(int wheel_number, int direction, int x, int y){
 	cout << "mouse wheel" << endl;
@@ -71,15 +77,16 @@ void visualixer::onInit(){
 	glut_window_number = glutCreateWindow(window_name);
 
 	// define callbacks (static functions required)
-	glutDisplayFunc(sDisplay);
-	glutReshapeFunc(sReshape);
-	glutMouseFunc(sMouseClick);
-	glutMotionFunc(sMouseMove);
-	glutMouseWheelFunc(sMouseWheel);
+	glutDisplayFunc(sDisplay); //check
+	glutReshapeFunc(sReshape); //check
+	glutMouseFunc(sMouseClick); //check
+	glutMotionFunc(sMouseMove); // check...not sure what it does though
+	glutMouseWheelFunc(sMouseWheel); // check...not tested
 	glutCloseFunc(sClose);
 	glutKeyboardFunc(sKeyDown);
 	glutKeyboardUpFunc(sKeyUp);
-	glutIdleFunc(sIdle);
+	//glutSpecialFunc(sSpecial); // sets special keyboard callback (F and arrow keys)
+	glutIdleFunc(sIdle); //check
 	return;
 }
 
@@ -142,7 +149,15 @@ void visualixer::sClose(void){
 }
 
 void visualixer::sReshape(int w, int h){
+	int current_window = glutGetWindow();
 
+	for (unsigned int i=0; i<_vInstances.size(); i++){
+		if (_vInstances.at(i)->glut_window_number == current_window){
+			_vInstances.at(i)->onReshape(w, h);
+			return;
+		}
+	}
+	return;
 }
 
 void visualixer::sDisplay(void){
@@ -178,7 +193,7 @@ void visualixer::sMouseMove(int x, int y){
 
 	for (unsigned int i=0; i<_vInstances.size(); i++){
 		if (_vInstances.at(i)->glut_window_number == current_window){
-			//_vInstances.at(i)->onMouseMove(x, y);
+			_vInstances.at(i)->onMouseMove(x, y);
 			return;
 		}
 	}
@@ -187,6 +202,7 @@ void visualixer::sMouseMove(int x, int y){
 
 void visualixer::sKeyUp(unsigned char key, int x, int y){
 	int current_window = glutGetWindow();
+	cout << "Pressed Key with unsigned char: " << key << endl;
 
 	for (unsigned int i=0; i<_vInstances.size(); i++){
 		if (_vInstances.at(i)->glut_window_number == current_window){
@@ -199,6 +215,7 @@ void visualixer::sKeyUp(unsigned char key, int x, int y){
 
 void visualixer::sKeyDown(unsigned char key, int x, int y){
 	int current_window = glutGetWindow();
+	cout << "Pressed Key with unsigned char: " << key << endl;
 
 	for (unsigned int i=0; i<_vInstances.size(); i++){
 		if (_vInstances.at(i)->glut_window_number == current_window){
@@ -214,7 +231,7 @@ void visualixer::sIdle(void){
 
 	for (unsigned int i=0; i<_vInstances.size(); i++){
 		if (_vInstances.at(i)->glut_window_number == current_window){
-			//_vInstances.at(i)->onIdle();
+			_vInstances.at(i)->onIdle();
 			return;
 		}
 	}
