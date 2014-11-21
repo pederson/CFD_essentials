@@ -9,10 +9,12 @@ using namespace std;
 //  - visualize the geometry in 2d and 3d and move around in it
 //  - visualize and interact with point clouds
 
+vector<visualixer*> _vInstances;
+
 visualixer::visualixer(){
 
 	// really should keep track of instances of visualixer
-
+	_vInstances.push_back(this);
 
 	int argc = 1;
 	char * argv = "visualixer";
@@ -26,7 +28,12 @@ visualixer::visualixer(){
 }
 
 visualixer::~visualixer(){
-
+	for (unsigned int i=0; i<_vInstances.size(); i++){
+		if (_vInstances.at(i) == this){
+			_vInstances.erase(_vInstances.begin() + i);
+			return;
+		}
+	}
 }
 
 char * visualixer::get_window_name(){ return window_name;}
@@ -36,18 +43,38 @@ void visualixer::set_window_name(char * w_name){
 	return;
 }
 
+void visualixer::run(){
+	this->run_test_triangle();
+	return;
+}
+
+void visualixer::onMouseClick(int button, int updown, int x, int y){
+	cout << "mouse click" << endl;
+}
+
+/*
+void visualixer::onMouseMove(int x, int y){
+	cout << "mouse move" << endl;
+}
+*/
+
+void visualixer::onMouseWheel(int wheel_number, int direction, int x, int y){
+	cout << "mouse wheel" << endl;
+}
+
+
 void visualixer::onInit(){
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitContextVersion(2, 0);
 	glutInitWindowPosition(200, 100);
 	glutInitWindowSize(640, 480);
-	glutCreateWindow(window_name);
+	glut_window_number = glutCreateWindow(window_name);
 
-	// define callbacks
+	// define callbacks (static functions required)
 	glutDisplayFunc(sDisplay);
 	glutReshapeFunc(sReshape);
-	glutMouseFunc(sMouse);
-	glutMotionFunc(sMotion);
+	glutMouseFunc(sMouseClick);
+	glutMotionFunc(sMouseMove);
 	glutMouseWheelFunc(sMouseWheel);
 	glutCloseFunc(sClose);
 	glutKeyboardFunc(sKeyDown);
@@ -122,28 +149,101 @@ void visualixer::sDisplay(void){
 
 }
 
-void visualixer::sMouse(int button, int updown, int x, int y){
+void visualixer::sMouseClick(int button, int updown, int x, int y){
+	int current_window = glutGetWindow();
 
+	for (unsigned int i=0; i<_vInstances.size(); i++){
+		if (_vInstances.at(i)->glut_window_number == current_window){
+			_vInstances.at(i)->onMouseClick(button, updown, x, y);
+			return;
+		}
+	}
+	return;
 }
 
 void visualixer::sMouseWheel(int wheel_number, int direction, int x, int y){
+	int current_window = glutGetWindow();
 
+	for (unsigned int i=0; i<_vInstances.size(); i++){
+		if (_vInstances.at(i)->glut_window_number == current_window){
+			_vInstances.at(i)->onMouseWheel(wheel_number, direction, x, y);
+			return;
+		}
+	}
+	return;
 }
 
-void visualixer::sMotion(int x, int y){
+void visualixer::sMouseMove(int x, int y){
+	int current_window = glutGetWindow();
 
+	for (unsigned int i=0; i<_vInstances.size(); i++){
+		if (_vInstances.at(i)->glut_window_number == current_window){
+			//_vInstances.at(i)->onMouseMove(x, y);
+			return;
+		}
+	}
+	return;
 }
 
 void visualixer::sKeyUp(unsigned char key, int x, int y){
+	int current_window = glutGetWindow();
 
+	for (unsigned int i=0; i<_vInstances.size(); i++){
+		if (_vInstances.at(i)->glut_window_number == current_window){
+			//_vInstances.at(i)->onKeyUp(key, x, y);
+			return;
+		}
+	}
+	return;
 }
 
 void visualixer::sKeyDown(unsigned char key, int x, int y){
+	int current_window = glutGetWindow();
 
+	for (unsigned int i=0; i<_vInstances.size(); i++){
+		if (_vInstances.at(i)->glut_window_number == current_window){
+			//_vInstances.at(i)->onKeyDown(key, x, y);
+			return;
+		}
+	}
+	return;
 }
 
 void visualixer::sIdle(void){
+	int current_window = glutGetWindow();
 
+	for (unsigned int i=0; i<_vInstances.size(); i++){
+		if (_vInstances.at(i)->glut_window_number == current_window){
+			//_vInstances.at(i)->onIdle();
+			return;
+		}
+	}
+	return;
+}
+
+/************************************************************/
+cloud_visualixer::cloud_visualixer(){
+
+	_vInstances.push_back(this);
+
+	int argc = 1;
+	char * argv = "cloud_visualixer";
+
+	visualixer_active = false;
+	window_name = "Cloud Visualixer";
+	lock_rotation = false;
+	color_ramp = NULL;
+
+	glutInit(&argc, &argv);
+}
+
+cloud_visualixer::~cloud_visualixer(){
+	for (unsigned int i=0; i<_vInstances.size(); i++){
+		if (_vInstances.at(i) == this){
+			_vInstances.erase(_vInstances.begin() + i);
+			return;
+		}
+	}
 }
 
 
@@ -162,12 +262,17 @@ void test_triangle(void) {
 
 int main(int argc, char * argv[]){
 	// declare vars
-	visualixer * mywindow = new visualixer();
+	
 
 	// test the base class
-	mywindow->run_test_triangle();
+	visualixer * mywindow = new visualixer();
+	mywindow->run();
+	delete mywindow;
 
-	// test the mesh viewer
+	// test the point cloud viewer
+	cloud_visualixer * mycvis = new cloud_visualixer();
+	mycvis->run();
+	delete mycvis;
 
 	// test the point cloud viewer
 

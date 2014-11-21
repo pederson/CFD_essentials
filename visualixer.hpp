@@ -2,6 +2,7 @@
 #define _VISUALIXER_H
 
 #include <iostream>
+#include <vector>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,45 +41,56 @@ public:
 	//float * get_color_ramp(ColorRamp vcolor);
 	//void set_color_ramp(char * cramp);
 	//void cycle_color_ramp();
+	//void set_lock_rotation(bool lock_mode);
+
+	// running the visualixer
+	virtual void run();
+
+protected:
+	int glut_window_number; // window number
+	bool visualixer_active; // is the window currently drawn?
+	bool lock_rotation; // lock mouse rotations?
+	char * window_name;
+	float * color_ramp;
+	float window_centroid[3];
 
 	// rendering and user interaction
 	//virtual void onIdle(void);
 	//virtual void onRender(void);
-	//virtual void onResize(int new_width, int new_height);
+	//virtual void onReshape(int new_width, int new_height);
 	virtual void onInit(void);
 	virtual void onExit(void);
+	virtual void onMouseClick(int button, int updown, int x, int y);
 	//virtual void onMouseDown(int button, int x, int y);
 	//virtual void onMouseUp(int button, int x, int y);
 	//virtual void OnMouseMove(int x, int y);
 	//virtual void onLeftMouseDrag(int x, int y);
-	//virtual void onMouseWheel(int new_wheel_number, int new_direction, int x, int y);
-	
-	//virtual void onKeyDownl(int new_key, char cAscii);
+	virtual void onMouseWheel(int new_wheel_number, int new_direction, int x, int y);
+	//virtual void onKeyDown(int new_key, char cAscii);
 	//virtual void onKeyUp(int new_key, char cAscii);
+
+
 	//virtual void Repaint();
 	virtual void SetFullscreen(bool bFullscreen);
 	virtual void Hide();
 	virtual void Show();
 	virtual void Close();
-	//virtual void onRun();
+
 	bool MainLoop();
 
+	
+
+private:
 
 	void run_test_triangle();
 
-protected:
-	bool visualixer_active; // is the window currently drawn?
-	bool lock_rotation; // lock mouse rotations?
-	char * window_name;
-	float * color_ramp;
-
-private:
+	// callback functions for glut functions
 	static void sClose(void);
 	static void sReshape(int w, int h);
 	static void sDisplay(void);
-	static void sMouse(int button, int updown, int x, int y);
+	static void sMouseClick(int button, int updown, int x, int y);
 	static void sMouseWheel(int wheel_number, int direction, int x, int y);
-	static void sMotion(int x, int y);
+	static void sMouseMove(int x, int y);
 	static void sKeyUp(unsigned char key, int x, int y);
 	static void sKeyDown(unsigned char key, int x, int y);
 	static void sIdle(void);
@@ -88,7 +100,10 @@ private:
 //*********** here are derived classes ****************
 
 // viewing point clouds
-class cloud_visualixer{
+class cloud_visualixer : public visualixer{
+public:
+	cloud_visualixer();
+	~cloud_visualixer();
 
 };
 
