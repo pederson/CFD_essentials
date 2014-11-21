@@ -168,6 +168,10 @@ void visualixer::sDisplay(void){
 
 void visualixer::sMouseClick(int button, int updown, int x, int y){
 	int current_window = glutGetWindow();
+	if (button == MOUSE_SCROLL_UP || button == MOUSE_SCROLL_DOWN ){
+		cout << "mouse scroll" << endl;
+		return;
+	}
 
 	for (unsigned int i=0; i<_vInstances.size(); i++){
 		if (_vInstances.at(i)->glut_window_number == current_window){
