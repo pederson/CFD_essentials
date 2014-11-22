@@ -24,7 +24,9 @@ visualixer::visualixer(){
 	lock_rotation = false;
 	color_ramp = NULL;
 
-	glutInit(&argc, &argv);
+
+
+	//glutInit(&argc, &argv);
 }
 
 visualixer::~visualixer(){
@@ -54,6 +56,25 @@ void visualixer::onIdle(){
 
 void visualixer::onReshape(int new_width, int new_height){
 	cout << "reshaping" << endl;
+	/*
+	if (new_height == 0) new_height = 1;
+	float ratio = 1.0*new_width/new_height;
+
+	// projection
+	glMatrixMode(GL_PROJECTION);
+
+	// reset matrix
+	glLoadIdentity();
+
+	// set the viewport to be the whole window
+	glViewport(0, 0, new_width, new_height);
+
+	// set the correct perspective
+	gluPerspective(45, ratio, 1, 1000);
+
+	// go back to modelview
+	glMatrixMode(GL_MODELVIEW);
+	*/
 }
 
 void visualixer::onMouseAction(int button, int updown, int x, int y){
@@ -92,6 +113,7 @@ void visualixer::onMouseClick(int button, int updown, int x, int y){
 
 void visualixer::onMouseWheel(int wheel_number, int direction, int x, int y){
 	cout << "mouse wheel" << endl;
+	//glm::mat4 scalematrix = glm::scale(2.0f, 2.0f, 2.0f);
 }
 
 void visualixer::onMouseClickDrag(int x, int y){
@@ -102,17 +124,19 @@ void visualixer::onMouseClickDrag(int x, int y){
 
 void visualixer::onMouseLeftDrag(int x, int y){
 	cout << "dragging left mouse button" << endl;
+	//glm::vec3 rotation_axis(0, 0, 1);
+	//glm::rotate(2, rotation_axis);
 }
 
 void visualixer::onMouseRightDrag(int x, int y){
 	cout << "dragging right mouse button" << endl;
+	//glm::mat4 transmatrix = glm::translate(0.5f, 0.0f, 0.0f);
 }
-
 
 void visualixer::onInit(){
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitContextVersion(2, 0);
-	glutInitWindowPosition(200, 100);
+	glutInitWindowPosition(100, 100);
 	glutInitWindowSize(640, 480);
 	glut_window_number = glutCreateWindow(window_name);
 
@@ -346,7 +370,12 @@ void test_triangle(void) {
 
 int main(int argc, char * argv[]){
 	// declare vars
+
+	glfwInit();
+	//std::this_thread::sleep_for(std::chrono::seconds(1));
+	glfwTerminate();
 	
+	return 0;
 
 	// test the base class
 	visualixer * mywindow = new visualixer();

@@ -3,12 +3,19 @@
 
 #include <iostream>
 #include <vector>
+//#include <thread>
 
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+//#include <GL/glu.h>
+
+#include <GLFW/glfw3.h>
+
+#include <glm/glm.hpp>
+//#include <glm/transform.hpp>
 
 #define DEFAULT_WIDTH 640
 #define DEFAULT_HEIGHT 480
@@ -24,14 +31,9 @@ enum
 	MOUSE_SCROLL_DOWN = 4
 };
 
-//#define PROGRAM "glversion"
-
-//GLuint program;
-//GLint attribute_coord2d;
-
 // this contains definitions for the openGL visualizer widget
-// basically just a placeholder and reminder for now,
-// but the visualizer should be able to:
+// 
+// the visualizer should be able to:
 //  - visualize flow in 2d and 3d and move around in it
 //  - visualize the geometry in 2d and 3d and move around in it
 //  - visualize and interact with point clouds
@@ -71,8 +73,6 @@ protected:
 	bool lock_pan; // lock mouse panning
 
 	
-
-
 	// rendering and user interaction
 	virtual void onIdle();
 	//virtual void onRender(void); // intended for use with sDisplay
