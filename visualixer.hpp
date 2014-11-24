@@ -14,13 +14,19 @@
 
 #include <GLFW/glfw3.h>
 
+#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/constants.hpp>
 //#include <glm/transform.hpp>
 
 #define DEFAULT_WIDTH 640
 #define DEFAULT_HEIGHT 480
 #define DEFAULT_CENTER_X 0
 #define DEFAULT_CENTER_Y 0
+
+#define VX_PI 3.14159265358979323846264338327950288
 
 enum
 {
@@ -59,38 +65,50 @@ public:
 
 
 protected:
-	int glut_window_number; // window number
+	GLFWwindow * window_ptr;
 	char * window_name;
 	float * color_ramp;
-	float window_centroid[3];
+	float model_centroid[3]; // from [model_min, model_max]
+	float screen_centroid[3]; // from [-1, 1]
+
+	GLuint ebo, vbo, vao;
+	GLuint vertexShader, fragmentShader, shaderProgram;
+	GLint uniModel, uniView, uniProj;
+
+	glm::mat4 model, view, proj;
+	float rotdeg;
 
 	// status data
-	bool visualixer_active; // is the window currently drawn?
 	bool left_mouse_engaged; // is the left mouse button clicked?
 	bool middle_mouse_engaged; // is the middle mouse button clicked?
 	bool right_mouse_engaged; // is the right mouse button clicked?
+	double x_upon_click, y_upon_click; // and and y positions of mouse upon click
+
+	bool visualixer_active; // is the window currently drawn?
 	bool lock_rotation; // lock mouse rotations?
 	bool lock_pan; // lock mouse panning
 
 	
 	// rendering and user interaction
-	virtual void onIdle();
-	//virtual void onRender(void); // intended for use with sDisplay
+	//virtual void onIdle();
 	virtual void onReshape(int new_width, int new_height);
-	virtual void onInit();
-	virtual void onExit();
-	virtual void onMouseAction(int button, int updown, int x, int y);
-	virtual void onMouseClick(int button, int updown, int x, int y);
+
+	// base callbacks to interface with GLFW
+	virtual void onMouseClick(int button, int action, int modifiers);
+	virtual void onMouseWheel(double xoffset, double yoffset);
+	virtual void onKeyboard(int key, int scancode, int action, int modifiers);
+	virtual void onCursorPosition(double xpos, double ypos);
+
+	// derived callbacks defined by me
 	virtual void onMouseClickDrag(int x, int y);
 	virtual void onMouseLeftDrag(int x, int y);
 	virtual void onMouseRightDrag(int x, int y);
 	//virtual void onMouseScrollDown(int button, int x, int y);
 	//virtual void onMouseScrollUp(int button, int x, int y);
-	virtual void onMouseWheel(int new_wheel_number, int new_direction, int x, int y);
+	
 	virtual void onKeyDown(unsigned char key, int x, int y);
 	virtual void onKeyUp(unsigned char key, int x, int y);
 	//virtual void onKeyboardDown(unsigned char key, int x, int y);
-
 
 	//virtual void Repaint();
 	virtual void SetFullscreen(bool bFullscreen);
@@ -99,25 +117,39 @@ protected:
 	virtual void Close();
 
 
+	// functions related to the context creation and main loop rendering
+	virtual void onInit();
+	virtual void onRender();
+	virtual void onShaders();
+	virtual void onExit();
+	const GLchar * VertexShaderSource();
+	const GLchar * FragmentShaderSource(); 
 	bool MainLoop();
 
-
+	// random shit
 	virtual void run_test_triangle();
 
 private:
 
+	// base callbacks for GLFW functions
+	static void sMouseClick(GLFWwindow * window, int button, int action, int modifiers);
+	static void sMouseWheel(GLFWwindow * window, double xoffset, double yoffset);
+	static void sKeyboard(GLFWwindow * window, int key, int scancode, int action, int modifiers);
+	static void sCursorPosition(GLFWwindow * window, double xpos, double ypos);
+
+
+	/*
 	// callback functions for glut functions
 	static void sClose();
 	static void sReshape(int w, int h);
 	static void sDisplay();
-	static void sMouseAction(int button, int updown, int x, int y);
-	static void sMouseWheel(int wheel_number, int direction, int x, int y);
 	static void sMouseClickDrag(int x, int y);
 	static void sKeyUp(unsigned char key, int x, int y);
 	static void sKeyDown(unsigned char key, int x, int y);
 	static void sSpecialKeyUp(int key, int x, int y);
 	static void sSpecialKeyDown(int key, int x, int y);
 	static void sIdle();
+	*/
 
 };
 
