@@ -119,6 +119,12 @@ void visualixer::onMouseClick(int button, int action, int modifiers){
 
 void visualixer::onMouseWheel(double xoffset, double yoffset){
 	cout << "MOUSE WHEEL" << endl;
+	camZ += 0.05;
+	view = glm::lookAt(
+        glm::vec3(1.2f, 1.2f, camZ),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, 1.0f)
+    );
 	//rotdeg = 5*3.14159/180;
 	//model = glm::rotate(model, rotdeg, glm::vec3(0.0f, 1.0f, 1.0f));
 	//glm::mat4 scalematrix = glm::scale(2.0f, 2.0f, 2.0f);
@@ -175,7 +181,7 @@ void visualixer::onInit(){
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1); // This must be compatible with the installed version of OpenGL
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); THIS CAUSES A FAILURE
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
 
 	window_ptr = glfwCreateWindow(400, 400, window_name, NULL, NULL); // Windowed
@@ -304,8 +310,9 @@ void visualixer::onShaders(){
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 	// Set up view matrix
+	camZ = 0.0f;
     view = glm::lookAt(
-        glm::vec3(1.2f, 1.2f, 1.2f),
+        glm::vec3(0.0f, 1.0f, 0.0f),
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 0.0f, 1.0f)
     );

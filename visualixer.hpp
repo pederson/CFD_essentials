@@ -69,14 +69,13 @@ protected:
 	char * window_name;
 	float * color_ramp;
 	float model_centroid[3]; // from [model_min, model_max]
-	float screen_centroid[3]; // from [-1, 1]
-
+	
 	GLuint ebo, vbo, vao;
 	GLuint vertexShader, fragmentShader, shaderProgram;
 	GLint uniModel, uniView, uniProj;
 
 	glm::mat4 model, view, proj;
-	float rotdeg;
+	float rotdeg, camZ;
 
 	// status data
 	bool left_mouse_engaged; // is the left mouse button clicked?
@@ -124,7 +123,7 @@ protected:
 	virtual void onExit();
 	const GLchar * VertexShaderSource();
 	const GLchar * FragmentShaderSource(); 
-	bool MainLoop();
+	virtual	bool MainLoop();
 
 	// random shit
 	virtual void run_test_triangle();
