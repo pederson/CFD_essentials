@@ -368,35 +368,186 @@ void test_triangle(void) {
     glutSwapBuffers();
 }
 
+
+// Shader sources
+const GLchar* vertexSource =
+    "#version 140\n"
+    "in vec2 position;"
+    "in vec3 color;"
+    "out vec3 Color;"
+    "void main() {"
+    "   Color = color;"
+    "   gl_Position = vec4(position, 0.0, 1.0);"
+    "}";
+const GLchar* fragmentSource =
+    "#version 140\n"
+    "in vec3 Color;"
+    "out vec4 outColor;"
+    "void main() {"
+    "   outColor = vec4(Color, 1.0);"
+    "}";
+
+
 int main(int argc, char * argv[]){
 	// declare vars
 
-	glfwInit();
+	if (!glfwInit()){
+		cout << "glfw Init failure " << endl;
+		throw -1;
+	}
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1); // This must be compatible with the installed version of OpenGL
+	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); THIS CAUSES A FAILURE
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-	cout << "yup" << endl;
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL", NULL, NULL); // Windowed
-	//GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL", glfwGetPrimaryMonitor(), nullptr); // Fullscreen
-
+	GLFWwindow* window = glfwCreateWindow(400, 400, "OpenGL", NULL, NULL); // Windowed
+	//GLFWwindow* window = glfwCreateWindow(400, 300, "OpenGL", glfwGetPrimaryMonitor(), NULL); // Fullscreen
+	if ( !window ) {
+		cout << "failed to create window" << endl;
+        glfwTerminate();
+        exit ( EXIT_FAILURE );
+    }
 	glfwMakeContextCurrent(window);
 	cout << "made context current" << endl;
-	while(!glfwWindowShouldClose(window)){
-		glfwSwapBuffers(window);
-		glfwPollEvents();
-		//if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    	//glfwSetWindowShouldClose(window, GL_TRUE);
+
+	glewExperimental = GL_TRUE;
+	GLenum glew_status = glewInit();
+    if ( GLEW_OK != glew_status ) {
+        exit ( EXIT_FAILURE );
+    }
+
+	// Create Vertex Array Object
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+	// create VBO and copy data to it
+	GLuint vbo;
+    glGenBuffers (1, &vbo);
+    printf("%u\n", vbo);
+
+    GLfloat vertices[] = {
+        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Top-left
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Top-right
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right
+        -0.5f, -0.5f, 1.0f, 1.0f, 1.0f  // Bottom-left
+    };
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    
+
+	// Create an element array
+    GLuint ebo;
+    glGenBuffers(1, &ebo);
+ 
+    GLuint elements[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+ 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
+
+    // create and compile the vertex shader
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexSource, NULL);
+    glCompileShader(vertexShader);
+
+    GLint status;
+    GLint logLength;
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
+	if (status != GL_TRUE){
+		cout << "vertex shader failed to compile" << endl;
+		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH , &logLength);
+		if (logLength > 1)
+		{
+		    GLchar* compiler_log = (GLchar*)malloc(logLength);
+		    glGetShaderInfoLog(vertexShader, logLength, 0, compiler_log);
+		    printf("%s\n", compiler_log);
+		    free (compiler_log);
+		}
 	}
 
+    // create and compile the fragment shader
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
+    glCompileShader(fragmentShader);
+
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &status);
+	if (status != GL_TRUE){
+		cout << "fragment shader failed to compile" << endl;
+		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH , &logLength);
+		if (logLength > 1)
+		{
+		    GLchar* compiler_log = (GLchar*)malloc(logLength);
+		    glGetShaderInfoLog(fragmentShader, logLength, 0, compiler_log);
+		    printf("%s\n", compiler_log);
+		    free (compiler_log);
+		}
+	}
+
+    // link the vertex and fragment shader into a shader program
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glBindFragDataLocation(shaderProgram, 0, "outColor");
+    glLinkProgram(shaderProgram);
+    glUseProgram(shaderProgram);
+
+    // Specify the layout of the vertex data
+    GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
+    glEnableVertexAttribArray(posAttrib);
+    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
+
+    GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
+    glEnableVertexAttribArray(colAttrib);
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+
+    // Get the location of the color uniform
+    //GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
+
+	while(!glfwWindowShouldClose(window)){
+
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    	glfwSetWindowShouldClose(window, GL_TRUE);
+
+    	glfwSwapBuffers(window);
+		glfwPollEvents();
+
+		// Set the color of the triangle
+        //GLfloat time = (GLfloat)glfwGetTime();
+        //glUniform3f(uniColor, (sin(time * 4.0f) + 1.0f) / 2.0f, 0.0f, 0.0f);
+
+        // Clear the screen to black
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // Draw a triangle from the 3 vertices
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	
+		
+
+	}
+
+	glDeleteProgram(shaderProgram);
+    glDeleteShader(fragmentShader);
+    glDeleteShader(vertexShader);
+
+    glDeleteBuffers(1, &ebo);
+	glDeleteBuffers(1, &vbo);
+
+	glDeleteVertexArrays(1, &vao);
+
+	//glfwDestroyWindow( window );
 	//std::this_thread::sleep_for(std::chrono::seconds(1));
-	glfwTerminate();
+	//glfwTerminate();
 	
 	return 0;
 
+	/*
 	// test the base class
 	visualixer * mywindow = new visualixer();
 	cout << "about to run" << endl;
@@ -414,5 +565,5 @@ int main(int argc, char * argv[]){
 	// test the mesh viewer
 
 	return 0;
-	
+	*/
 }
