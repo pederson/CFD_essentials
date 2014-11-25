@@ -121,9 +121,9 @@ void visualixer::onMouseWheel(double xoffset, double yoffset){
 	cout << "MOUSE WHEEL" << endl;
 	camZ += 0.05;
 	view = glm::lookAt(
-        glm::vec3(1.2f, 1.2f, camZ),
+        glm::vec3(0.0f, 0.0f, camZ),
         glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f)
+        glm::vec3(0.0f, 1.0f, 0.0f)
     );
 	//rotdeg = 5*3.14159/180;
 	//model = glm::rotate(model, rotdeg, glm::vec3(0.0f, 1.0f, 1.0f));
@@ -310,17 +310,18 @@ void visualixer::onShaders(){
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 	// Set up view matrix
-	camZ = 0.0f;
+	camZ = 1.05f;
     view = glm::lookAt(
-        glm::vec3(0.0f, 1.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f)
+        glm::vec3(0.0f, 0.0f, camZ), // camera position
+        glm::vec3(0.0f, 0.0f, 0.0f), // the position to be looking at
+        glm::vec3(0.0f, 1.0f, 0.0f)  // the up vector
     );
     uniView = glGetUniformLocation(shaderProgram, "view");
     glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
     // set up projection matrix
     proj = glm::perspective(0.785f, 800.0f / 600.0f, 1.0f, 10.0f);
+    //proj = glm::perspective(3.14f/2, 800.0f / 600.0f, 1.0f, 10.0f);
     uniProj = glGetUniformLocation(shaderProgram, "proj");
     glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
