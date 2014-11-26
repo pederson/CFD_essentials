@@ -81,8 +81,8 @@ protected:
 	float * color_ramp;
 	float model_centroid[3]; // from [model_min, model_max]
 	float xmin, xmax, ymin, ymax, zmin, zmax;
-	unsigned int num_vertices, num_per_vertex;
-	unsigned int num_elements; // number of triangles that may share vertices
+	unsigned int num_vertices, num_per_vertex, num_vertex_points;
+	unsigned int num_elements, num_per_element; // number of triangles that may share vertices
 
 	// shaders and buffer objects
 	GLuint ebo, vbo, vao;
@@ -127,8 +127,8 @@ protected:
 
 
 	// functions related to the context creation and main loop rendering
-	const GLchar * VertexShaderSource();
-	const GLchar * FragmentShaderSource(); 
+	virtual const GLchar * VertexShaderSource();
+	virtual const GLchar * FragmentShaderSource(); 
 	virtual void onInit();
 	virtual void onRender();
 	virtual void onShaders();
@@ -156,6 +156,7 @@ public:
 
 	void add_cloud(PointCloud * cloud);
 	void set_test_case();
+	const GLchar * VertexShaderSource();
 	bool MainLoop();
 
 };

@@ -65,6 +65,7 @@ void visualixer::run(){
 void visualixer::set_test_case(){
 	num_vertices = 4;
 	num_per_vertex = 5;
+	num_vertex_points = 2;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
 	vertices[0] = -0.5; vertices[1] = 0.5; vertices[2] = 1.0; vertices[3] = 0.0; vertices[4] = 0.0;
 	vertices[5] = 0.5; vertices[6] = 0.5; vertices[7] = 0.0; vertices[8] = 1.0; vertices[9] = 0.0;
@@ -72,7 +73,8 @@ void visualixer::set_test_case(){
 	vertices[15] = -0.5; vertices[16] = -0.5; vertices[17] = 1.0; vertices[18] = 1.0; vertices[19] = 1.0;
 
     num_elements = 2;
-    elements = new GLuint[3*num_elements];
+    num_per_element = 3;
+    elements = new GLuint[num_per_element*num_elements];
     elements[0] = 0; elements[1] = 1; elements[2] = 2;
     elements[3] = 2; elements[4] = 3; elements[5] = 0;
 	
@@ -318,7 +320,7 @@ void visualixer::onRender(){
 	if (num_elements > 0){
 	    glGenBuffers(1, &ebo);
 	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * num_elements * sizeof(GLuint), elements, GL_STATIC_DRAW);
+	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_elements * num_per_element * sizeof(GLuint), elements, GL_STATIC_DRAW);
     }
     return;
 }
@@ -381,7 +383,7 @@ void visualixer::onShaders(){
     // Specify the layout of the vertex data
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), 0);
+    glVertexAttribPointer(posAttrib, num_vertex_points, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), 0);
 
     GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
     glEnableVertexAttribArray(colAttrib);
@@ -397,7 +399,7 @@ void visualixer::onShaders(){
 	zoom_scale = 1.0f;
 	up_vec = glm::vec3(0.0f, 1.0f, 0.0f);
 	focus_vec = glm::vec3(model_centroid[0], model_centroid[1], model_centroid[2]);
-	eye_vec = glm::vec3(model_centroid[0], model_centroid[1], 10.0*(model_centroid[3]+1.0f));
+	eye_vec = glm::vec3(model_centroid[0], model_centroid[1], 5.0*(model_centroid[3]+1.0f));
     view = glm::lookAt(
         eye_vec, // camera position
         focus_vec, // the position to be looking at
@@ -439,7 +441,7 @@ bool visualixer::MainLoop(){
         glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
         // Draw a triangle from the 3 vertices
-        glDrawElements(GL_TRIANGLES, 3*num_elements, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, num_per_element*num_elements, GL_UNSIGNED_INT, 0);
         //cout << "drew elements" << endl;
         //cout << "looping \r" << flush;
 	
@@ -547,6 +549,7 @@ cloud_visualixer::~cloud_visualixer(){
 void cloud_visualixer::set_test_case(){
 	num_vertices = 100;
 	num_per_vertex = 6;
+	num_vertex_points = 3;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
 	for (unsigned int i=0; i<num_vertices; i++){
 		vertices[i*num_per_vertex] = GLfloat(i);
@@ -559,6 +562,7 @@ void cloud_visualixer::set_test_case(){
 	}
 
 	num_elements = num_vertices;
+	num_per_element = 1;
 	elements = new GLuint[num_elements];
 	for (unsigned int i=0; i<num_vertices; i++){
 		elements[i] = i;
@@ -580,18 +584,20 @@ void cloud_visualixer::set_test_case(){
 void cloud_visualixer::add_cloud(PointCloud * cloud){
 	num_vertices = cloud->pointcount;
 	num_per_vertex = 6;
+	num_vertex_points = 3;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
 	for (unsigned int i=0; i<num_vertices; i++){
 		vertices[i*num_per_vertex] = cloud->x[i];
 		vertices[i*num_per_vertex + 1] = cloud->y[i];
 		vertices[i*num_per_vertex + 2] = cloud->z[i];
-		vertices[i*num_per_vertex + 3] = GLfloat(i)/GLfloat(num_vertices);
-		vertices[i*num_per_vertex + 4] = GLfloat(i)/GLfloat(num_vertices);
-		vertices[i*num_per_vertex + 5] = GLfloat(i)/GLfloat(num_vertices);
+		vertices[i*num_per_vertex + 3] = 1.0;
+		vertices[i*num_per_vertex + 4] = 1.0;
+		vertices[i*num_per_vertex + 5] = 1.0;
 
 	}
 
 	num_elements = num_vertices;
+	num_per_element = 1;
 	elements = new GLuint[num_elements];
 	for (unsigned int i=0; i<num_vertices; i++){
 		elements[i] = i;
@@ -607,6 +613,25 @@ void cloud_visualixer::add_cloud(PointCloud * cloud){
 	ymin = cloud->ymin;
 	zmin = cloud->zmin;
 	return;
+}
+
+const GLchar * cloud_visualixer::VertexShaderSource(){
+	// Shader sources
+	const GLchar* vertexSource =
+	    "#version 140\n"
+	    "in vec3 position;"
+	    "in vec3 color;"
+	    "out vec3 Color;"
+	    "uniform mat4 model;"
+	    "uniform mat4 view;"
+    	"uniform mat4 proj;"
+	    "void main() {"
+	    "   Color = color;"
+	    "   gl_PointSize = 10;"
+	    "   gl_Position = proj*view*model*vec4(position, 1.0);"
+	    "}";
+	return vertexSource;
+
 }
 
 bool cloud_visualixer::MainLoop(){
@@ -633,7 +658,7 @@ bool cloud_visualixer::MainLoop(){
         glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
         // Draw a triangle from the 3 vertices
-        glDrawElements(GL_POINTS, num_elements, GL_UNSIGNED_BYTE, 0);
+        glDrawElements(GL_POINTS, num_elements * num_per_element, GL_UNSIGNED_BYTE, 0);
         //cout << "drew elements" << endl;
         //cout << "looping \r" << flush;
 	}
@@ -658,9 +683,9 @@ int main(int argc, char * argv[]){
 
 	// test the point cloud viewer
 	cloud_visualixer * mycvis = new cloud_visualixer();
-	//mycvis->set_test_case();
-	PointCloud * cloud = PointCloud::read_LAS("../testfiles/ComplexSRSInfo.las");
-	mycvis->add_cloud(cloud);
+	mycvis->set_test_case();
+	//PointCloud * cloud = PointCloud::read_LAS("../testfiles/ComplexSRSInfo.las");
+	//mycvis->add_cloud(cloud);
 	mycvis->run();
 	delete mycvis;
 
