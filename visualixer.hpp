@@ -1,6 +1,8 @@
 #ifndef _VISUALIXER_H
 #define _VISUALIXER_H
 
+#include "PointCloud.hpp"
+
 #include <iostream>
 #include <vector>
 //#include <thread>
@@ -19,6 +21,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/constants.hpp>
+#include <glm/gtx/fast_trigonometry.hpp>
+#include <glm/gtx/fast_exponential.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 //#include <glm/transform.hpp>
 
 #define DEFAULT_WIDTH 640
@@ -75,7 +80,8 @@ protected:
 	GLint uniModel, uniView, uniProj;
 
 	glm::mat4 model, view, proj;
-	float rotdeg, camZ;
+	glm::vec3 eye_vec, new_eye, focus_vec, new_focus, up_vec;
+	float rotdeg, zoom_level, zoom_scale;
 
 	// status data
 	bool left_mouse_engaged; // is the left mouse button clicked?
@@ -160,11 +166,14 @@ public:
 	cloud_visualixer();
 	~cloud_visualixer();
 
+	void add_cloud(PointCloud * cloud);
+
 };
 
 // viewing a mesh
 class mesh_visualixer : public visualixer{
-
+	mesh_visualixer();
+	~mesh_visualixer();
 };
 
 // viewing a simulation

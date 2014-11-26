@@ -101,7 +101,14 @@ void visualixer::onMouseClick(int button, int action, int modifiers){
 		case GLFW_MOUSE_BUTTON_LEFT :
 			left_mouse_engaged = state;
 			cout << "left mouse click " << (state? "on":"off") << endl;
-			glfwGetCursorPos(window_ptr, &x_upon_click, &y_upon_click);
+			if (state) {
+				glfwGetCursorPos(window_ptr, &x_upon_click, &y_upon_click);
+				new_eye = eye_vec;
+			}
+			else {
+				eye_vec = new_eye;
+			}
+			
 			break;
 		case GLFW_MOUSE_BUTTON_MIDDLE :
 			middle_mouse_engaged = state;
@@ -119,11 +126,23 @@ void visualixer::onMouseClick(int button, int action, int modifiers){
 
 void visualixer::onMouseWheel(double xoffset, double yoffset){
 	cout << "MOUSE WHEEL" << endl;
-	camZ += 0.05;
+	//cout << "xoffset: " << xoffset << " yoffset: " << yoffset << endl;
+	float zoom_scale_new;
+	if (yoffset < 0){
+		zoom_level -= 0.05;
+
+	}
+	else if (yoffset > 0){
+		zoom_level += 0.05;
+		
+	}
+	zoom_scale_new = exp(zoom_level);
+	eye_vec = eye_vec*(zoom_scale_new-zoom_scale + 1.0f);
+	zoom_scale = zoom_scale_new;
 	view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, camZ),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f)
+        eye_vec,
+        focus_vec,
+        up_vec
     );
 	//rotdeg = 5*3.14159/180;
 	//model = glm::rotate(model, rotdeg, glm::vec3(0.0f, 1.0f, 1.0f));
@@ -132,15 +151,51 @@ void visualixer::onMouseWheel(double xoffset, double yoffset){
 
 void visualixer::onKeyboard(int key, int scancode, int action, int modifiers){
 	cout << "KEYBOARD PRESS" << endl;
+	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS){ // resets the view
+		eye_vec.x = 0.0f;
+		eye_vec.y = 0.0f;
+		eye_vec.z = 1.05f;
+		focus_vec.x = 0.0f;
+		focus_vec.y = 0.0f;
+		focus_vec.z = 0.0f;
+		up_vec.x = 0.0f;
+		up_vec.y = 1.0f; 
+		up_vec.z = 0.0f;
+		view = glm::lookAt(
+        eye_vec,
+        focus_vec,
+        up_vec
+    	);
+	}
 }
 
 void visualixer::onCursorPosition(double xpos, double ypos){
 	cout << "CURSOR MOVED IN CONTEXT\r" << flush;
 	if (left_mouse_engaged){
 		double new_x_pos, new_y_pos;
+		int width, height;
+		glm::vec3 in_plane, rot_vec;
+		glm::vec4 world_in_plane;
+
+		glfwGetWindowSize(window_ptr, &width, &height);
 		glfwGetCursorPos(window_ptr, &new_x_pos, &new_y_pos);
-		rotdeg = 1*3.14159/180;
-		model = glm::rotate(model, rotdeg, glm::vec3(-(new_x_pos-x_upon_click), -(new_y_pos-y_upon_click), 0.0f));
+
+		rotdeg = ((new_x_pos-x_upon_click)*(new_x_pos-x_upon_click)
+						 + (new_y_pos-y_upon_click)*(new_y_pos-y_upon_click))/(width*width + height*height)*3.14159;
+		in_plane = glm::vec3((new_x_pos-x_upon_click), (new_y_pos-y_upon_click), 0.0f);
+		world_in_plane = model*view*proj*glm::vec4(in_plane, 1.0f);
+		world_in_plane.x = world_in_plane.x - eye_vec.x;
+		world_in_plane.y = world_in_plane.y - eye_vec.y;
+		world_in_plane.z = world_in_plane.z - eye_vec.z;
+
+		rot_vec.x = eye_vec.y*world_in_plane.z - eye_vec.z*world_in_plane.y;
+		rot_vec.y = eye_vec.z*world_in_plane.x - eye_vec.x*world_in_plane.z;
+		rot_vec.z = eye_vec.x*world_in_plane.y - eye_vec.y*world_in_plane.x;
+
+
+		new_eye = glm::rotate(eye_vec, rotdeg, -rot_vec);
+		view = glm::lookAt(new_eye, focus_vec, up_vec);
+		
 	}
 }
 
@@ -310,17 +365,21 @@ void visualixer::onShaders(){
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 	// Set up view matrix
-	camZ = 1.05f;
+	zoom_level = 0.0f;
+	zoom_scale = 1.0f;
+	up_vec = glm::vec3(0.0f, 1.0f, 0.0f);
+	focus_vec = glm::vec3(0.0f, 0.0f, 0.0f);
+	eye_vec = glm::vec3(0.0f, 0.0f, 1.05f);
     view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, camZ), // camera position
-        glm::vec3(0.0f, 0.0f, 0.0f), // the position to be looking at
-        glm::vec3(0.0f, 1.0f, 0.0f)  // the up vector
+        eye_vec, // camera position
+        focus_vec, // the position to be looking at
+        up_vec  // the up vector
     );
     uniView = glGetUniformLocation(shaderProgram, "view");
     glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
     // set up projection matrix
-    proj = glm::perspective(0.785f, 800.0f / 600.0f, 1.0f, 10.0f);
+    proj = glm::perspective(0.785f, float(DEFAULT_WIDTH)/float(DEFAULT_HEIGHT), 0.05f, 100.0f);
     //proj = glm::perspective(3.14f/2, 800.0f / 600.0f, 1.0f, 10.0f);
     uniProj = glGetUniformLocation(shaderProgram, "proj");
     glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
@@ -606,6 +665,10 @@ cloud_visualixer::~cloud_visualixer(){
 			return;
 		}
 	}
+}
+
+void cloud_visualixer::add_cloud(PointCloud * cloud){
+	return;
 }
 
 // this is old deprecated style of opengl

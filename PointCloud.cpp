@@ -1,5 +1,5 @@
 // this is a placeholder for the PointCloud class
-#define _TEST_
+//#define _TEST_
 // it should hold the following elements (at least):
 //  - x,y,z,intensity
 //  - return number
