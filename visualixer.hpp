@@ -64,21 +64,32 @@ public:
 	//void set_color_ramp(char * cramp);
 	//void cycle_color_ramp();
 	//void set_lock_rotation(bool lock_mode);
+	virtual void set_test_case();
 
 	// running the visualixer
 	virtual void run();
 
+	
+
 
 protected:
+	// model related data
 	GLFWwindow * window_ptr;
 	char * window_name;
+	GLfloat * vertices;
+	GLuint * elements;
 	float * color_ramp;
 	float model_centroid[3]; // from [model_min, model_max]
-	
+	float xmin, xmax, ymin, ymax, zmin, zmax;
+	unsigned int num_vertices, num_per_vertex;
+	unsigned int num_elements; // number of triangles that may share vertices
+
+	// shaders and buffer objects
 	GLuint ebo, vbo, vao;
 	GLuint vertexShader, fragmentShader, shaderProgram;
 	GLint uniModel, uniView, uniProj;
 
+	// visualizer user viewing data
 	glm::mat4 model, view, proj;
 	glm::vec3 eye_vec, new_eye, focus_vec, new_focus, up_vec;
 	float rotdeg, zoom_level, zoom_scale;
@@ -94,9 +105,6 @@ protected:
 	bool lock_pan; // lock mouse panning
 
 	
-	// rendering and user interaction
-	//virtual void onIdle();
-	virtual void onReshape(int new_width, int new_height);
 
 	// base callbacks to interface with GLFW
 	virtual void onMouseClick(int button, int action, int modifiers);
@@ -105,34 +113,28 @@ protected:
 	virtual void onCursorPosition(double xpos, double ypos);
 
 	// derived callbacks defined by me
-	virtual void onMouseClickDrag(int x, int y);
-	virtual void onMouseLeftDrag(int x, int y);
-	virtual void onMouseRightDrag(int x, int y);
+	virtual void onMouseLeftDrag(double xpos, double ypos);
+	virtual void onMouseRightDrag(double xpos, double ypos);
+	virtual void onMouseMiddleDrag(double xpos, double ypos);
 	//virtual void onMouseScrollDown(int button, int x, int y);
 	//virtual void onMouseScrollUp(int button, int x, int y);
-	
 	virtual void onKeyDown(unsigned char key, int x, int y);
 	virtual void onKeyUp(unsigned char key, int x, int y);
 	//virtual void onKeyboardDown(unsigned char key, int x, int y);
-
 	//virtual void Repaint();
+	virtual void onReshape(int new_width, int new_height);
 	virtual void SetFullscreen(bool bFullscreen);
-	virtual void Hide();
-	virtual void Show();
-	virtual void Close();
 
 
 	// functions related to the context creation and main loop rendering
+	const GLchar * VertexShaderSource();
+	const GLchar * FragmentShaderSource(); 
 	virtual void onInit();
 	virtual void onRender();
 	virtual void onShaders();
-	virtual void onExit();
-	const GLchar * VertexShaderSource();
-	const GLchar * FragmentShaderSource(); 
 	virtual	bool MainLoop();
-
-	// random shit
-	virtual void run_test_triangle();
+	virtual void onExit();
+	
 
 private:
 
@@ -141,20 +143,6 @@ private:
 	static void sMouseWheel(GLFWwindow * window, double xoffset, double yoffset);
 	static void sKeyboard(GLFWwindow * window, int key, int scancode, int action, int modifiers);
 	static void sCursorPosition(GLFWwindow * window, double xpos, double ypos);
-
-
-	/*
-	// callback functions for glut functions
-	static void sClose();
-	static void sReshape(int w, int h);
-	static void sDisplay();
-	static void sMouseClickDrag(int x, int y);
-	static void sKeyUp(unsigned char key, int x, int y);
-	static void sKeyDown(unsigned char key, int x, int y);
-	static void sSpecialKeyUp(int key, int x, int y);
-	static void sSpecialKeyDown(int key, int x, int y);
-	static void sIdle();
-	*/
 
 };
 
@@ -167,6 +155,8 @@ public:
 	~cloud_visualixer();
 
 	void add_cloud(PointCloud * cloud);
+	void set_test_case();
+	bool MainLoop();
 
 };
 
@@ -185,13 +175,5 @@ class sim_visualixer{
 class geometry_visualixer{
 
 };
-
-/*
-int init_resources(void);
-void onDisplay();
-void free_resources();
-*/
-
-void test_triangle(void);
 
 #endif

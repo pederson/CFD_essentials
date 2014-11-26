@@ -20,6 +20,16 @@ visualixer::visualixer(){
 	window_name = "Visualixer";
 	lock_rotation = false;
 	color_ramp = NULL;
+	vertices = NULL;
+	elements = NULL;
+
+	num_vertices = 0;
+	num_per_vertex = 0;
+	num_elements = 0;
+
+	model_centroid[0] = 0.0;
+    model_centroid[1] = 0.0;
+    model_centroid[2] = 0.0;
 }
 
 visualixer::~visualixer(){
@@ -31,6 +41,9 @@ visualixer::~visualixer(){
 	}
 
 	delete[] window_name;
+	if (color_ramp != NULL) delete[] color_ramp;
+	if (vertices != NULL) delete[] vertices;
+	if (elements != NULL) delete[] elements;
 }
 
 char * visualixer::get_window_name(){ return window_name;}
@@ -49,41 +62,32 @@ void visualixer::run(){
 	return;
 }
 
+void visualixer::set_test_case(){
+	num_vertices = 4;
+	num_per_vertex = 5;
+	vertices = new GLfloat[num_vertices*num_per_vertex];
+	vertices[0] = -0.5; vertices[1] = 0.5; vertices[2] = 1.0; vertices[3] = 0.0; vertices[4] = 0.0;
+	vertices[5] = 0.5; vertices[6] = 0.5; vertices[7] = 0.0; vertices[8] = 1.0; vertices[9] = 0.0;
+	vertices[10] = 0.5; vertices[11] = -0.5; vertices[12] = 0.0; vertices[13] = 0.0; vertices[14] = 1.0;
+	vertices[15] = -0.5; vertices[16] = -0.5; vertices[17] = 1.0; vertices[18] = 1.0; vertices[19] = 1.0;
 
+    num_elements = 2;
+    elements = new GLuint[3*num_elements];
+    elements[0] = 0; elements[1] = 1; elements[2] = 2;
+    elements[3] = 2; elements[4] = 3; elements[5] = 0;
+	
+    model_centroid[0] = 0.0;
+    model_centroid[1] = 0.0;
+    model_centroid[2] = 0.0;
+    xmax = 0.5;
+    ymax = 0.5;
+    zmax = 0.0;
+    xmin = -0.5;
+    ymin = -0.5;
+    zmin = 0.0;
 
-
-
-
-
-
-void visualixer::onReshape(int new_width, int new_height){
-	cout << "reshaping" << endl;
-	/*
-	if (new_height == 0) new_height = 1;
-	float ratio = 1.0*new_width/new_height;
-
-	// projection
-	glMatrixMode(GL_PROJECTION);
-
-	// reset matrix
-	glLoadIdentity();
-
-	// set the viewport to be the whole window
-	glViewport(0, 0, new_width, new_height);
-
-	// set the correct perspective
-	gluPerspective(45, ratio, 1, 1000);
-
-	// go back to modelview
-	glMatrixMode(GL_MODELVIEW);
-	*/
+	return;
 }
-
-
-
-
-
-
 
 
 
@@ -144,9 +148,6 @@ void visualixer::onMouseWheel(double xoffset, double yoffset){
         focus_vec,
         up_vec
     );
-	//rotdeg = 5*3.14159/180;
-	//model = glm::rotate(model, rotdeg, glm::vec3(0.0f, 1.0f, 1.0f));
-	//glm::mat4 scalematrix = glm::scale(2.0f, 2.0f, 2.0f);
 }
 
 void visualixer::onKeyboard(int key, int scancode, int action, int modifiers){
@@ -155,75 +156,112 @@ void visualixer::onKeyboard(int key, int scancode, int action, int modifiers){
 		eye_vec.x = 0.0f;
 		eye_vec.y = 0.0f;
 		eye_vec.z = 1.05f;
-		focus_vec.x = 0.0f;
-		focus_vec.y = 0.0f;
-		focus_vec.z = 0.0f;
+		focus_vec.x = model_centroid[0];
+		focus_vec.y = model_centroid[1];
+		focus_vec.z = model_centroid[2];
 		up_vec.x = 0.0f;
 		up_vec.y = 1.0f; 
 		up_vec.z = 0.0f;
 		view = glm::lookAt(
-        eye_vec,
-        focus_vec,
-        up_vec
-    	);
+	        eye_vec,
+	        focus_vec,
+	        up_vec
+	    	);
 	}
 }
 
 void visualixer::onCursorPosition(double xpos, double ypos){
 	cout << "CURSOR MOVED IN CONTEXT\r" << flush;
-	if (left_mouse_engaged){
-		double new_x_pos, new_y_pos;
-		int width, height;
-		glm::vec3 in_plane, rot_vec;
-		glm::vec4 world_in_plane;
-
-		glfwGetWindowSize(window_ptr, &width, &height);
-		glfwGetCursorPos(window_ptr, &new_x_pos, &new_y_pos);
-
-		rotdeg = ((new_x_pos-x_upon_click)*(new_x_pos-x_upon_click)
-						 + (new_y_pos-y_upon_click)*(new_y_pos-y_upon_click))/(width*width + height*height)*3.14159;
-		in_plane = glm::vec3((new_x_pos-x_upon_click), (new_y_pos-y_upon_click), 0.0f);
-		world_in_plane = model*view*proj*glm::vec4(in_plane, 1.0f);
-		world_in_plane.x = world_in_plane.x - eye_vec.x;
-		world_in_plane.y = world_in_plane.y - eye_vec.y;
-		world_in_plane.z = world_in_plane.z - eye_vec.z;
-
-		rot_vec.x = eye_vec.y*world_in_plane.z - eye_vec.z*world_in_plane.y;
-		rot_vec.y = eye_vec.z*world_in_plane.x - eye_vec.x*world_in_plane.z;
-		rot_vec.z = eye_vec.x*world_in_plane.y - eye_vec.y*world_in_plane.x;
-
-
-		new_eye = glm::rotate(eye_vec, rotdeg, -rot_vec);
-		view = glm::lookAt(new_eye, focus_vec, up_vec);
-		
-	}
+	if (left_mouse_engaged) onMouseLeftDrag(xpos, ypos);
+	else if(right_mouse_engaged) onMouseRightDrag(xpos, ypos);
+	else if(middle_mouse_engaged) onMouseMiddleDrag(xpos, ypos);
 }
 
 
 
+void visualixer::onMouseLeftDrag(double xpos, double ypos){
+	double new_x_pos, new_y_pos;
+	int width, height;
+	glm::vec3 in_plane, rot_vec;
+	glm::vec4 world_in_plane;
+
+	glfwGetWindowSize(window_ptr, &width, &height);
+	glfwGetCursorPos(window_ptr, &new_x_pos, &new_y_pos);
+
+	rotdeg = ((new_x_pos-x_upon_click)*(new_x_pos-x_upon_click)
+					 + (new_y_pos-y_upon_click)*(new_y_pos-y_upon_click))/(width*width + height*height)*3.14159;
+	in_plane = glm::vec3((new_x_pos-x_upon_click), (new_y_pos-y_upon_click), 0.0f);
+	world_in_plane = model*view*proj*glm::vec4(in_plane, 1.0f);
+	world_in_plane.x = world_in_plane.x - eye_vec.x;
+	world_in_plane.y = world_in_plane.y - eye_vec.y;
+	world_in_plane.z = world_in_plane.z - eye_vec.z;
+
+	rot_vec.x = eye_vec.y*world_in_plane.z - eye_vec.z*world_in_plane.y;
+	rot_vec.y = eye_vec.z*world_in_plane.x - eye_vec.x*world_in_plane.z;
+	rot_vec.z = eye_vec.x*world_in_plane.y - eye_vec.y*world_in_plane.x;
 
 
-
-
-
-
-
-
-void visualixer::onMouseClickDrag(int x, int y){
-	if (left_mouse_engaged) onMouseLeftDrag(x, y);
-	else if (right_mouse_engaged) onMouseRightDrag(x, y);
-	else cout << "dragging middle mouse button" << endl;
+	new_eye = glm::rotate(eye_vec, rotdeg, -rot_vec);
+	view = glm::lookAt(new_eye, focus_vec, up_vec);
 }
 
-void visualixer::onMouseLeftDrag(int x, int y){
-	cout << "dragging left mouse button" << endl;
-	//glm::vec3 rotation_axis(0, 0, 1);
-	//glm::rotate(2, rotation_axis);
-}
-
-void visualixer::onMouseRightDrag(int x, int y){
+void visualixer::onMouseRightDrag(double xpos, double ypos){
 	cout << "dragging right mouse button" << endl;
-	//glm::mat4 transmatrix = glm::translate(0.5f, 0.0f, 0.0f);
+}
+
+void visualixer::onMouseMiddleDrag(double xpos, double ypos){
+	cout << "dragging middle mouse button" << endl;
+}
+
+void visualixer::onKeyDown(unsigned char key, int x, int y){
+	cout << "Pressed Key with unsigned char : " << key << endl;
+	return;
+}
+
+void visualixer::onKeyUp(unsigned char key, int x, int y){
+	cout << "Released Key with unsigned char: " << key << endl;
+	return;
+}
+
+void visualixer::onReshape(int new_width, int new_height){
+	cout << "reshaping" << endl;
+}
+
+void visualixer::SetFullscreen(bool bFullscreen){
+
+}
+
+
+
+
+
+const GLchar * visualixer::VertexShaderSource(){
+	// Shader sources
+	const GLchar* vertexSource =
+	    "#version 140\n"
+	    "in vec2 position;"
+	    "in vec3 color;"
+	    "out vec3 Color;"
+	    "uniform mat4 model;"
+	    "uniform mat4 view;"
+    	"uniform mat4 proj;"
+	    "void main() {"
+	    "   Color = color;"
+	    "   gl_Position = proj*view*model*vec4(position, 0.0, 1.0);"
+	    "}";
+	return vertexSource;
+
+}
+
+const GLchar * visualixer::FragmentShaderSource(){
+	const GLchar* fragmentSource =
+    "#version 140\n"
+    "in vec3 Color;"
+    "out vec4 outColor;"
+    "void main() {"
+    "   outColor = vec4(Color, 1.0);"
+    "}";
+    return fragmentSource;
 }
 
 void visualixer::onInit(){
@@ -239,7 +277,7 @@ void visualixer::onInit(){
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
 
-	window_ptr = glfwCreateWindow(400, 400, window_name, NULL, NULL); // Windowed
+	window_ptr = glfwCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, window_name, NULL, NULL); // Windowed
 	//GLFWwindow* window = glfwCreateWindow(400, 300, "OpenGL", glfwGetPrimaryMonitor(), NULL); // Fullscreen
 	if ( !window_ptr ) {
 		cout << "failed to create window" << endl;
@@ -270,28 +308,18 @@ void visualixer::onRender(){
     glGenBuffers (1, &vbo);
 
     // visualizer specific data definitions
-    GLfloat vertices[] = {
-        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // Top-left
-         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // Top-right
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right
-        -0.5f, -0.5f, 1.0f, 1.0f, 1.0f  // Bottom-left
-    };
+    // this one happens to be XYRGB
     //cout << "binding vbo" << endl;
-
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, num_vertices * num_per_vertex * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
     
 	//cout << "binding ebo" << endl;
-	// Create an element array
-    glGenBuffers(1, &ebo);
- 
-    GLuint elements[] = {
-        0, 1, 2,
-        2, 3, 0
-    };
- 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
+	// Create an element array if necessary
+	if (num_elements > 0){
+	    glGenBuffers(1, &ebo);
+	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * num_elements * sizeof(GLuint), elements, GL_STATIC_DRAW);
+    }
     return;
 }
 
@@ -353,11 +381,11 @@ void visualixer::onShaders(){
     // Specify the layout of the vertex data
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
+    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), 0);
 
     GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
     glEnableVertexAttribArray(colAttrib);
-    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
 
     rotdeg = 0;
 	model = glm::rotate(model, rotdeg, glm::vec3(0.0f, 0.0f, 1.0f)); // angle in radians to suppress some output
@@ -368,8 +396,8 @@ void visualixer::onShaders(){
 	zoom_level = 0.0f;
 	zoom_scale = 1.0f;
 	up_vec = glm::vec3(0.0f, 1.0f, 0.0f);
-	focus_vec = glm::vec3(0.0f, 0.0f, 0.0f);
-	eye_vec = glm::vec3(0.0f, 0.0f, 1.05f);
+	focus_vec = glm::vec3(model_centroid[0], model_centroid[1], model_centroid[2]);
+	eye_vec = glm::vec3(model_centroid[0], model_centroid[1], 10.0*(model_centroid[3]+1.0f));
     view = glm::lookAt(
         eye_vec, // camera position
         focus_vec, // the position to be looking at
@@ -379,41 +407,13 @@ void visualixer::onShaders(){
     glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
     // set up projection matrix
-    proj = glm::perspective(0.785f, float(DEFAULT_WIDTH)/float(DEFAULT_HEIGHT), 0.05f, 100.0f);
+    proj = glm::perspective(0.785f, float(DEFAULT_WIDTH)/float(DEFAULT_HEIGHT), 0.05f, 100000.0f);
     //proj = glm::perspective(3.14f/2, 800.0f / 600.0f, 1.0f, 10.0f);
     uniProj = glGetUniformLocation(shaderProgram, "proj");
     glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
 }
 
-const GLchar * visualixer::VertexShaderSource(){
-	// Shader sources
-	const GLchar* vertexSource =
-	    "#version 140\n"
-	    "in vec2 position;"
-	    "in vec3 color;"
-	    "out vec3 Color;"
-	    "uniform mat4 model;"
-	    "uniform mat4 view;"
-    	"uniform mat4 proj;"
-	    "void main() {"
-	    "   Color = color;"
-	    "   gl_Position = proj*view*model*vec4(position, 0.0, 1.0);"
-	    "}";
-	return vertexSource;
-
-}
-
-const GLchar * visualixer::FragmentShaderSource(){
-	const GLchar* fragmentSource =
-    "#version 140\n"
-    "in vec3 Color;"
-    "out vec4 outColor;"
-    "void main() {"
-    "   outColor = vec4(Color, 1.0);"
-    "}";
-    return fragmentSource;
-}
 
 bool visualixer::MainLoop(){
 
@@ -439,7 +439,7 @@ bool visualixer::MainLoop(){
         glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
         // Draw a triangle from the 3 vertices
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 3*num_elements, GL_UNSIGNED_INT, 0);
         //cout << "drew elements" << endl;
         //cout << "looping \r" << flush;
 	
@@ -456,7 +456,7 @@ void visualixer::onExit(){
     glDeleteShader(fragmentShader);
     glDeleteShader(vertexShader);
 
-    glDeleteBuffers(1, &ebo);
+    if (num_elements > 0) glDeleteBuffers(1, &ebo);
 	glDeleteBuffers(1, &vbo);
 
 	glDeleteVertexArrays(1, &vao);
@@ -467,66 +467,10 @@ void visualixer::onExit(){
 }
 
 
-void visualixer::onKeyDown(unsigned char key, int x, int y){
-	cout << "Pressed Key with unsigned char : " << key << endl;
-	return;
-}
 
-void visualixer::onKeyUp(unsigned char key, int x, int y){
-	cout << "Released Key with unsigned char: " << key << endl;
-	return;
-}
 
-void visualixer::SetFullscreen(bool bFullscreen){
-	if (bFullscreen){
-		glutFullScreen();
-	}
-	else{
-		glutPositionWindow(DEFAULT_CENTER_X, DEFAULT_CENTER_Y);
-		glutReshapeWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT);
-	}
-	return;
-}
 
-void visualixer::Hide(){
-	glutHideWindow();
-	return;
-}
 
-void visualixer::Show(){
-	glutShowWindow();
-	return;
-}
-void visualixer::Close(){
-	glutDestroyWindow(0);
-	return;
-}
-
-void visualixer::run_test_triangle(){
-	return;
-}
-
-/*
-void visualixer::sClose(){
-
-}
-
-void visualixer::sReshape(int w, int h){
-	int current_window = glutGetWindow();
-
-	for (unsigned int i=0; i<_vInstances.size(); i++){
-		if (_vInstances.at(i)->window_ptr == current_window){
-			_vInstances.at(i)->onReshape(w, h);
-			return;
-		}
-	}
-	return;
-}
-
-void visualixer::sDisplay(){
-
-}
-*/
 
 void visualixer::sMouseClick(GLFWwindow * window, int button, int action, int modifiers){
 	for (unsigned int i=0; i<_vInstances.size(); i++){
@@ -569,83 +513,6 @@ void visualixer::sCursorPosition(GLFWwindow * window, double xpos, double ypos){
 	return;
 }
 
-/*
-void visualixer::sMouseClickDrag(int x, int y){
-	int current_window = glutGetWindow();
-
-	for (unsigned int i=0; i<_vInstances.size(); i++){
-		if (_vInstances.at(i)->window_ptr == current_window){
-			_vInstances.at(i)->onMouseClickDrag(x, y);
-			return;
-		}
-	}
-	return;
-}
-
-void visualixer::sKeyUp(unsigned char key, int x, int y){
-	int current_window = glutGetWindow();
-	//cout << "Pressed Key with unsigned char: " << key << endl;
-	
-	for (unsigned int i=0; i<_vInstances.size(); i++){
-		if (_vInstances.at(i)->window_ptr == current_window){
-			_vInstances.at(i)->onKeyUp(key, x, y);
-			return;
-		}
-	}
-	return;
-}
-
-void visualixer::sKeyDown(unsigned char key, int x, int y){
-	int current_window = glutGetWindow();
-	//cout << "Pressed Key with unsigned char: " << key << endl;
-
-	for (unsigned int i=0; i<_vInstances.size(); i++){
-		if (_vInstances.at(i)->window_ptr == current_window){
-			_vInstances.at(i)->onKeyDown(key, x, y);
-			return;
-		}
-	}
-	return;
-}
-
-void visualixer::sSpecialKeyUp(int key, int x, int y){
-	int current_window = glutGetWindow();
-	cout << "Released Special Key " << endl;
-
-	for (unsigned int i=0; i<_vInstances.size(); i++){
-		if (_vInstances.at(i)->window_ptr == current_window){
-			//_vInstances.at(i)->onSpecialKeyUp(key, x, y);
-			return;
-		}
-	}
-	return;
-}
-
-void visualixer::sSpecialKeyDown(int key, int x, int y){
-	int current_window = glutGetWindow();
-	cout << "Pressed Special Key " << endl;
-
-	for (unsigned int i=0; i<_vInstances.size(); i++){
-		if (_vInstances.at(i)->window_ptr == current_window){
-			//_vInstances.at(i)->onSpecialKeyDown(key, x, y);
-			return;
-		}
-	}
-	return;
-}
-
-void visualixer::sIdle(){
-	int current_window = glutGetWindow();
-
-	for (unsigned int i=0; i<_vInstances.size(); i++){
-		if (_vInstances.at(i)->window_ptr == current_window){
-			_vInstances.at(i)->onIdle();
-			return;
-		}
-	}
-	return;
-}
-*/
 
 /************************************************************/
 cloud_visualixer::cloud_visualixer(){
@@ -656,6 +523,16 @@ cloud_visualixer::cloud_visualixer(){
 	window_name = "Cloud Visualixer";
 	lock_rotation = false;
 	color_ramp = NULL;
+	vertices = NULL;
+	elements = NULL;
+
+	num_vertices = 0;
+	num_per_vertex = 0;
+	num_elements = 0;
+
+	model_centroid[0] = 0.0;
+    model_centroid[1] = 0.0;
+    model_centroid[2] = 0.0;
 }
 
 cloud_visualixer::~cloud_visualixer(){
@@ -667,24 +544,103 @@ cloud_visualixer::~cloud_visualixer(){
 	}
 }
 
-void cloud_visualixer::add_cloud(PointCloud * cloud){
+void cloud_visualixer::set_test_case(){
+	num_vertices = 100;
+	num_per_vertex = 6;
+	vertices = new GLfloat[num_vertices*num_per_vertex];
+	for (unsigned int i=0; i<num_vertices; i++){
+		vertices[i*num_per_vertex] = GLfloat(i);
+		vertices[i*num_per_vertex + 1] = GLfloat(i);
+		vertices[i*num_per_vertex + 2] = GLfloat(i);
+		vertices[i*num_per_vertex + 3] = GLfloat(i)/GLfloat(num_vertices);
+		vertices[i*num_per_vertex + 4] = GLfloat(i)/GLfloat(num_vertices);
+		vertices[i*num_per_vertex + 5] = GLfloat(i)/GLfloat(num_vertices);
+
+	}
+
+	num_elements = num_vertices;
+	elements = new GLuint[num_elements];
+	for (unsigned int i=0; i<num_vertices; i++){
+		elements[i] = i;
+	}
+
+	model_centroid[0] = num_vertices/2.0;
+	model_centroid[1] = num_vertices/2.0;
+	model_centroid[2] = num_vertices/2.0;
+	xmax = num_vertices-1;
+	ymax = num_vertices-1;
+	zmax = num_vertices-1;
+	xmin = num_vertices-1;
+	ymin = num_vertices-1;
+	zmin = num_vertices-1;
+
 	return;
 }
 
-// this is old deprecated style of opengl
-void test_triangle(void) {
+void cloud_visualixer::add_cloud(PointCloud * cloud){
+	num_vertices = cloud->pointcount;
+	num_per_vertex = 6;
+	vertices = new GLfloat[num_vertices*num_per_vertex];
+	for (unsigned int i=0; i<num_vertices; i++){
+		vertices[i*num_per_vertex] = cloud->x[i];
+		vertices[i*num_per_vertex + 1] = cloud->y[i];
+		vertices[i*num_per_vertex + 2] = cloud->z[i];
+		vertices[i*num_per_vertex + 3] = GLfloat(i)/GLfloat(num_vertices);
+		vertices[i*num_per_vertex + 4] = GLfloat(i)/GLfloat(num_vertices);
+		vertices[i*num_per_vertex + 5] = GLfloat(i)/GLfloat(num_vertices);
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
 
-	glBegin(GL_TRIANGLES);
-		glVertex3f(-0.5,-0.5,0.0);
-		glVertex3f(0.5,0.0,0.0);
-		glVertex3f(0.0,0.5,0.0);
-	glEnd();
+	num_elements = num_vertices;
+	elements = new GLuint[num_elements];
+	for (unsigned int i=0; i<num_vertices; i++){
+		elements[i] = i;
+	}
 
-    glutSwapBuffers();
+	model_centroid[0] = (cloud->xmax + cloud->xmin)/2.0;
+	model_centroid[1] = (cloud->ymax + cloud->ymin)/2.0;
+	model_centroid[2] = (cloud->zmax + cloud->zmin)/2.0;
+	xmax = cloud->xmax;
+	ymax = cloud->ymax;
+	zmax = cloud->zmax;
+	xmin = cloud->xmin;
+	ymin = cloud->ymin;
+	zmin = cloud->zmin;
+	return;
 }
 
+bool cloud_visualixer::MainLoop(){
+
+    //cout << "entering main loop" << endl;
+    while(!glfwWindowShouldClose(window_ptr)){
+
+		if (glfwGetKey(window_ptr, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    	glfwSetWindowShouldClose(window_ptr, GL_TRUE);
+
+    	//cout << " got keys" << endl;
+    	glfwSwapBuffers(window_ptr);
+    	//cout << "swapped buffers" << endl;
+		glfwPollEvents();
+		//cout << "polled events" << endl;
+
+        // Clear the screen to black
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        //cout << "cleared colors" << endl;
+
+        glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
+
+        // Draw a triangle from the 3 vertices
+        glDrawElements(GL_POINTS, num_elements, GL_UNSIGNED_BYTE, 0);
+        //cout << "drew elements" << endl;
+        //cout << "looping \r" << flush;
+	}
+	//cout << "finished main loop I guess" << endl;
+
+	return 0;
+}
 
 
 int main(int argc, char * argv[]){
@@ -693,6 +649,7 @@ int main(int argc, char * argv[]){
 	// test the base class
 	visualixer * mywindow = new visualixer();
 	//cout << "about to run" << endl;
+	mywindow->set_test_case();
 	mywindow->run();
 	//cout << "about to delete mywindow" << endl;
 	delete mywindow;
@@ -701,6 +658,9 @@ int main(int argc, char * argv[]){
 
 	// test the point cloud viewer
 	cloud_visualixer * mycvis = new cloud_visualixer();
+	//mycvis->set_test_case();
+	PointCloud * cloud = PointCloud::read_LAS("../testfiles/ComplexSRSInfo.las");
+	mycvis->add_cloud(cloud);
 	mycvis->run();
 	delete mycvis;
 
