@@ -67,10 +67,10 @@ void visualixer::set_test_case(){
 	num_per_vertex = 5;
 	num_vertex_points = 2;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
-	vertices[0] = -0.5; vertices[1] = 0.5; vertices[2] = 1.0; vertices[3] = 0.0; vertices[4] = 0.0;
-	vertices[5] = 0.5; vertices[6] = 0.5; vertices[7] = 0.0; vertices[8] = 1.0; vertices[9] = 0.0;
-	vertices[10] = 0.5; vertices[11] = -0.5; vertices[12] = 0.0; vertices[13] = 0.0; vertices[14] = 1.0;
-	vertices[15] = -0.5; vertices[16] = -0.5; vertices[17] = 1.0; vertices[18] = 1.0; vertices[19] = 1.0;
+	vertices[0] = 10.0-0.5; vertices[1] = 10.0+0.5; vertices[2] = 1.0; vertices[3] = 0.0; vertices[4] = 0.0;
+	vertices[5] = 10.0+0.5; vertices[6] = 10.0+0.5; vertices[7] = 0.0; vertices[8] = 1.0; vertices[9] = 0.0;
+	vertices[10] = 10.0+0.5; vertices[11] = 10.0-0.5; vertices[12] = 0.0; vertices[13] = 0.0; vertices[14] = 1.0;
+	vertices[15] = 10.0-0.5; vertices[16] = 10.0-0.5; vertices[17] = 1.0; vertices[18] = 1.0; vertices[19] = 1.0;
 
     num_elements = 2;
     num_per_element = 3;
@@ -78,8 +78,8 @@ void visualixer::set_test_case(){
     elements[0] = 0; elements[1] = 1; elements[2] = 2;
     elements[3] = 2; elements[4] = 3; elements[5] = 0;
 	
-    model_centroid[0] = 0.0;
-    model_centroid[1] = 0.0;
+    model_centroid[0] = 10.0;
+    model_centroid[1] = 10.0;
     model_centroid[2] = 0.0;
     xmax = 0.5;
     ymax = 0.5;
@@ -143,7 +143,7 @@ void visualixer::onMouseWheel(double xoffset, double yoffset){
 		
 	}
 	zoom_scale_new = exp(zoom_level);
-	eye_vec = eye_vec*(zoom_scale_new-zoom_scale + 1.0f);
+	eye_vec = focus_vec + (eye_vec-focus_vec)*(zoom_scale_new-zoom_scale + 1.0f);
 	zoom_scale = zoom_scale_new;
 	view = glm::lookAt(
         eye_vec,
@@ -155,15 +155,17 @@ void visualixer::onMouseWheel(double xoffset, double yoffset){
 void visualixer::onKeyboard(int key, int scancode, int action, int modifiers){
 	cout << "KEYBOARD PRESS" << endl;
 	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS){ // resets the view
-		eye_vec.x = 0.0f;
-		eye_vec.y = 0.0f;
-		eye_vec.z = 1.05f;
+		eye_vec.x = model_centroid[0];
+		eye_vec.y = model_centroid[1];
+		eye_vec.z = zmax+1.0f;
 		focus_vec.x = model_centroid[0];
 		focus_vec.y = model_centroid[1];
 		focus_vec.z = model_centroid[2];
 		up_vec.x = 0.0f;
 		up_vec.y = 1.0f; 
 		up_vec.z = 0.0f;
+
+		cout << "zmax is " << zmax << endl;
 		view = glm::lookAt(
 	        eye_vec,
 	        focus_vec,
@@ -203,7 +205,7 @@ void visualixer::onMouseLeftDrag(double xpos, double ypos){
 	rot_vec.z = eye_vec.x*world_in_plane.y - eye_vec.y*world_in_plane.x;
 
 
-	new_eye = glm::rotate(eye_vec, rotdeg, -rot_vec);
+	new_eye = focus_vec +  glm::rotate((eye_vec-focus_vec), rotdeg, -rot_vec);
 	view = glm::lookAt(new_eye, focus_vec, up_vec);
 }
 
@@ -239,6 +241,7 @@ void visualixer::SetFullscreen(bool bFullscreen){
 
 const GLchar * visualixer::VertexShaderSource(){
 	// Shader sources
+	cout << "this is the base vertex shader source!" << endl;
 	const GLchar* vertexSource =
 	    "#version 140\n"
 	    "in vec2 position;"
@@ -256,6 +259,7 @@ const GLchar * visualixer::VertexShaderSource(){
 }
 
 const GLchar * visualixer::FragmentShaderSource(){
+	cout << "this is the base fragment shader source!" << endl;
 	const GLchar* fragmentSource =
     "#version 140\n"
     "in vec3 Color;"
@@ -322,6 +326,10 @@ void visualixer::onRender(){
 	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_elements * num_per_element * sizeof(GLuint), elements, GL_STATIC_DRAW);
     }
+
+    // enable point size specification
+    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+
     return;
 }
 
@@ -330,7 +338,7 @@ void visualixer::onShaders(){
 
     // create and compile the vertex shader
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    const GLchar * vssource = VertexShaderSource();
+    const GLchar * vssource = this->VertexShaderSource();
     glShaderSource(vertexShader, 1, &(vssource), NULL);
     glCompileShader(vertexShader);
 
@@ -353,7 +361,7 @@ void visualixer::onShaders(){
 
     // create and compile the fragment shader
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    const GLchar * fssource = FragmentShaderSource();
+    const GLchar * fssource = this->FragmentShaderSource();
     glShaderSource(fragmentShader, 1, &(fssource), NULL);
     glCompileShader(fragmentShader);
 
@@ -381,13 +389,14 @@ void visualixer::onShaders(){
     glUseProgram(shaderProgram);
 
     // Specify the layout of the vertex data
+    cout << "num_vertices: " << num_vertices << " num_vertex_points: " << num_vertex_points << " num_per_vertex: " << num_per_vertex << endl;
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
     glVertexAttribPointer(posAttrib, num_vertex_points, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), 0);
 
     GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
     glEnableVertexAttribArray(colAttrib);
-    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), (void*)(num_vertex_points * sizeof(GLfloat)));
 
     rotdeg = 0;
 	model = glm::rotate(model, rotdeg, glm::vec3(0.0f, 0.0f, 1.0f)); // angle in radians to suppress some output
@@ -395,11 +404,14 @@ void visualixer::onShaders(){
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 	// Set up view matrix
+
 	zoom_level = 0.0f;
 	zoom_scale = 1.0f;
 	up_vec = glm::vec3(0.0f, 1.0f, 0.0f);
+	//cout << "centroid is: " << model_centroid[0] << ", " << model_centroid[1] << ", " << model_centroid[2] << endl;
 	focus_vec = glm::vec3(model_centroid[0], model_centroid[1], model_centroid[2]);
-	eye_vec = glm::vec3(model_centroid[0], model_centroid[1], 5.0*(model_centroid[3]+1.0f));
+	//eye_vec = glm::vec3(model_centroid[0], model_centroid[1], 5.0*(model_centroid[3]+1.0f));
+	eye_vec = glm::vec3(model_centroid[0], model_centroid[1], zmax + 1.0f);
     view = glm::lookAt(
         eye_vec, // camera position
         focus_vec, // the position to be looking at
@@ -551,32 +563,44 @@ void cloud_visualixer::set_test_case(){
 	num_per_vertex = 6;
 	num_vertex_points = 3;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
-	for (unsigned int i=0; i<num_vertices; i++){
-		vertices[i*num_per_vertex] = GLfloat(i);
-		vertices[i*num_per_vertex + 1] = GLfloat(i);
-		vertices[i*num_per_vertex + 2] = GLfloat(i);
-		vertices[i*num_per_vertex + 3] = GLfloat(i)/GLfloat(num_vertices);
-		vertices[i*num_per_vertex + 4] = GLfloat(i)/GLfloat(num_vertices);
-		vertices[i*num_per_vertex + 5] = GLfloat(i)/GLfloat(num_vertices);
-
+	for (unsigned int i=0; i<10; i++){
+		for (unsigned int j=0; j<10; j++){
+			vertices[(i*10+j)*num_per_vertex] = GLfloat(i);
+			vertices[(i*10+j)*num_per_vertex + 1] = GLfloat(j);
+			vertices[(i*10+j)*num_per_vertex + 2] = 10.0;//GLfloat(i);
+			if (j%2==0){
+				vertices[(i*10+j)*num_per_vertex + 3] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+				vertices[(i*10+j)*num_per_vertex + 4] = 0.0f; //GLfloat(i)/GLfloat(num_vertices);
+				vertices[(i*10+j)*num_per_vertex + 5] = 0.0f; //GLfloat(i)/GLfloat(num_vertices);
+			}
+			else {
+				vertices[(i*10+j)*num_per_vertex + 3] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+				vertices[(i*10+j)*num_per_vertex + 4] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+				vertices[(i*10+j)*num_per_vertex + 5] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+			}
+		}
 	}
 
 	num_elements = num_vertices;
 	num_per_element = 1;
-	elements = new GLuint[num_elements];
+	elements = new GLuint[num_elements*num_per_element];
 	for (unsigned int i=0; i<num_vertices; i++){
 		elements[i] = i;
 	}
 
-	model_centroid[0] = num_vertices/2.0;
-	model_centroid[1] = num_vertices/2.0;
-	model_centroid[2] = num_vertices/2.0;
+	for (unsigned int i=0; i<num_vertices; i++){
+		cout << "x: " << vertices[i*num_per_vertex] << " y: " << vertices[i*num_per_vertex +1] << " z: " << vertices[i*num_per_vertex+2] << endl;
+	}
+
+	model_centroid[0] = 4.5;//num_vertices/2.0;
+	model_centroid[1] = 4.5;//num_vertices/2.0;
+	model_centroid[2] = 0.0; //num_vertices/2.0;
 	xmax = num_vertices-1;
 	ymax = num_vertices-1;
-	zmax = num_vertices-1;
-	xmin = num_vertices-1;
-	ymin = num_vertices-1;
-	zmin = num_vertices-1;
+	zmax = 10.0; //num_vertices-1;
+	xmin = 0;
+	ymin = 0;
+	zmin = 0;
 
 	return;
 }
@@ -590,10 +614,16 @@ void cloud_visualixer::add_cloud(PointCloud * cloud){
 		vertices[i*num_per_vertex] = cloud->x[i];
 		vertices[i*num_per_vertex + 1] = cloud->y[i];
 		vertices[i*num_per_vertex + 2] = cloud->z[i];
-		vertices[i*num_per_vertex + 3] = 1.0;
-		vertices[i*num_per_vertex + 4] = 1.0;
-		vertices[i*num_per_vertex + 5] = 1.0;
-
+		if (cloud->RGB != NULL){
+			vertices[i*num_per_vertex + 3] = cloud->RGB[i].R/65,535;
+			vertices[i*num_per_vertex + 4] = cloud->RGB[i].G/65,535;
+			vertices[i*num_per_vertex + 5] = cloud->RGB[i].B/65,535;
+		}
+		else {
+			vertices[i*num_per_vertex + 3] = 1.0;
+			vertices[i*num_per_vertex + 4] = 1.0;
+			vertices[i*num_per_vertex + 5] = 1.0;
+		}
 	}
 
 	num_elements = num_vertices;
@@ -617,6 +647,7 @@ void cloud_visualixer::add_cloud(PointCloud * cloud){
 
 const GLchar * cloud_visualixer::VertexShaderSource(){
 	// Shader sources
+	cout << "this is the derived vertex shader source" << endl;
 	const GLchar* vertexSource =
 	    "#version 140\n"
 	    "in vec3 position;"
@@ -627,7 +658,7 @@ const GLchar * cloud_visualixer::VertexShaderSource(){
     	"uniform mat4 proj;"
 	    "void main() {"
 	    "   Color = color;"
-	    "   gl_PointSize = 10;"
+	    "   gl_PointSize = 2.0;"
 	    "   gl_Position = proj*view*model*vec4(position, 1.0);"
 	    "}";
 	return vertexSource;
@@ -658,8 +689,8 @@ bool cloud_visualixer::MainLoop(){
         glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
         // Draw a triangle from the 3 vertices
-        glDrawElements(GL_POINTS, num_elements * num_per_element, GL_UNSIGNED_BYTE, 0);
-        //cout << "drew elements" << endl;
+        glDrawElements(GL_POINTS, num_elements , GL_UNSIGNED_INT, NULL);
+        //cout << "drew " << num_elements << " elements" << endl;
         //cout << "looping \r" << flush;
 	}
 	//cout << "finished main loop I guess" << endl;
@@ -683,9 +714,11 @@ int main(int argc, char * argv[]){
 
 	// test the point cloud viewer
 	cloud_visualixer * mycvis = new cloud_visualixer();
-	mycvis->set_test_case();
+	//mycvis->set_test_case();
 	//PointCloud * cloud = PointCloud::read_LAS("../testfiles/ComplexSRSInfo.las");
-	//mycvis->add_cloud(cloud);
+	PointCloud * cloud = PointCloud::read_LAS("../testfiles/xyzrgb_manuscript.las");
+	//PointCloud * cloud = PointCloud::read_LAS("../testfiles/LAS12_Sample_withRGB_Quick_Terrain_Modeler.las");
+	mycvis->add_cloud(cloud);
 	mycvis->run();
 	delete mycvis;
 
