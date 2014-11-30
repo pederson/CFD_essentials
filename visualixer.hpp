@@ -2,6 +2,7 @@
 #define _VISUALIXER_H
 
 #include "PointCloud.hpp"
+#include "mesh_class.hpp"
 
 #include <iostream>
 #include <vector>
@@ -163,8 +164,21 @@ public:
 
 // viewing a mesh
 class mesh_visualixer : public visualixer{
+public:
 	mesh_visualixer();
 	~mesh_visualixer();
+
+	//void add_mesh(Mesh * mesh);
+	void set_test_case();
+	const GLchar * VertexShaderSource();
+	void onRender();
+	bool MainLoop();
+	void onExit();
+
+protected:
+	GLuint * line_elements;
+	GLuint lebo;
+	unsigned int num_line_elements, num_per_line_element, line_element_offset;
 };
 
 // viewing a simulation
@@ -172,7 +186,7 @@ class sim_visualixer{
 
 };
 
-// viewing an arbitrary geometry
+// viewing an arbitrary geometry (like a CAD model)
 class geometry_visualixer{
 
 };

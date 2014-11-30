@@ -556,6 +556,11 @@ cloud_visualixer::~cloud_visualixer(){
 			return;
 		}
 	}
+
+	delete[] window_name;
+	if (color_ramp != NULL) delete[] color_ramp;
+	if (vertices != NULL) delete[] vertices;
+	if (elements != NULL) delete[] elements;
 }
 
 void cloud_visualixer::set_test_case(){
@@ -698,6 +703,210 @@ bool cloud_visualixer::MainLoop(){
 	return 0;
 }
 
+//*********************************************************************
+
+mesh_visualixer::mesh_visualixer(){
+
+	_vInstances.push_back(this);
+
+	visualixer_active = false;
+	window_name = "Mesh Visualixer";
+	lock_rotation = false;
+	color_ramp = NULL;
+	vertices = NULL;
+	elements = NULL;
+
+	num_vertices = 0;
+	num_per_vertex = 0;
+	num_elements = 0;
+	num_line_elements = 0;
+
+	model_centroid[0] = 0.0;
+    model_centroid[1] = 0.0;
+    model_centroid[2] = 0.0;
+}
+
+mesh_visualixer::~mesh_visualixer(){
+	for (unsigned int i=0; i<_vInstances.size(); i++){
+		if (_vInstances.at(i) == this){
+			_vInstances.erase(_vInstances.begin() + i);
+			return;
+		}
+	}
+
+	delete[] window_name;
+	if (color_ramp != NULL) delete[] color_ramp;
+	if (vertices != NULL) delete[] vertices;
+	if (elements != NULL) delete[] elements;
+}
+
+/*
+void mesh_visualixer::add_mesh(Mesh * mesh){
+
+	return;
+}
+*/
+
+void mesh_visualixer::set_test_case(){
+	num_vertices = 100;
+	num_per_vertex = 6;
+	num_vertex_points = 3;
+	vertices = new GLfloat[num_vertices*num_per_vertex];
+	for (unsigned int i=0; i<10; i++){
+		for (unsigned int j=0; j<10; j++){
+			vertices[(i*10+j)*num_per_vertex] = GLfloat(i);
+			vertices[(i*10+j)*num_per_vertex + 1] = GLfloat(j);
+			vertices[(i*10+j)*num_per_vertex + 2] = 10.0;//GLfloat(i);
+			if (j%2==0){
+				vertices[(i*10+j)*num_per_vertex + 3] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+				vertices[(i*10+j)*num_per_vertex + 4] = 0.0f; //GLfloat(i)/GLfloat(num_vertices);
+				vertices[(i*10+j)*num_per_vertex + 5] = 0.0f; //GLfloat(i)/GLfloat(num_vertices);
+			}
+			else {
+				vertices[(i*10+j)*num_per_vertex + 3] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+				vertices[(i*10+j)*num_per_vertex + 4] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+				vertices[(i*10+j)*num_per_vertex + 5] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+			}
+		}
+	}
+
+	num_elements = num_vertices;
+	num_per_element = 1;
+	num_line_elements = 18;
+	num_per_line_element = 2;
+	elements = new GLuint[num_elements*num_per_element + num_line_elements*num_per_line_element];
+	line_element_offset = num_elements*num_per_element;
+	for (unsigned int i=0; i<num_vertices; i++){
+		elements[i] = i;
+	}
+	for (unsigned int i=0; i<9; i++){
+		elements[line_element_offset + i*num_per_line_element] = i;
+		elements[line_element_offset + i*num_per_line_element+1] = i+1;
+	}
+	for (unsigned int i=0; i<9; i++){
+		elements[line_element_offset + (i+9)*num_per_line_element] = i*10;
+		elements[line_element_offset + (i+9)*num_per_line_element + 1] = (i+1)*10;
+	}
+
+	/*
+	for (unsigned int i=0; i<18; i++){
+		cout << "line element : " << line_elements[i*num_per_line_element] << " line element2: " << line_elements[i*num_per_line_element+1] << endl;
+	}
+	*/
+	//for (unsigned int i=0; i<num_vertices; i++){
+	//	cout << "x: " << vertices[i*num_per_vertex] << " y: " << vertices[i*num_per_vertex +1] << " z: " << vertices[i*num_per_vertex+2] << endl;
+	//}
+
+	model_centroid[0] = 4.5;//num_vertices/2.0;
+	model_centroid[1] = 4.5;//num_vertices/2.0;
+	model_centroid[2] = 10.0; //num_vertices/2.0;
+	xmax = num_vertices-1;
+	ymax = num_vertices-1;
+	zmax = 10.0; //num_vertices-1;
+	xmin = 0;
+	ymin = 0;
+	zmin = 0;
+
+	return;
+}
+const GLchar * mesh_visualixer::VertexShaderSource(){
+	// Shader sources
+	const GLchar* vertexSource =
+	    "#version 140\n"
+	    "in vec3 position;"
+	    "in vec3 color;"
+	    "out vec3 Color;"
+	    "uniform mat4 model;"
+	    "uniform mat4 view;"
+    	"uniform mat4 proj;"
+	    "void main() {"
+	    "   Color = color;"
+	    "   gl_PointSize = 3.0;"
+	    "   gl_Position = proj*view*model*vec4(position, 1.0);"
+	    "}";
+	return vertexSource;
+}
+
+void mesh_visualixer::onRender(){
+	// Create Vertex Array Object
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+	// create VBO and copy data to it
+    glGenBuffers (1, &vbo);
+
+    // visualizer specific data definitions
+    // this one happens to be XYRGB
+    //cout << "binding vbo" << endl;
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, num_vertices * num_per_vertex * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+    
+	//cout << "binding ebo" << endl;
+	// Create an element array if necessary
+	if (num_elements > 0){
+	    glGenBuffers(1, &ebo);
+	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (num_elements * num_per_element + num_line_elements * num_per_line_element) * sizeof(GLuint), elements, GL_STATIC_DRAW);
+    }
+
+    // enable point size specification
+    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+
+    return;
+}
+
+bool mesh_visualixer::MainLoop(){
+	//cout << "entering main loop" << endl;
+    while(!glfwWindowShouldClose(window_ptr)){
+
+		if (glfwGetKey(window_ptr, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    	glfwSetWindowShouldClose(window_ptr, GL_TRUE);
+
+    	//cout << " got keys" << endl;
+    	glfwSwapBuffers(window_ptr);
+    	//cout << "swapped buffers" << endl;
+		glfwPollEvents();
+		//cout << "polled events" << endl;
+
+        // Clear the screen to black
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        //cout << "cleared colors" << endl;
+
+        glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
+
+        // Draw nodes
+        glDrawElements(GL_POINTS, num_elements , GL_UNSIGNED_INT, NULL);
+        // Draw lines
+        glDrawElements(GL_LINES, num_line_elements , GL_UNSIGNED_INT, (void *)(line_element_offset * sizeof(GLuint)));
+
+        //cout << "drew " << num_elements << " elements" << endl;
+        //cout << "looping \r" << flush;
+	}
+	//cout << "finished main loop I guess" << endl;
+
+	return 0;
+}
+
+void mesh_visualixer::onExit(){
+	glDeleteProgram(shaderProgram);
+    glDeleteShader(fragmentShader);
+    glDeleteShader(vertexShader);
+
+    if (num_elements > 0) glDeleteBuffers(1, &ebo);
+	if (num_line_elements > 0) glDeleteBuffers(1, &lebo);
+	glDeleteBuffers(1, &vbo);
+
+	glDeleteVertexArrays(1, &vao);
+
+	glfwDestroyWindow( window_ptr );
+	glfwTerminate();
+	return;
+}
+
+//*********************************************************************
 
 int main(int argc, char * argv[]){
 	// declare vars
@@ -723,6 +932,10 @@ int main(int argc, char * argv[]){
 	delete mycvis;
 
 	// test the mesh viewer
+	mesh_visualixer * mymvis = new mesh_visualixer();
+	mymvis->set_test_case();
+	mymvis->run();
+	delete mymvis;
 
 	return 0;
 	
