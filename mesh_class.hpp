@@ -91,6 +91,7 @@ public:
   // node access and manipulation
   Node * get_node_ptr(unsigned int key);
   unsigned int get_node_key(unsigned int i);
+  //unsigned int get_node_index(unsigned int key);
   void add_node(Node * new_node); // add node and add neighbor connections
   void remove_node(unsigned int key); // remove node and delete neighbor connections
 
