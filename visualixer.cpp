@@ -780,6 +780,7 @@ mesh_visualixer::~mesh_visualixer(){
 
 void mesh_visualixer::add_mesh(Mesh * mesh){
 	Node * node;
+	std::map<unsigned int, unsigned int> key_to_index_map;
 
 	num_vertices = mesh->get_num_nodes();
 	num_per_vertex = 6;
@@ -794,7 +795,12 @@ void mesh_visualixer::add_mesh(Mesh * mesh){
 		vertices[i*num_per_vertex + 3] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
 		vertices[i*num_per_vertex + 4] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
 		vertices[i*num_per_vertex + 5] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+		
+		key_to_index_map[node->key] = i;
+		if (node->key == 1500) cout << "REACHED THE 1500" << endl;
+		if (node->key == 1499) cout << "REACHED THE 1499" << endl;
 	}
+	cout << "yeeerp" << endl;
 
 	// figure out how many line elements are needed
 	num_line_elements = 0;
@@ -820,8 +826,12 @@ void mesh_visualixer::add_mesh(Mesh * mesh){
 		node = mesh->get_node_ptr(mesh->get_node_key(i));
 
 		for (unsigned int j=0; j<node->neighbor_keys.size(); j++){
-			elements[line_element_offset + elements_added*num_per_line_element] = mesh->get_node_key(i);
-			elements[line_element_offset + elements_added*num_per_line_element + 1] = node->neighbor_keys[j];		
+			//cout << "node: " << node->key << " neighbor: " << node->neighbor_keys[j] << endl;
+			//if (node->neighbor_keys[j]==1500) continue;
+
+			elements[line_element_offset + elements_added*num_per_line_element] = key_to_index_map.at(node->key);
+			elements[line_element_offset + elements_added*num_per_line_element + 1] = key_to_index_map.at(node->neighbor_keys[j]);		
+			
 			elements_added++;
 		}
 	}
