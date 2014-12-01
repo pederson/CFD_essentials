@@ -34,6 +34,7 @@
 
 #define VX_PI 3.14159265358979323846264338327950288
 
+/*
 enum
 {
 	MOUSE_LEFT_BUTTON = 0,
@@ -42,6 +43,7 @@ enum
 	MOUSE_SCROLL_UP = 3,
 	MOUSE_SCROLL_DOWN = 4
 };
+*/
 
 // this contains definitions for the openGL visualizer widget
 // 

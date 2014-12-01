@@ -106,7 +106,7 @@ void visualixer::onMouseClick(int button, int action, int modifiers){
 	switch (button){
 		case GLFW_MOUSE_BUTTON_LEFT :
 			left_mouse_engaged = state;
-			cout << "left mouse click " << (state? "on":"off") << endl;
+			//cout << "left mouse click " << (state? "on":"off") << endl;
 			if (state) {
 				glfwGetCursorPos(window_ptr, &x_upon_click, &y_upon_click);
 				new_eye = eye_vec;
@@ -118,11 +118,20 @@ void visualixer::onMouseClick(int button, int action, int modifiers){
 			break;
 		case GLFW_MOUSE_BUTTON_MIDDLE :
 			middle_mouse_engaged = state;
-			cout << "middle mouse click " << (state? "on":"off")  << endl;
+			//cout << "middle mouse click " << (state? "on":"off")  << endl;
 			break;
 		case GLFW_MOUSE_BUTTON_RIGHT :
 			right_mouse_engaged = state;
-			cout << "right mouse click " << (state? "on":"off")  << endl;
+			if (state) {
+				glfwGetCursorPos(window_ptr, &x_upon_click, &y_upon_click);
+				new_eye = eye_vec;
+				new_focus = focus_vec;
+			}
+			else {
+				eye_vec = new_eye;
+				focus_vec = new_focus;
+			}
+			//cout << "right mouse click " << (state? "on":"off")  << endl;
 			break;
 		otherwise :
 			cout << "unknown mouse button" << endl;
@@ -131,7 +140,7 @@ void visualixer::onMouseClick(int button, int action, int modifiers){
 }
 
 void visualixer::onMouseWheel(double xoffset, double yoffset){
-	cout << "MOUSE WHEEL" << endl;
+	//cout << "MOUSE WHEEL" << endl;
 	//cout << "xoffset: " << xoffset << " yoffset: " << yoffset << endl;
 	float zoom_scale_new;
 	if (yoffset < 0){
@@ -175,14 +184,14 @@ void visualixer::onKeyboard(int key, int scancode, int action, int modifiers){
 }
 
 void visualixer::onCursorPosition(double xpos, double ypos){
-	cout << "CURSOR MOVED IN CONTEXT\r" << flush;
+	//cout << "CURSOR MOVED IN CONTEXT\r" << flush;
 	if (left_mouse_engaged) onMouseLeftDrag(xpos, ypos);
 	else if(right_mouse_engaged) onMouseRightDrag(xpos, ypos);
 	else if(middle_mouse_engaged) onMouseMiddleDrag(xpos, ypos);
 }
 
 
-
+//DYLAN_TODO: do this using quaternions instead
 void visualixer::onMouseLeftDrag(double xpos, double ypos){
 	double new_x_pos, new_y_pos;
 	int width, height;
@@ -194,15 +203,16 @@ void visualixer::onMouseLeftDrag(double xpos, double ypos){
 
 	rotdeg = ((new_x_pos-x_upon_click)*(new_x_pos-x_upon_click)
 					 + (new_y_pos-y_upon_click)*(new_y_pos-y_upon_click))/(width*width + height*height)*3.14159;
-	in_plane = glm::vec3((new_x_pos-x_upon_click), (new_y_pos-y_upon_click), 0.0f);
-	world_in_plane = model*view*proj*glm::vec4(in_plane, 1.0f);
+	in_plane = glm::vec3((new_x_pos-x_upon_click), -(new_y_pos-y_upon_click), 0.0f);
+	world_in_plane = glm::inverse(proj*view*model)*glm::vec4(in_plane, 1.0f);
 	world_in_plane.x = world_in_plane.x - eye_vec.x;
 	world_in_plane.y = world_in_plane.y - eye_vec.y;
 	world_in_plane.z = world_in_plane.z - eye_vec.z;
 
-	rot_vec.x = eye_vec.y*world_in_plane.z - eye_vec.z*world_in_plane.y;
-	rot_vec.y = eye_vec.z*world_in_plane.x - eye_vec.x*world_in_plane.z;
-	rot_vec.z = eye_vec.x*world_in_plane.y - eye_vec.y*world_in_plane.x;
+	// comes from the cross product
+	rot_vec.x = (eye_vec.y-focus_vec.y)*world_in_plane.z - (eye_vec.z-focus_vec.z)*world_in_plane.y;
+	rot_vec.y = (eye_vec.z-focus_vec.z)*world_in_plane.x - (eye_vec.x-focus_vec.x)*world_in_plane.z;
+	rot_vec.z = (eye_vec.x-focus_vec.x)*world_in_plane.y - (eye_vec.y-focus_vec.y)*world_in_plane.x;
 
 
 	new_eye = focus_vec +  glm::rotate((eye_vec-focus_vec), rotdeg, -rot_vec);
@@ -210,7 +220,34 @@ void visualixer::onMouseLeftDrag(double xpos, double ypos){
 }
 
 void visualixer::onMouseRightDrag(double xpos, double ypos){
-	cout << "dragging right mouse button" << endl;
+	//cout << "dragging right mouse button" << endl;
+	double new_x_pos, new_y_pos;
+	int width, height;
+	glm::vec3 in_plane, rot_vec, wip3;
+	glm::vec4 world_in_plane;
+	GLfloat pan_scale, in_plane_norm;
+
+	glfwGetWindowSize(window_ptr, &width, &height);
+	glfwGetCursorPos(window_ptr, &new_x_pos, &new_y_pos);
+
+	
+	pan_scale = ((new_x_pos-x_upon_click)*(new_x_pos-x_upon_click) + (new_y_pos-y_upon_click)*(new_y_pos-y_upon_click))/(width*width + height*height)*((xmax-xmin)*(xmax-xmin)+(ymax-ymin)*(ymax-ymin));
+	cout << "pan scale: " << pan_scale << endl;
+
+	in_plane_norm = (new_x_pos-x_upon_click)*(new_x_pos-x_upon_click) + (new_y_pos-y_upon_click)*(new_y_pos-y_upon_click);
+	in_plane = glm::vec3((new_x_pos-x_upon_click)/glm::sqrt(in_plane_norm), -(new_y_pos-y_upon_click)/sqrt(in_plane_norm), 0.0f);
+	world_in_plane = glm::inverse(proj*view*model)*glm::vec4(in_plane, 1.0f);
+
+
+	wip3.x = world_in_plane.x;
+	wip3.y = world_in_plane.y;
+	wip3.z = world_in_plane.z;
+
+	cout << "about to translate " << endl;
+	new_eye = eye_vec + pan_scale*wip3;
+	new_focus = focus_vec + pan_scale*wip3;
+	view = glm::lookAt(eye_vec, focus_vec, up_vec);
+	cout << "finished translating" << endl;
 }
 
 void visualixer::onMouseMiddleDrag(double xpos, double ypos){
