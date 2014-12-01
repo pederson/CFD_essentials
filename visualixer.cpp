@@ -694,7 +694,7 @@ bool cloud_visualixer::MainLoop(){
         glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
         // Draw a triangle from the 3 vertices
-        glDrawElements(GL_POINTS, num_elements , GL_UNSIGNED_INT, NULL);
+        glDrawElements(GL_POINTS, num_elements*num_per_element , GL_UNSIGNED_INT, NULL);
         //cout << "drew " << num_elements << " elements" << endl;
         //cout << "looping \r" << flush;
 	}
@@ -740,12 +740,74 @@ mesh_visualixer::~mesh_visualixer(){
 	if (elements != NULL) delete[] elements;
 }
 
-/*
+
 void mesh_visualixer::add_mesh(Mesh * mesh){
+	Node * node;
+
+	num_vertices = mesh->get_num_nodes();
+	num_per_vertex = 6;
+	num_vertex_points = 3;
+	vertices = new GLfloat[num_vertices*num_per_vertex];
+	for (unsigned int i=0; i<num_vertices; i++){
+		node = mesh->get_node_ptr(mesh->get_node_key(i));
+
+		vertices[i*num_per_vertex] = node->x;
+		vertices[i*num_per_vertex + 1] = node->y;
+		vertices[i*num_per_vertex + 2] = node->z;
+		vertices[i*num_per_vertex + 3] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+		vertices[i*num_per_vertex + 4] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+		vertices[i*num_per_vertex + 5] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+	}
+
+	// figure out how many line elements are needed
+	num_line_elements = 0;
+	for (unsigned int i=0; i<num_vertices; i++){
+		node = mesh->get_node_ptr(mesh->get_node_key(i));
+		num_line_elements+=node->neighbor_keys.size();
+	}
+
+
+	num_elements = num_vertices;
+	num_per_element = 1;
+	num_per_line_element = 2;
+	elements = new GLuint[num_elements*num_per_element + num_line_elements*num_per_line_element];
+	line_element_offset = num_elements*num_per_element;
+	// set the point elements
+	for (unsigned int i=0; i<num_vertices; i++){
+		elements[i] = i;
+	}
+	// set the line elements NOTE: THIS IS WRONG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// DYLAN_TODO: fix this... the key value isn't necessarily the same as the index
+	unsigned int elements_added = 0;
+	for (unsigned int i=0; i<num_vertices; i++){
+		node = mesh->get_node_ptr(mesh->get_node_key(i));
+
+		for (unsigned int j=0; j<node->neighbor_keys.size(); j++){
+			elements[line_element_offset + elements_added*num_per_line_element] = mesh->get_node_key(i);
+			elements[line_element_offset + elements_added*num_per_line_element + 1] = node->neighbor_keys[j];		
+			elements_added++;
+		}
+	}
+
+
+
+
+	xmax = mesh->get_xmax();
+	ymax = mesh->get_ymax();
+	zmax = mesh->get_zmax();
+	xmin = mesh->get_xmin();
+	ymin = mesh->get_ymin();
+	zmin = mesh->get_zmin();
+
+	model_centroid[0] = (xmax + xmin)/2.0;
+	model_centroid[1] = (ymax + ymin)/2.0;
+	model_centroid[2] = (zmax + zmin)/2.0;
+	
+
 
 	return;
 }
-*/
+
 
 void mesh_visualixer::set_test_case(){
 	num_vertices = 100;
@@ -762,6 +824,11 @@ void mesh_visualixer::set_test_case(){
 				vertices[(i*10+j)*num_per_vertex + 4] = 0.0f; //GLfloat(i)/GLfloat(num_vertices);
 				vertices[(i*10+j)*num_per_vertex + 5] = 0.0f; //GLfloat(i)/GLfloat(num_vertices);
 			}
+			else if (j%3==0){
+				vertices[(i*10+j)*num_per_vertex + 3] = 0.0f; //GLfloat(i)/GLfloat(num_vertices);
+				vertices[(i*10+j)*num_per_vertex + 4] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+				vertices[(i*10+j)*num_per_vertex + 5] = 0.0f; //GLfloat(i)/GLfloat(num_vertices);
+			}
 			else {
 				vertices[(i*10+j)*num_per_vertex + 3] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
 				vertices[(i*10+j)*num_per_vertex + 4] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
@@ -776,12 +843,14 @@ void mesh_visualixer::set_test_case(){
 	num_per_line_element = 2;
 	elements = new GLuint[num_elements*num_per_element + num_line_elements*num_per_line_element];
 	line_element_offset = num_elements*num_per_element;
+	// set the point elements
 	for (unsigned int i=0; i<num_vertices; i++){
 		elements[i] = i;
 	}
+	// add in the line elements
 	for (unsigned int i=0; i<9; i++){
 		elements[line_element_offset + i*num_per_line_element] = i;
-		elements[line_element_offset + i*num_per_line_element+1] = i+1;
+		elements[line_element_offset + i*num_per_line_element+1] = (i+1);
 	}
 	for (unsigned int i=0; i<9; i++){
 		elements[line_element_offset + (i+9)*num_per_line_element] = i*10;
@@ -790,9 +859,10 @@ void mesh_visualixer::set_test_case(){
 
 	/*
 	for (unsigned int i=0; i<18; i++){
-		cout << "line element : " << line_elements[i*num_per_line_element] << " line element2: " << line_elements[i*num_per_line_element+1] << endl;
+		cout << "line element : " << elements[line_element_offset + i*num_per_line_element] << " line element2: " << elements[line_element_offset + i*num_per_line_element+1] << endl;
 	}
 	*/
+	
 	//for (unsigned int i=0; i<num_vertices; i++){
 	//	cout << "x: " << vertices[i*num_per_vertex] << " y: " << vertices[i*num_per_vertex +1] << " z: " << vertices[i*num_per_vertex+2] << endl;
 	//}
@@ -849,6 +919,7 @@ void mesh_visualixer::onRender(){
 	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (num_elements * num_per_element + num_line_elements * num_per_line_element) * sizeof(GLuint), elements, GL_STATIC_DRAW);
     }
 
+    cout << "total elements buffered: " << num_elements * num_per_element + num_line_elements * num_per_line_element << endl;
     // enable point size specification
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
@@ -878,9 +949,9 @@ bool mesh_visualixer::MainLoop(){
         glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
         // Draw nodes
-        glDrawElements(GL_POINTS, num_elements , GL_UNSIGNED_INT, NULL);
+        glDrawElements(GL_POINTS, num_elements*num_per_element , GL_UNSIGNED_INT, NULL);
         // Draw lines
-        glDrawElements(GL_LINES, num_line_elements , GL_UNSIGNED_INT, (void *)(line_element_offset * sizeof(GLuint)));
+        glDrawElements(GL_LINES, num_line_elements*num_per_line_element , GL_UNSIGNED_INT, (void *)(line_element_offset * sizeof(GLuint)));
 
         //cout << "drew " << num_elements << " elements" << endl;
         //cout << "looping \r" << flush;
@@ -924,8 +995,8 @@ int main(int argc, char * argv[]){
 	// test the point cloud viewer
 	cloud_visualixer * mycvis = new cloud_visualixer();
 	//mycvis->set_test_case();
-	//PointCloud * cloud = PointCloud::read_LAS("../testfiles/ComplexSRSInfo.las");
-	PointCloud * cloud = PointCloud::read_LAS("../testfiles/xyzrgb_manuscript.las");
+	PointCloud * cloud = PointCloud::read_LAS("../testfiles/ComplexSRSInfo.las");
+	//PointCloud * cloud = PointCloud::read_LAS("../testfiles/xyzrgb_manuscript.las");
 	//PointCloud * cloud = PointCloud::read_LAS("../testfiles/LAS12_Sample_withRGB_Quick_Terrain_Modeler.las");
 	mycvis->add_cloud(cloud);
 	mycvis->run();
@@ -933,7 +1004,9 @@ int main(int argc, char * argv[]){
 
 	// test the mesh viewer
 	mesh_visualixer * mymvis = new mesh_visualixer();
-	mymvis->set_test_case();
+	Mesh * mesh = Mesh::create_regular_grid(0.1, (unsigned int)50, (unsigned int)30);//, (unsigned int)20);
+	//mymvis->set_test_case();
+	mymvis->add_mesh(mesh);
 	mymvis->run();
 	delete mymvis;
 
