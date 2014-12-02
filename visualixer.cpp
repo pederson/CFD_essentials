@@ -1055,7 +1055,7 @@ int main(int argc, char * argv[]){
 
 	// test the mesh viewer
 	mesh_visualixer * mymvis = new mesh_visualixer();
-	Mesh * mesh = Mesh::create_regular_grid(0.1, (unsigned int)30, (unsigned int)50);//, (unsigned int)10);
+	Mesh * mesh = Mesh::create_regular_grid(0.1, (unsigned int)10, (unsigned int)10, (unsigned int)10);
 	//mymvis->set_test_case();
 	mymvis->add_mesh(mesh);
 	mymvis->run();

@@ -478,21 +478,216 @@ Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned 
           node_spawn->y = double(j)*res;
           node_spawn->z = double(k)*res;
 
-          // boundaries
-          if (i == 0 || j == 0 || k == 0 || i == num_nodes_x-1 || j == num_nodes_y-1 || k == num_nodes_z-1){
-            node_spawn->boundary = true;
-          }
-          else{
-            node_spawn->boundary = false;
 
-            node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
-            node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
-            node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
-            node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
-            node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
-            node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+          // boundaries
+        if (i == 0 || j == 0 || k == 0 || i == num_nodes_x-1 || j == num_nodes_y-1 || k == num_nodes_z-1){
+          node_spawn->boundary = true;
+
+          if (i==0){
+            if (j==0){
+              if (k==0){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+              }
+              else if(k==num_nodes_z-1){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+              else{
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+            }
+            else if (j==num_nodes_y-1){
+              if (k==0){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+              }
+              else if(k==num_nodes_z-1){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+              else{
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+
+              }
+            }
+            else{
+              if (k==0){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+              }
+              else if(k==num_nodes_z-1){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+              else{
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+            }
+          }
+
+          else if (i==num_nodes_x-1){
+            if (j==0){
+              if (k==0){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+              }
+              else if(k==num_nodes_z-1){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+              else{
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+            }
+            else if (j==num_nodes_y-1){
+              if (k==0){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+              }
+              else if(k==num_nodes_z-1){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+              else{
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+
+              }
+            }
+            else{
+              if (k==0){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+              }
+              else if(k==num_nodes_z-1){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+              else{
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+            }
+          }
+
+          else{
+            if (j==0){
+              if (k==0){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+              }
+              else if(k==num_nodes_z-1){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+              else{
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+            }
+            else if (j==num_nodes_y-1){
+              if (k==0){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+              }
+              else if(k==num_nodes_z-1){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+              else{
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+
+              }
+            }
+            else{
+              if (k==0){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+              }
+              else if(k==num_nodes_z-1){
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+              else{
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+                node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+                node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+                node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+              }
+            }
+
           }
         }
+
+        else {
+          node_spawn->boundary = false;
+
+          node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j+1)*num_nodes_z + k); // top
+          node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + (j-1)*num_nodes_z + k); // bottom
+          node_spawn->neighbor_keys.push_back((i-1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // left
+          node_spawn->neighbor_keys.push_back((i+1)*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k); // right
+          node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k+1); // charm
+          node_spawn->neighbor_keys.push_back(i*(num_nodes_y*num_nodes_z) + j*num_nodes_z + k-1); // strange
+        }
+      }
       }
     }
   }
