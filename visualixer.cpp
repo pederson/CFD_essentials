@@ -792,15 +792,19 @@ void mesh_visualixer::add_mesh(Mesh * mesh){
 		vertices[i*num_per_vertex] = node->x;
 		vertices[i*num_per_vertex + 1] = node->y;
 		vertices[i*num_per_vertex + 2] = node->z;
-		vertices[i*num_per_vertex + 3] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
-		vertices[i*num_per_vertex + 4] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
-		vertices[i*num_per_vertex + 5] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
-		
+		if (node->boundary){
+			vertices[i*num_per_vertex + 3] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+			vertices[i*num_per_vertex + 4] = 0.0f; //GLfloat(i)/GLfloat(num_vertices);
+			vertices[i*num_per_vertex + 5] = 0.0f; //GLfloat(i)/GLfloat(num_vertices);
+		}
+		else {
+			vertices[i*num_per_vertex + 3] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+			vertices[i*num_per_vertex + 4] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+			vertices[i*num_per_vertex + 5] = 1.0f; //GLfloat(i)/GLfloat(num_vertices);
+		}
+
 		key_to_index_map[node->key] = i;
-		if (node->key == 1500) cout << "REACHED THE 1500" << endl;
-		if (node->key == 1499) cout << "REACHED THE 1499" << endl;
 	}
-	cout << "yeeerp" << endl;
 
 	// figure out how many line elements are needed
 	num_line_elements = 0;
@@ -1051,7 +1055,7 @@ int main(int argc, char * argv[]){
 
 	// test the mesh viewer
 	mesh_visualixer * mymvis = new mesh_visualixer();
-	Mesh * mesh = Mesh::create_regular_grid(0.1, (unsigned int)50, (unsigned int)30);//, (unsigned int)20);
+	Mesh * mesh = Mesh::create_regular_grid(0.1, (unsigned int)30, (unsigned int)50);//, (unsigned int)10);
 	//mymvis->set_test_case();
 	mymvis->add_mesh(mesh);
 	mymvis->run();

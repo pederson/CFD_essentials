@@ -409,7 +409,7 @@ Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned 
               node_spawn->neighbor_keys.push_back(i*num_nodes_y + j+1); // top
               node_spawn->neighbor_keys.push_back((i+1)*num_nodes_y + j); // right
             }
-            else if(j==num_nodes_y){
+            else if(j==num_nodes_y-1){
               node_spawn->neighbor_keys.push_back(i*num_nodes_y + j-1); // bottom
               node_spawn->neighbor_keys.push_back((i+1)*num_nodes_y + j); // right
             }
@@ -420,12 +420,12 @@ Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned 
             }
 
           }
-          else if (i==num_nodes_x){
+          else if (i==num_nodes_x-1){
             if (j==0){
               node_spawn->neighbor_keys.push_back(i*num_nodes_y + j+1); // top
               node_spawn->neighbor_keys.push_back((i-1)*num_nodes_y + j); // left
             }
-            else if(j==num_nodes_y){
+            else if(j==num_nodes_y-1){
               node_spawn->neighbor_keys.push_back(i*num_nodes_y + j-1); // bottom
               node_spawn->neighbor_keys.push_back((i-1)*num_nodes_y + j); // left
             }
@@ -442,7 +442,7 @@ Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned 
               node_spawn->neighbor_keys.push_back((i-1)*num_nodes_y + j); // left
               node_spawn->neighbor_keys.push_back((i+1)*num_nodes_y + j); // right
             }
-            else if(j==num_nodes_y){
+            else if(j==num_nodes_y-1){
               node_spawn->neighbor_keys.push_back(i*num_nodes_y + j-1); // bottom
               node_spawn->neighbor_keys.push_back((i-1)*num_nodes_y + j); // left
               node_spawn->neighbor_keys.push_back((i+1)*num_nodes_y + j); // right
@@ -459,9 +459,6 @@ Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned 
         }
       }
     }
-
-    // take care of neighbors for boundaries
-    // four corners
 
   }
   else{ // x, y, and z points
