@@ -189,7 +189,17 @@ class sim_visualixer{
 };
 
 // viewing an arbitrary geometry (like a CAD model)
-class geometry_visualixer{
+class geometry_visualixer : public visualixer{
+
+	geometry_visualixer();
+	~geometry_visualixer();
+
+	//void add_model(composite_model);
+	void set_test_case();
+	const GLchar * VertexShaderSource();
+	void onRender();
+	bool MainLoop();
+	void onExit();
 
 };
 

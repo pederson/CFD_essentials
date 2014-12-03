@@ -63,9 +63,22 @@ private:
 class triangle_mesh : public geometric_object{
 public:
 
-	static triangle_mesh * read_STL(char * filename);
+	triangle_mesh();
+	~triangle_mesh();
+
+	static triangle_mesh * read_STL(char * filename, unsigned int byte_offset=0);
+
+
+	unsigned int * vertex_inds; // 3 inds per triangle 
+	float * vertices; // 3*triangle_count vertices
+	float * normals; 
+	unsigned int triangle_count;
 
 private:
+
+	
+
+	//float[4] model_color;
 
 };
 
@@ -90,3 +103,18 @@ struct stl_tri{
 	unsigned short attrib_byte_count;
 };
 #pragma pack(pop)
+
+class composite_model: public geometric_object{
+public:
+	//void union();
+	//void intersection();
+	//void subtraction();
+	// other possible 3d combinations...?
+
+protected:
+
+private:
+
+};
+
+#endif
