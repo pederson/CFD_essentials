@@ -1,24 +1,24 @@
 #include "geometric_object.hpp"
 
-#define _TEST_
+//#define _TEST_
 
 using namespace std;
 
-triangle_mesh::triangle_mesh(){
+mesh_model::mesh_model(){
 	vertices = NULL;
 	normals = NULL;
 	vertex_inds = NULL;
 }
 
-triangle_mesh::~triangle_mesh(){
+mesh_model::~mesh_model(){
 	if(vertices != NULL) delete[] vertices;
 	if(normals != NULL) delete[] normals;
 	if(vertex_inds != NULL) delete[] vertex_inds;
 }
 
-triangle_mesh * triangle_mesh::read_STL(char * filename, unsigned int byte_offset){
+mesh_model * mesh_model::read_STL(char * filename, unsigned int byte_offset){
 	// declare vars
-	triangle_mesh * outmesh;
+	mesh_model * outmesh;
 	int fd;
 	unsigned int tricount;
 	char * stlmap;
@@ -36,7 +36,8 @@ triangle_mesh * triangle_mesh::read_STL(char * filename, unsigned int byte_offse
 	read(fd, &tricount, 4); // read the triangle count
 
 
-	stlmap = (char *)mmap(NULL, sizeof(stl_tri)*tricount, PROT_READ, MAP_PRIVATE, fd, 0);
+  lseek(fd, byte_offset, SEEK_CUR); // back to the beginning
+	stlmap = (char *)mmap(NULL, 84 + sizeof(stl_tri)*tricount, PROT_READ, MAP_PRIVATE, fd, 0);
 	if (stlmap == MAP_FAILED){
 		cout << "Failed to map stl file" << endl;
 	throw -1;
@@ -44,11 +45,12 @@ triangle_mesh * triangle_mesh::read_STL(char * filename, unsigned int byte_offse
 
 	// copy the triangle data into structures
 	stl_tri * triangles = new stl_tri[tricount];
-	memcpy(triangles, stlmap, sizeof(stl_tri)*tricount);
+	memcpy(triangles, &stlmap[84], sizeof(stl_tri)*tricount);
 
 	// copy the structure data into the member data
-	outmesh = new triangle_mesh();
+	outmesh = new mesh_model();
 	outmesh->triangle_count = tricount;
+  outmesh->vertex_count = 3*tricount;
 	outmesh->vertices = new float[tricount*3*3];
 	outmesh->normals = new float[tricount*3];
 	outmesh->vertex_inds = new unsigned int[tricount*3];
@@ -76,6 +78,14 @@ triangle_mesh * triangle_mesh::read_STL(char * filename, unsigned int byte_offse
 		outmesh->vertex_inds[i*3+2] = i*3+2;
 	}
 
+  if (munmap(stlmap, 84 + sizeof(stl_tri)*tricount) < 0){
+    cout << "ruh roh! problem unmapping LAS file" << endl;
+    throw -1;
+  }
+  close(fd);
+
+  delete[] triangles;
+
 	return outmesh;
 }
 
@@ -87,7 +97,7 @@ int main(int argc, char * argv[]){
 	// declare vars
 
 	// test stl reader
-	triangle_mesh * mytri = triangle_mesh::read_STL("./testfiles/brain-gear.stl");
+	mesh_model * mytri = mesh_model::read_STL("./testfiles/brain-gear.stl");
 
 	delete mytri;
 

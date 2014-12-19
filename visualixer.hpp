@@ -3,6 +3,7 @@
 
 #include "PointCloud.hpp"
 #include "mesh_class.hpp"
+#include "geometric_object.hpp"
 
 #include <iostream>
 #include <vector>
@@ -46,7 +47,7 @@ enum
 */
 
 // this contains definitions for the openGL visualizer widget
-// 
+//
 // the visualizer should be able to:
 //  - visualize flow in 2d and 3d and move around in it
 //  - visualize the geometry in 2d and 3d and move around in it
@@ -72,7 +73,7 @@ public:
 	// running the visualixer
 	virtual void run();
 
-	
+
 
 
 protected:
@@ -107,7 +108,7 @@ protected:
 	bool lock_rotation; // lock mouse rotations?
 	bool lock_pan; // lock mouse panning
 
-	
+
 
 	// base callbacks to interface with GLFW
 	virtual void onMouseClick(int button, int action, int modifiers);
@@ -131,13 +132,13 @@ protected:
 
 	// functions related to the context creation and main loop rendering
 	virtual const GLchar * VertexShaderSource();
-	virtual const GLchar * FragmentShaderSource(); 
+	virtual const GLchar * FragmentShaderSource();
 	virtual void onInit();
 	virtual void onRender();
 	virtual void onShaders();
 	virtual	bool MainLoop();
 	virtual void onExit();
-	
+
 
 private:
 
@@ -188,13 +189,28 @@ class sim_visualixer{
 
 };
 
-// viewing an arbitrary geometry (like a CAD model)
-class geometry_visualixer : public visualixer{
+// viewing an mesh model geometry (like an STL model)
+class mesh_model_visualixer : public visualixer{
+public:
+	mesh_model_visualixer();
+	~mesh_model_visualixer();
 
-	geometry_visualixer();
-	~geometry_visualixer();
+	void add_model(mesh_model * model);
+	void set_test_case();
+	const GLchar * VertexShaderSource();
+	void onRender();
+	bool MainLoop();
+	void onExit();
 
-	//void add_model(composite_model);
+};
+
+// viewing an parametric geometry (like a CAD model)
+class parametric_model_visualixer : public visualixer{
+
+	parametric_model_visualixer();
+	~parametric_model_visualixer();
+
+	//void add_model(parametric_model);
 	void set_test_case();
 	const GLchar * VertexShaderSource();
 	void onRender();

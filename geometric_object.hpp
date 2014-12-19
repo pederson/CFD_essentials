@@ -60,23 +60,23 @@ public:
 private:
 };
 
-class triangle_mesh : public geometric_object{
+class mesh_model : public geometric_object{
 public:
 
-	triangle_mesh();
-	~triangle_mesh();
+	mesh_model();
+	~mesh_model();
 
-	static triangle_mesh * read_STL(char * filename, unsigned int byte_offset=0);
+	static mesh_model * read_STL(char * filename, unsigned int byte_offset=0);
 
 
-	unsigned int * vertex_inds; // 3 inds per triangle 
-	float * vertices; // 3*triangle_count vertices
-	float * normals; 
-	unsigned int triangle_count;
+	unsigned int * vertex_inds; // 3 inds per triangle
+	float * vertices; //
+	float * normals;
+	unsigned int triangle_count, vertex_count;
 
 private:
 
-	
+
 
 	//float[4] model_color;
 
@@ -104,7 +104,7 @@ struct stl_tri{
 };
 #pragma pack(pop)
 
-class composite_model: public geometric_object{
+class parametric_model: public geometric_object{
 public:
 	//void union();
 	//void intersection();
