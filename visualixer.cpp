@@ -1259,6 +1259,9 @@ void mesh_model_visualixer::onRender(){
     // enable face culling
     glEnable(GL_CULL_FACE);
 
+    // enable depth test culling
+    glEnable(GL_DEPTH_TEST);
+
     return;
 }
 
@@ -1277,8 +1280,7 @@ bool mesh_model_visualixer::MainLoop(){
 
         // Clear the screen to black
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glClear(GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //cout << "cleared colors" << endl;
 
         glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -1286,7 +1288,8 @@ bool mesh_model_visualixer::MainLoop(){
         glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
         // Draw triangles
-        //glCullFace(GL_BACK);
+        glCullFace(GL_BACK);
+        //glFrontFace(GL_CCW);
         glDrawElements(GL_TRIANGLES, num_elements*num_per_element , GL_UNSIGNED_INT, NULL);
         //glDrawElements(GL_POINTS, num_elements*num_per_element , GL_UNSIGNED_INT, NULL);
 
