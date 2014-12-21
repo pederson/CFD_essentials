@@ -78,6 +78,13 @@ mesh_model * mesh_model::read_STL(char * filename, unsigned int byte_offset){
 		outmesh->vertex_inds[i*3+2] = i*3+2;
 	}
 
+  /*
+  for (unsigned int i=0; i<20; i++){
+    cout << " TRIANGLES PREVIEW" << endl;
+    cout << "vertex: " << outmesh
+  }
+  */
+
   if (munmap(stlmap, 84 + sizeof(stl_tri)*tricount) < 0){
     cout << "ruh roh! problem unmapping LAS file" << endl;
     throw -1;

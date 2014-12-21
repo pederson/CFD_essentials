@@ -278,7 +278,7 @@ void visualixer::SetFullscreen(bool bFullscreen){
 
 const GLchar * visualixer::VertexShaderSource(){
 	// Shader sources
-	cout << "this is the base vertex shader source!" << endl;
+	//cout << "this is the base vertex shader source!" << endl;
 	const GLchar* vertexSource =
 	    "#version 140\n"
 	    "in vec2 position;"
@@ -296,7 +296,7 @@ const GLchar * visualixer::VertexShaderSource(){
 }
 
 const GLchar * visualixer::FragmentShaderSource(){
-	cout << "this is the base fragment shader source!" << endl;
+	//cout << "this is the base fragment shader source!" << endl;
 	const GLchar* fragmentSource =
     "#version 140\n"
     "in vec3 Color;"
@@ -426,7 +426,7 @@ void visualixer::onShaders(){
     glUseProgram(shaderProgram);
 
     // Specify the layout of the vertex data
-    cout << "num_vertices: " << num_vertices << " num_vertex_points: " << num_vertex_points << " num_per_vertex: " << num_per_vertex << endl;
+    //cout << "num_vertices: " << num_vertices << " num_vertex_points: " << num_vertex_points << " num_per_vertex: " << num_per_vertex << endl;
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
     glEnableVertexAttribArray(posAttrib);
     glVertexAttribPointer(posAttrib, num_vertex_points, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), 0);
@@ -689,7 +689,7 @@ void cloud_visualixer::add_cloud(PointCloud * cloud){
 
 const GLchar * cloud_visualixer::VertexShaderSource(){
 	// Shader sources
-	cout << "this is the derived vertex shader source" << endl;
+	//cout << "this is the derived vertex shader source" << endl;
 	const GLchar* vertexSource =
 	    "#version 140\n"
 	    "in vec3 position;"
@@ -971,7 +971,7 @@ void mesh_visualixer::onRender(){
 	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (num_elements * num_per_element + num_line_elements * num_per_line_element) * sizeof(GLuint), elements, GL_STATIC_DRAW);
     }
 
-    cout << "total elements buffered: " << num_elements * num_per_element + num_line_elements * num_per_line_element << endl;
+    //cout << "total elements buffered: " << num_elements * num_per_element + num_line_elements * num_per_line_element << endl;
     // enable point size specification
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
@@ -982,31 +982,30 @@ bool mesh_visualixer::MainLoop(){
 	//cout << "entering main loop" << endl;
     while(!glfwWindowShouldClose(window_ptr)){
 
-		if (glfwGetKey(window_ptr, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    	glfwSetWindowShouldClose(window_ptr, GL_TRUE);
+		  if (glfwGetKey(window_ptr, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window_ptr, GL_TRUE);
 
     	//cout << " got keys" << endl;
     	glfwSwapBuffers(window_ptr);
     	//cout << "swapped buffers" << endl;
-		glfwPollEvents();
-		//cout << "polled events" << endl;
+		  glfwPollEvents();
+		  //cout << "polled events" << endl;
 
-        // Clear the screen to black
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        //cout << "cleared colors" << endl;
+      // Clear the screen to black
+      glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT);
+      //cout << "cleared colors" << endl;
 
-        glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
+      glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+      glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
+      glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
-        // Draw nodes
-        glDrawElements(GL_POINTS, num_elements*num_per_element , GL_UNSIGNED_INT, NULL);
-        // Draw lines
-        glDrawElements(GL_LINES, num_line_elements*num_per_line_element , GL_UNSIGNED_INT, (void *)(line_element_offset * sizeof(GLuint)));
+      // Draw nodes
+      glDrawElements(GL_POINTS, num_elements*num_per_element , GL_UNSIGNED_INT, NULL);
+      // Draw lines
+      glDrawElements(GL_LINES, num_line_elements*num_per_line_element , GL_UNSIGNED_INT, (void *)(line_element_offset * sizeof(GLuint)));
 
-        //cout << "drew " << num_elements << " elements" << endl;
-        //cout << "looping \r" << flush;
+      //cout << "drew " << num_elements << " elements" << endl;
+      //cout << "looping \r" << flush;
 	}
 	//cout << "finished main loop I guess" << endl;
 
@@ -1071,30 +1070,33 @@ void mesh_model_visualixer::add_model(mesh_model * model){
 
   // assign basic info
   num_vertices = model->vertex_count;
-  //num_vertices = 66;
+  //num_vertices = 42;
 	num_per_vertex = 6;
 	num_vertex_points = 3;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
   for (unsigned int i=0; i<num_vertices; i++){
-      vertices[i*3] = model->vertices[i*3];
-      vertices[i*3+1] = model->vertices[i*3+1];
-      vertices[i*3+2] = model->vertices[i*3+2];
+      vertices[i*num_per_vertex] = model->vertices[i*3];
+      vertices[i*num_per_vertex+1] = model->vertices[i*3+1];
+      vertices[i*num_per_vertex+2]= model->vertices[i*3+2];
       if (i%2==0){
-          vertices[i*num_per_vertex + 3] = 1.0f;
-          vertices[i*num_per_vertex + 4]  = 0.0f;
-          vertices[i*num_per_vertex + 5] = 0.0f;
+          vertices[i*num_per_vertex + 3] = 0.81f;
+          vertices[i*num_per_vertex + 4]  = 0.81f;
+          vertices[i*num_per_vertex + 5] = 0.81f;
         }
       else {
-          vertices[i*num_per_vertex + 3] = 0.0f;
-          vertices[i*num_per_vertex + 4]  = 0.0f;
-          vertices[i*num_per_vertex + 5] = 1.0f;
+          vertices[i*num_per_vertex + 3] = 0.41f;
+          vertices[i*num_per_vertex + 4]  = 0.41f;
+          vertices[i*num_per_vertex + 5] = 0.41f;
         }
 
-    if (i<20){
-      cout << "vertex: " << vertices[i*3] << " , " << vertices[i*3+1] << " , " << vertices[i*3+2] << endl;
+    /*
+    if (i<num_vertices){
+      cout << "vertex: " << vertices[i*num_per_vertex] << " , " << vertices[i*num_per_vertex+1] << " , " << vertices[i*num_per_vertex+2] << endl;
+      if (i%3==2) cout << "----------------------------" << endl;
     }
+    */
+    //if (vertices[i*3] == NaN || vertices[i*3+1] == NaN || vertices[i*3+2] == NaN) cout << "NaN at i: " << i << endl;
   }
-
 
   num_elements = num_vertices/3;
 	num_per_element = 3;
@@ -1143,12 +1145,14 @@ void mesh_model_visualixer::add_model(mesh_model * model){
   model_centroid[1] /= num_vertices;
   model_centroid[2] /= num_vertices;
 
+  /*
   cout << "centroid: " << model_centroid[0] << " , " << model_centroid[1] << " , " << model_centroid[2] << endl;
   cout << "xmin: " << xmin << "    xmax: " << xmax << endl;
   cout << "ymin: " << ymin << "    ymax: " << ymax << endl;
   cout << "zmin: " << zmin << "    zmax: " << zmax << endl;
   cout << "number of triangles: " << num_elements << endl;
   cout << "number of vertices: " << num_vertices << endl;
+  */
 
   return;
 }
@@ -1163,7 +1167,8 @@ void mesh_model_visualixer::set_test_case(){
 			vertices[i*num_per_vertex] = 0.5*GLfloat(i);
 			if (i%2==0) vertices[i*num_per_vertex + 1] = 0.5;
       else vertices[i*num_per_vertex +1] = 0.0;
-			vertices[i*num_per_vertex + 2] = 0.0;
+			if (i%3==1) vertices[i*num_per_vertex + 2] = 0.5;
+      else vertices[i*num_per_vertex + 2] = 0.0;
 			if (i%2==0){
 				vertices[i*num_per_vertex + 3] = 1.0f;
 				vertices[i*num_per_vertex + 4]  = 0.0f;
@@ -1247,9 +1252,12 @@ void mesh_model_visualixer::onRender(){
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, (num_elements * num_per_element) * sizeof(GLuint), elements, GL_STATIC_DRAW);
     }
 
-    cout << "total elements buffered: " << num_elements * num_per_element<< endl;
+    //cout << "total elements buffered: " << num_elements * num_per_element<< endl;
     // enable point size specification
-    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+    //glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+
+    // enable face culling
+    glEnable(GL_CULL_FACE);
 
     return;
 }
@@ -1270,6 +1278,7 @@ bool mesh_model_visualixer::MainLoop(){
         // Clear the screen to black
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_DEPTH_BUFFER_BIT);
         //cout << "cleared colors" << endl;
 
         glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -1277,6 +1286,7 @@ bool mesh_model_visualixer::MainLoop(){
         glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
         // Draw triangles
+        //glCullFace(GL_BACK);
         glDrawElements(GL_TRIANGLES, num_elements*num_per_element , GL_UNSIGNED_INT, NULL);
         //glDrawElements(GL_POINTS, num_elements*num_per_element , GL_UNSIGNED_INT, NULL);
 
@@ -1332,7 +1342,7 @@ int main(int argc, char * argv[]){
 
 	// test the mesh viewer
 	mesh_visualixer * mymvis = new mesh_visualixer();
-	Mesh * mesh = Mesh::create_regular_grid(0.1, (unsigned int)50, (unsigned int)50, (unsigned int)30);
+	Mesh * mesh = Mesh::create_regular_grid(0.1, (unsigned int)50, (unsigned int)50);//, (unsigned int)30);
 	//mymvis->set_test_case();
 	mymvis->add_mesh(mesh);
 	mymvis->run();
