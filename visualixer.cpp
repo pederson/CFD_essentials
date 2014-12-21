@@ -64,13 +64,13 @@ void visualixer::run(){
 
 void visualixer::set_test_case(){
 	num_vertices = 4;
-	num_per_vertex = 5;
-	num_vertex_points = 2;
+	num_per_vertex = 6;
+	num_vertex_points = 3;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
-	vertices[0] = 10.0-0.5; vertices[1] = 10.0+0.5; vertices[2] = 1.0; vertices[3] = 0.0; vertices[4] = 0.0;
-	vertices[5] = 10.0+0.5; vertices[6] = 10.0+0.5; vertices[7] = 0.0; vertices[8] = 1.0; vertices[9] = 0.0;
-	vertices[10] = 10.0+0.5; vertices[11] = 10.0-0.5; vertices[12] = 0.0; vertices[13] = 0.0; vertices[14] = 1.0;
-	vertices[15] = 10.0-0.5; vertices[16] = 10.0-0.5; vertices[17] = 1.0; vertices[18] = 1.0; vertices[19] = 1.0;
+	vertices[0] = 10.0-0.5; vertices[1] = 10.0+0.5; vertices[2] = 0.0; vertices[3] = 1.0; vertices[4] = 0.0; vertices[5] = 0.0;
+	vertices[6] = 10.0+0.5; vertices[7] = 10.0+0.5; vertices[8] = 0.0; vertices[9] = 0.0; vertices[10] = 1.0; vertices[11] = 0.0;
+	vertices[12] = 10.0+0.5; vertices[13] = 10.0-0.5; vertices[14] = 0.0; vertices[15] = 0.0; vertices[16] = 0.0; vertices[17] = 1.0;
+	vertices[18] = 10.0-0.5; vertices[19] = 10.0-0.5; vertices[20] = 0.0; vertices[21] = 1.0; vertices[22] = 1.0; vertices[23] = 1.0;
 
   num_elements = 2;
   num_per_element = 3;
@@ -273,7 +273,7 @@ const GLchar * visualixer::VertexShaderSource(){
 	// vertex shader sources
 	const GLchar* vertexSource =
 	    "#version 140\n"
-	    "in vec2 position;"
+	    "in vec3 position;"
 	    "in vec3 color;"
 	    "out vec3 Color;"
 	    "uniform mat4 model;"
@@ -281,7 +281,8 @@ const GLchar * visualixer::VertexShaderSource(){
     	"uniform mat4 proj;"
 	    "void main() {"
 	    "   Color = color;"
-	    "   gl_Position = proj*view*model*vec4(position, 0.0, 1.0);"
+      "   gl_PointSize = 2.0;"
+	    "   gl_Position = proj*view*model*vec4(position, 1.0);"
 	    "}";
 	return vertexSource;
 
@@ -657,24 +658,6 @@ void cloud_visualixer::add_cloud(PointCloud * cloud){
 	return;
 }
 
-const GLchar * cloud_visualixer::VertexShaderSource(){
-  // vertex shader source
-	const GLchar* vertexSource =
-	    "#version 140\n"
-	    "in vec3 position;"
-	    "in vec3 color;"
-	    "out vec3 Color;"
-	    "uniform mat4 model;"
-	    "uniform mat4 view;"
-    	"uniform mat4 proj;"
-	    "void main() {"
-	    "   Color = color;"
-	    "   gl_PointSize = 2.0;"
-	    "   gl_Position = proj*view*model*vec4(position, 1.0);"
-	    "}";
-	return vertexSource;
-}
-
 bool cloud_visualixer::MainLoop(){
 
   while(!glfwWindowShouldClose(window_ptr)){
@@ -873,24 +856,6 @@ void mesh_visualixer::set_test_case(){
 	zmin = 0;
 
 	return;
-}
-
-const GLchar * mesh_visualixer::VertexShaderSource(){
-	// vertex shader sources
-	const GLchar* vertexSource =
-	    "#version 140\n"
-	    "in vec3 position;"
-	    "in vec3 color;"
-	    "out vec3 Color;"
-	    "uniform mat4 model;"
-	    "uniform mat4 view;"
-    	"uniform mat4 proj;"
-	    "void main() {"
-	    "   Color = color;"
-	    "   gl_PointSize = 3.0;"
-	    "   gl_Position = proj*view*model*vec4(position, 1.0);"
-	    "}";
-	return vertexSource;
 }
 
 void mesh_visualixer::onRender(){
@@ -1115,24 +1080,6 @@ void mesh_model_visualixer::set_test_case(){
 	zmin = 0;
 
 	return;
-}
-
-const GLchar * mesh_model_visualixer::VertexShaderSource(){
-  // vertex shader sources
-	const GLchar* vertexSource =
-	    "#version 140\n"
-	    "in vec3 position;"
-	    "in vec3 color;"
-	    "out vec3 Color;"
-	    "uniform mat4 model;"
-	    "uniform mat4 view;"
-    	"uniform mat4 proj;"
-	    "void main() {"
-	    "   Color = color;"
-	    "   gl_PointSize = 3.0;"
-	    "   gl_Position = proj*view*model*vec4(position, 1.0);"
-	    "}";
-	return vertexSource;
 }
 
 void mesh_model_visualixer::onRender(){

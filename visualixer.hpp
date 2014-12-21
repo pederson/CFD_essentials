@@ -142,7 +142,6 @@ public:
 
 	void add_cloud(PointCloud * cloud);
 	void set_test_case();
-	const GLchar * VertexShaderSource();
 	bool MainLoop();
 
 };
@@ -156,7 +155,6 @@ public:
 
 	void add_mesh(Mesh * mesh);
 	void set_test_case();
-	const GLchar * VertexShaderSource();
 	void onRender();
 	bool MainLoop();
 	void onExit();
@@ -181,7 +179,6 @@ public:
 
 	void add_model(mesh_model * model);
 	void set_test_case();
-	const GLchar * VertexShaderSource();
 	void onRender();
 	bool MainLoop();
 	void onExit();
@@ -197,7 +194,6 @@ class parametric_model_visualixer : public visualixer{
 
 	//void add_model(parametric_model);
 	void set_test_case();
-	const GLchar * VertexShaderSource();
 	void onRender();
 	bool MainLoop();
 	void onExit();
