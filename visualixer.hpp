@@ -13,8 +13,6 @@
 #include <stdlib.h>
 
 #include <GL/glew.h>
-//#include <GL/freeglut.h>
-//#include <GL/glu.h>
 
 #include <GLFW/glfw3.h>
 
@@ -35,26 +33,16 @@
 
 #define VX_PI 3.14159265358979323846264338327950288
 
-/*
-enum
-{
-	MOUSE_LEFT_BUTTON = 0,
-	MOUSE_MIDDLE_BUTTON = 1,
-	MOUSE_RIGHT_BUTTON = 2,
-	MOUSE_SCROLL_UP = 3,
-	MOUSE_SCROLL_DOWN = 4
-};
-*/
-
 // this contains definitions for the openGL visualizer widget
 //
 // the visualizer should be able to:
 //  - visualize flow in 2d and 3d and move around in it
 //  - visualize the geometry in 2d and 3d and move around in it
+//  - visualize parametric or mesh CAD models and move around
 //  - visualize and interact with point clouds
 
 
-// here is the main visualizer class
+//************** base visualixer class *********************
 class visualixer{
 public:
 
@@ -62,7 +50,7 @@ public:
 	virtual ~visualixer();
 
 	// getters and setters
-	virtual char * get_window_name();
+	virtual char * get_window_name() {return window_name;};
 	virtual void set_window_name(char * w_name);
 	//float * get_color_ramp(ColorRamp vcolor);
 	//void set_color_ramp(char * cramp);
@@ -109,7 +97,6 @@ protected:
 	bool lock_pan; // lock mouse panning
 
 
-
 	// base callbacks to interface with GLFW
 	virtual void onMouseClick(int button, int action, int modifiers);
 	virtual void onMouseWheel(double xoffset, double yoffset);
@@ -120,12 +107,8 @@ protected:
 	virtual void onMouseLeftDrag(double xpos, double ypos);
 	virtual void onMouseRightDrag(double xpos, double ypos);
 	virtual void onMouseMiddleDrag(double xpos, double ypos);
-	//virtual void onMouseScrollDown(int button, int x, int y);
-	//virtual void onMouseScrollUp(int button, int x, int y);
 	virtual void onKeyDown(unsigned char key, int x, int y);
 	virtual void onKeyUp(unsigned char key, int x, int y);
-	//virtual void onKeyboardDown(unsigned char key, int x, int y);
-	//virtual void Repaint();
 	virtual void onReshape(int new_width, int new_height);
 	virtual void SetFullscreen(bool bFullscreen);
 
@@ -150,8 +133,7 @@ private:
 
 };
 
-//*********** here are derived classes ****************
-
+//*********** Point Cloud Visualixer ****************
 // viewing point clouds
 class cloud_visualixer : public visualixer{
 public:
@@ -165,6 +147,7 @@ public:
 
 };
 
+//************** Mesh Visualixer ********************
 // viewing a mesh
 class mesh_visualixer : public visualixer{
 public:
@@ -184,11 +167,12 @@ protected:
 	unsigned int num_line_elements, num_per_line_element, line_element_offset;
 };
 
-// viewing a simulation
+//************** Simuluation Visualixer *******************
 class sim_visualixer{
 
 };
 
+//**************** Mesh Model Visualixer ********************
 // viewing an mesh model geometry (like an STL model)
 class mesh_model_visualixer : public visualixer{
 public:
@@ -204,6 +188,7 @@ public:
 
 };
 
+//***************** Parametric Model Visualixer ************************
 // viewing an parametric geometry (like a CAD model)
 class parametric_model_visualixer : public visualixer{
 
