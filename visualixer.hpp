@@ -53,17 +53,16 @@ public:
 	// getters and setters
 	virtual char * get_window_name() {return window_name;};
 	virtual void set_window_name(char * w_name);
-	//float * get_color_ramp(ColorRamp vcolor);
-	//void set_color_ramp(char * cramp);
-	//void cycle_color_ramp();
+
+	virtual void set_color_ramp(CRamp ramp_name);
+  //virtual void set_color_by(float * colorby); // set a non-z color by array
+  //virtual void set_custom_colors(rgb * colors);
 	//void set_lock_rotation(bool lock_mode);
+
 	virtual void set_test_case();
 
 	// running the visualixer
 	virtual void run();
-
-
-
 
 protected:
 	// model related data
@@ -71,7 +70,8 @@ protected:
 	char * window_name;
 	GLfloat * vertices;
 	GLuint * elements;
-	float * color_ramp;
+	//rgb * colors;
+  ColorRamp * color_ramp;
 	float model_centroid[3]; // from [model_min, model_max]
 	float xmin, xmax, ymin, ymax, zmin, zmax;
 	unsigned int num_vertices, num_per_vertex, num_vertex_points;

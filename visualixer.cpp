@@ -53,6 +53,23 @@ void visualixer::set_window_name(char * w_name){
 	return;
 }
 
+void visualixer::set_color_ramp(CRamp ramp_name){
+  if (color_ramp == NULL) {
+    cout << "color ramp not instantiated yet" << endl;
+    return;
+  }
+
+  color_ramp->set_ramp(ramp_name);
+  rgb ptcolor;
+  for (unsigned int i=0; i<num_vertices; i++){
+    ptcolor = color_ramp->get_ramp_color((vertices[i*num_per_vertex+2]-zmin)/(zmax - zmin));
+    vertices[i*num_per_vertex + 3] = ptcolor.R;
+    vertices[i*num_per_vertex + 4] = ptcolor.G;
+    vertices[i*num_per_vertex + 5] = ptcolor.B;
+  }
+  return;
+}
+
 void visualixer::run(){
 	onInit();
 	onRender();
@@ -619,6 +636,8 @@ void cloud_visualixer::set_test_case(){
 }
 
 void cloud_visualixer::add_cloud(PointCloud * cloud){
+  color_ramp = new ColorRamp();
+
 	num_vertices = cloud->pointcount;
 	num_per_vertex = 6;
 	num_vertex_points = 3;
@@ -627,16 +646,7 @@ void cloud_visualixer::add_cloud(PointCloud * cloud){
 		vertices[i*num_per_vertex] = cloud->x[i];
 		vertices[i*num_per_vertex + 1] = cloud->y[i];
 		vertices[i*num_per_vertex + 2] = cloud->z[i];
-		if (cloud->RGB != NULL){
-			vertices[i*num_per_vertex + 3] = cloud->RGB[i].R/65,535;
-			vertices[i*num_per_vertex + 4] = cloud->RGB[i].G/65,535;
-			vertices[i*num_per_vertex + 5] = cloud->RGB[i].B/65,535;
-		}
-		else {
-			vertices[i*num_per_vertex + 3] = 1.0;
-			vertices[i*num_per_vertex + 4] = 1.0;
-			vertices[i*num_per_vertex + 5] = 1.0;
-		}
+
 	}
 
 	num_elements = num_vertices;
@@ -645,6 +655,23 @@ void cloud_visualixer::add_cloud(PointCloud * cloud){
 	for (unsigned int i=0; i<num_vertices; i++){
 		elements[i] = i;
 	}
+
+  if (cloud->RGB != NULL){
+    for (unsigned int i=0; i<cloud->pointcount; i){
+      vertices[i*num_per_vertex + 3] = cloud->RGB[i].R/65,535;
+      vertices[i*num_per_vertex + 4] = cloud->RGB[i].G/65,535;
+      vertices[i*num_per_vertex + 5] = cloud->RGB[i].B/65,535;
+    }
+  }
+  else {
+    rgb ptcolor;
+    for (unsigned int i=0; i<cloud->pointcount; i++){
+      ptcolor = color_ramp->get_ramp_color((cloud->z[i]-cloud->zmin)/(cloud->zmax - cloud->zmin));
+      vertices[i*num_per_vertex + 3] = ptcolor.R;
+      vertices[i*num_per_vertex + 4] = ptcolor.G;
+      vertices[i*num_per_vertex + 5] = ptcolor.B;
+    }
+  }
 
 	model_centroid[0] = (cloud->xmax + cloud->xmin)/2.0;
 	model_centroid[1] = (cloud->ymax + cloud->ymin)/2.0;
@@ -1185,6 +1212,7 @@ int main(int argc, char * argv[]){
 	//PointCloud * cloud = PointCloud::read_LAS("../testfiles/xyzrgb_manuscript.las");
 	//PointCloud * cloud = PointCloud::read_LAS("../testfiles/LAS12_Sample_withRGB_Quick_Terrain_Modeler.las");
 	mycvis->add_cloud(cloud);
+  mycvis->set_color_ramp(CR_QUALITATIVE_1);
 	mycvis->run();
 	delete mycvis;
 
