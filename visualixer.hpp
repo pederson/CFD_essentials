@@ -4,6 +4,7 @@
 #include "PointCloud.hpp"
 #include "mesh_class.hpp"
 #include "geometric_object.hpp"
+#include "colorramp.hpp"
 
 #include <iostream>
 #include <vector>
