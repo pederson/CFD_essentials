@@ -1,0 +1,10 @@
+TODO:
+
+X - Mesh Class
+X - Visualizer
+- Equation setter
+- Property setter
+- Geometry setter
+- Boundary conditions/ Initial Conditions
+- Matrix equation assembler (parallelizable)
+- Matrix equation solver (parallelizable)

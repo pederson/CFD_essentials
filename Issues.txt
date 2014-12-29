@@ -1,0 +1,5 @@
+Issues:
+
+1. Crashing on glm::sqrt for visualizer user interaction
+2. Very slow loading of point clouds in the visualixer
+3. Lots of calls are used without get/set 
