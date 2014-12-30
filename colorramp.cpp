@@ -110,7 +110,7 @@ ColorRamp::ColorRamp(){
   rgb_max = 255;
   num_values = 9;
   rgb_interpolation = false;
-  current_ramp = CR_DIVERGENT_8;
+  current_ramp = CRamp::DIVERGENT_8;
   reset_ramp_array();
 }
 
@@ -119,8 +119,8 @@ ColorRamp::~ColorRamp(){
 }
 
 void ColorRamp::cycle_ramp(){
-  current_ramp = static_cast<CRamp>( static_cast<int>(current_ramp) + 1);
-  if (current_ramp == CR_END_OF_LIST) current_ramp = (CRamp) 0;
+  current_ramp = static_cast<CRamp>( static_cast<char>(current_ramp) + 1);
+  if (current_ramp == CRamp::END_OF_LIST) current_ramp = (CRamp) 0;
   reset_ramp_array();
   return;
 }
@@ -152,103 +152,103 @@ void ColorRamp::reset_ramp_array(){
   rgb_max = 255;
 
   switch (current_ramp){
-    case CR_MULTI_HUE_RED_1:
+    case CRamp::MULTI_HUE_RED_1:
       rgbvals = multi_hue_red_1;
       break;
 
-    case CR_MULTI_HUE_RED_2:
+    case CRamp::MULTI_HUE_RED_2:
       rgbvals = multi_hue_red_2;
       break;
 
-    case CR_MULTI_HUE_ORANGE:
+    case CRamp::MULTI_HUE_ORANGE:
       rgbvals = multi_hue_orange;
       break;
 
-    case CR_MULTI_HUE_GREEN_1:
+    case CRamp::MULTI_HUE_GREEN_1:
       rgbvals = multi_hue_green_1;
       break;
 
-    case CR_MULTI_HUE_GREEN_2:
+    case CRamp::MULTI_HUE_GREEN_2:
       rgbvals = multi_hue_green_2;
       break;
 
-    case CR_MULTI_HUE_BG_1:
+    case CRamp::MULTI_HUE_BG_1:
       rgbvals = multi_hue_bg_1;
       break;
 
-    case CR_MULTI_HUE_BG_2:
+    case CRamp::MULTI_HUE_BG_2:
       rgbvals = multi_hue_bg_2;
       break;
 
-    case CR_MULTI_HUE_BG_3:
+    case CRamp::MULTI_HUE_BG_3:
       rgbvals = multi_hue_bg_3;
       break;
 
-    case CR_MULTI_HUE_BLUE:
+    case CRamp::MULTI_HUE_BLUE:
       rgbvals = multi_hue_blue;
       break;
 
-    case CR_MULTI_HUE_PURPLE:
+    case CRamp::MULTI_HUE_PURPLE:
       rgbvals = multi_hue_purple;
       break;
 
-    case CR_MULTI_HUE_PINK_1:
+    case CRamp::MULTI_HUE_PINK_1:
       rgbvals = multi_hue_pink_1;
       break;
 
-    case CR_MULTI_HUE_PINK_2:
+    case CRamp::MULTI_HUE_PINK_2:
       rgbvals = multi_hue_pink_2;
       break;
 
-    case CR_DIVERGENT_1:
+    case CRamp::DIVERGENT_1:
       rgbvals = divergent_1;
       break;
 
-    case CR_DIVERGENT_2:
+    case CRamp::DIVERGENT_2:
       rgbvals = divergent_2;
       break;
 
-    case CR_DIVERGENT_3:
+    case CRamp::DIVERGENT_3:
       rgbvals = divergent_3;
       break;
 
-    case CR_DIVERGENT_4:
+    case CRamp::DIVERGENT_4:
       rgbvals = divergent_4;
       break;
 
-    case CR_DIVERGENT_5:
+    case CRamp::DIVERGENT_5:
       rgbvals = divergent_5;
       break;
 
-    case CR_DIVERGENT_6:
+    case CRamp::DIVERGENT_6:
       rgbvals = divergent_6;
       break;
 
-    case CR_DIVERGENT_7:
+    case CRamp::DIVERGENT_7:
       rgbvals = divergent_7;
       break;
 
-    case CR_DIVERGENT_8:
+    case CRamp::DIVERGENT_8:
       rgbvals = divergent_8;
       break;
 
-    case CR_DIVERGENT_9:
+    case CRamp::DIVERGENT_9:
       rgbvals = divergent_9;
       break;
 
-    case CR_QUALITATIVE_1:
+    case CRamp::QUALITATIVE_1:
       rgbvals = qualitative_1;
       break;
 
-    case CR_QUALITATIVE_2:
+    case CRamp::QUALITATIVE_2:
       rgbvals = qualitative_2;
       break;
 
-    case CR_QUALITATIVE_3:
+    case CRamp::QUALITATIVE_3:
       rgbvals = qualitative_3;
       break;
 
-    case CR_QUALITATIVE_4:
+    case CRamp::QUALITATIVE_4:
       rgbvals = qualitative_4;
       break;
 

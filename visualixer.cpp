@@ -128,6 +128,7 @@ void visualixer::onMouseClick(int button, int action, int modifiers){
 			}
 			else {
 				eye_vec = new_eye;
+				recalcCamera();
 			}
 
 			break;
@@ -145,6 +146,7 @@ void visualixer::onMouseClick(int button, int action, int modifiers){
 			else {
 				eye_vec = new_eye;
 				focus_vec = new_focus;
+				recalcCamera();
 			}
 			break;
 		otherwise :
@@ -164,7 +166,10 @@ void visualixer::onMouseWheel(double xoffset, double yoffset){
 		zoom_level += 0.05;
 
 	}
-	zoom_scale_new = exp(zoom_level);
+	//cout << "zoom level: " << zoom_level << endl;
+	if (zoom_level > 3.0) zoom_level = 3.0; // limit the zoom in
+	if (zoom_level < 0.5) zoom_level = 0.5; // limit the zoom out
+	zoom_scale_new = 1/(zoom_level);
 	eye_vec = focus_vec + (eye_vec-focus_vec)*(zoom_scale_new-zoom_scale + 1.0f);
 	zoom_scale = zoom_scale_new;
 	view = glm::lookAt(
@@ -179,7 +184,7 @@ void visualixer::onKeyboard(int key, int scancode, int action, int modifiers){
 	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS){ // resets the view
 		eye_vec.x = model_centroid[0];
 		eye_vec.y = model_centroid[1];
-		eye_vec.z = zmax+1.0f;
+		eye_vec.z = eyez_init;
 		focus_vec.x = model_centroid[0];
 		focus_vec.y = model_centroid[1];
 		focus_vec.z = model_centroid[2];
@@ -187,7 +192,9 @@ void visualixer::onKeyboard(int key, int scancode, int action, int modifiers){
 		up_vec.y = 1.0f;
 		up_vec.z = 0.0f;
 
-		cout << "zmax is " << zmax << endl;
+		recalcCamera();
+
+		//cout << "zmax is " << zmax << endl;
 		view = glm::lookAt(
 	        eye_vec,
 	        focus_vec,
@@ -206,34 +213,28 @@ void visualixer::onCursorPosition(double xpos, double ypos){
 void visualixer::onMouseLeftDrag(double xpos, double ypos){
 	double new_x_pos, new_y_pos;
 	int width, height;
-	glm::vec3 in_plane, rot_vec;
-	glm::vec4 world_in_plane;
+	glm::vec3 rot_vec, in_world_ip;
 
 	glfwGetWindowSize(window_ptr, &width, &height);
 	glfwGetCursorPos(window_ptr, &new_x_pos, &new_y_pos);
 
 	rotdeg = ((new_x_pos-x_upon_click)*(new_x_pos-x_upon_click)
-					 + (new_y_pos-y_upon_click)*(new_y_pos-y_upon_click))/(width*width + height*height)*3.14159;
-	in_plane = glm::vec3((new_x_pos-x_upon_click), -(new_y_pos-y_upon_click), 0.0f);
-	world_in_plane = glm::inverse(proj*view*model)*glm::vec4(in_plane, 1.0f);
-	world_in_plane.x = world_in_plane.x - eye_vec.x;
-	world_in_plane.y = world_in_plane.y - eye_vec.y;
-	world_in_plane.z = world_in_plane.z - eye_vec.z;
+					 + (new_y_pos-y_upon_click)*(new_y_pos-y_upon_click))/(width*width + height*height)*3.14159/2;
+
+
+	in_world_ip = float(new_x_pos-x_upon_click)*-camera_side + float(new_y_pos-y_upon_click)*camera_up;
 
 	// comes from the cross product
-	rot_vec.x = (eye_vec.y-focus_vec.y)*world_in_plane.z - (eye_vec.z-focus_vec.z)*world_in_plane.y;
-	rot_vec.y = (eye_vec.z-focus_vec.z)*world_in_plane.x - (eye_vec.x-focus_vec.x)*world_in_plane.z;
-	rot_vec.z = (eye_vec.x-focus_vec.x)*world_in_plane.y - (eye_vec.y-focus_vec.y)*world_in_plane.x;
+	rot_vec = glm::cross(in_world_ip, focus_vec - eye_vec);
 
-
-	new_eye = focus_vec +  glm::rotate((eye_vec-focus_vec), rotdeg, -rot_vec);
+	new_eye = focus_vec +  glm::rotate((eye_vec-focus_vec), rotdeg, rot_vec);
 	view = glm::lookAt(new_eye, focus_vec, up_vec);
 }
 
 void visualixer::onMouseRightDrag(double xpos, double ypos){
 	double new_x_pos, new_y_pos;
 	int width, height;
-	glm::vec3 in_plane, rot_vec, wip3;
+	glm::vec3 in_plane, in_world_ip;
 	glm::vec4 world_in_plane;
 	GLfloat pan_scale, in_plane_norm;
 
@@ -244,19 +245,13 @@ void visualixer::onMouseRightDrag(double xpos, double ypos){
 	pan_scale = ((new_x_pos-x_upon_click)*(new_x_pos-x_upon_click) + (new_y_pos-y_upon_click)*(new_y_pos-y_upon_click))/(width*width + height*height)*((xmax-xmin)*(xmax-xmin)+(ymax-ymin)*(ymax-ymin));
 	//cout << "pan scale: " << pan_scale << endl;
 
-	in_plane_norm = (new_x_pos-x_upon_click)*(new_x_pos-x_upon_click) + (new_y_pos-y_upon_click)*(new_y_pos-y_upon_click);
-	in_plane = glm::vec3((new_x_pos-x_upon_click)/glm::sqrt(in_plane_norm), -(new_y_pos-y_upon_click)/sqrt(in_plane_norm), 0.0f);
-	world_in_plane = glm::inverse(proj*view*model)*glm::vec4(in_plane, 1.0f);
-
-
-	wip3.x = world_in_plane.x;
-	wip3.y = world_in_plane.y;
-	wip3.z = world_in_plane.z;
+	in_world_ip = float(new_x_pos-x_upon_click)*-camera_side + float(new_y_pos-y_upon_click)*camera_up;
+	in_world_ip = glm::normalize(in_world_ip);
 
 	//cout << "about to translate " << endl;
-	new_eye = eye_vec + pan_scale*wip3;
-	new_focus = focus_vec + pan_scale*wip3;
-	view = glm::lookAt(eye_vec, focus_vec, up_vec);
+	new_eye = eye_vec + pan_scale*in_world_ip;
+	new_focus = focus_vec + pan_scale*in_world_ip;
+	view = glm::lookAt(new_eye, new_focus, up_vec);
 	//cout << "finished translating" << endl;
 }
 
@@ -280,6 +275,19 @@ void visualixer::onReshape(int new_width, int new_height){
 
 void visualixer::SetFullscreen(bool bFullscreen){
 
+}
+
+void visualixer::recalcCamera(){
+	camera_side = glm::normalize(glm::cross(focus_vec - eye_vec, up_vec - eye_vec + focus_vec));
+	camera_up = glm::normalize(glm::cross(camera_side, focus_vec - eye_vec));
+
+	/*
+	cout << "focus_vec: " << focus_vec.x << ", " << focus_vec.y << ", " << focus_vec.z << endl;
+	cout << "eye_vec: " << eye_vec.x << ", " << eye_vec.y << ", " << eye_vec.z << endl;
+	cout << "up_vec: " << up_vec.x << ", " << up_vec.y << ", " << up_vec.z << endl;
+	cout << "camera_side: " << camera_side.x << ", " << camera_side.y << ", " << camera_side.z << endl;
+	cout << "camera_up: " << camera_up.x << ", " << camera_up.y << ", " << camera_up.z << endl;
+	*/
 }
 
 
@@ -443,17 +451,22 @@ void visualixer::onShaders(){
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 	// Set up view matrix
-	zoom_level = 0.0f;
+	zoom_level = 1.0f;
 	zoom_scale = 1.0f;
 	up_vec = glm::vec3(0.0f, 1.0f, 0.0f);
+	// calculate the eye z position so that it can view the whole scene
+	if (xmax - xmin > ymax - ymin) eyez_init = (xmax-xmin) + zmax;
+	else eyez_init = (ymax - ymin) + zmax;
 	//cout << "centroid is: " << model_centroid[0] << ", " << model_centroid[1] << ", " << model_centroid[2] << endl;
 	focus_vec = glm::vec3(model_centroid[0], model_centroid[1], model_centroid[2]);
-	eye_vec = glm::vec3(model_centroid[0], model_centroid[1], zmax + 1.0f);
+	eye_vec = glm::vec3(model_centroid[0], model_centroid[1], eyez_init);
   view = glm::lookAt(
     eye_vec, // camera position
     focus_vec, // the position to be looking at
     up_vec  // the up vector
   );
+  recalcCamera();
+
   uniView = glGetUniformLocation(shaderProgram, "view");
   glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
@@ -1212,7 +1225,7 @@ int main(int argc, char * argv[]){
 	//PointCloud * cloud = PointCloud::read_LAS("../testfiles/xyzrgb_manuscript.las");
 	//PointCloud * cloud = PointCloud::read_LAS("../testfiles/LAS12_Sample_withRGB_Quick_Terrain_Modeler.las");
 	mycvis->add_cloud(cloud);
-  mycvis->set_color_ramp(CR_QUALITATIVE_1);
+    mycvis->set_color_ramp(CRamp::DIVERGENT_1);
 	mycvis->run();
 	delete mycvis;
 

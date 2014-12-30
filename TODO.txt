@@ -1,5 +1,6 @@
 TODO:
 
+- Doxygen comments for everything
 X - Mesh Class
 X - Visualizer
 - Equation setter

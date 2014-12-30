@@ -27,8 +27,8 @@
 #include <glm/gtx/rotate_vector.hpp>
 //#include <glm/transform.hpp>
 
-#define DEFAULT_WIDTH 640
-#define DEFAULT_HEIGHT 480
+#define DEFAULT_WIDTH 800
+#define DEFAULT_HEIGHT 600
 #define DEFAULT_CENTER_X 0
 #define DEFAULT_CENTER_Y 0
 
@@ -84,8 +84,10 @@ protected:
 
 	// visualizer user viewing data
 	glm::mat4 model, view, proj;
-	glm::vec3 eye_vec, new_eye, focus_vec, new_focus, up_vec;
-	float rotdeg, zoom_level, zoom_scale;
+	glm::vec3 eye_vec, focus_vec, up_vec;
+	glm::vec3 new_eye, new_focus;
+	glm::vec3 camera_side, camera_up;
+	float rotdeg, zoom_level, zoom_scale, eyez_init;
 
 	// status data
 	bool left_mouse_engaged; // is the left mouse button clicked?
@@ -112,6 +114,7 @@ protected:
 	virtual void onKeyUp(unsigned char key, int x, int y);
 	virtual void onReshape(int new_width, int new_height);
 	virtual void SetFullscreen(bool bFullscreen);
+	virtual void recalcCamera();
 
 
 	// functions related to the context creation and main loop rendering
@@ -143,6 +146,8 @@ public:
 
 	void add_cloud(PointCloud * cloud);
 	void set_test_case();
+
+protected:
 	bool MainLoop();
 
 };
@@ -156,11 +161,12 @@ public:
 
 	void add_mesh(Mesh * mesh);
 	void set_test_case();
+
+protected:
 	void onRender();
 	bool MainLoop();
 	void onExit();
 
-protected:
 	GLuint * line_elements;
 	GLuint lebo;
 	unsigned int num_line_elements, num_per_line_element, line_element_offset;
@@ -180,6 +186,8 @@ public:
 
 	void add_model(mesh_model * model);
 	void set_test_case();
+
+protected:
 	void onRender();
 	bool MainLoop();
 	void onExit();
@@ -195,6 +203,8 @@ class parametric_model_visualixer : public visualixer{
 
 	//void add_model(parametric_model);
 	void set_test_case();
+
+protected:
 	void onRender();
 	bool MainLoop();
 	void onExit();

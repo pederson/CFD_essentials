@@ -1,0 +1,3 @@
+# specify files to exclude 
+*~
+Makefile
