@@ -219,7 +219,7 @@ void visualixer::onMouseLeftDrag(double xpos, double ypos){
 	glfwGetCursorPos(window_ptr, &new_x_pos, &new_y_pos);
 
 	rotdeg = ((new_x_pos-x_upon_click)*(new_x_pos-x_upon_click)
-					 + (new_y_pos-y_upon_click)*(new_y_pos-y_upon_click))/(width*width + height*height)*3.14159/2;
+					 + (new_y_pos-y_upon_click)*(new_y_pos-y_upon_click))/(width*width + height*height)*VX_PI/2;
 
 
 	in_world_ip = float(new_x_pos-x_upon_click)*-camera_side + float(new_y_pos-y_upon_click)*camera_up;
@@ -735,11 +735,13 @@ mesh_visualixer::mesh_visualixer(){
 	color_ramp = NULL;
 	vertices = NULL;
 	elements = NULL;
+	normals = NULL;
 
 	num_vertices = 0;
 	num_per_vertex = 0;
 	num_elements = 0;
 	num_line_elements = 0;
+	num_normals = 0;
 
 	model_centroid[0] = 0.0;
   model_centroid[1] = 0.0;
@@ -758,6 +760,7 @@ mesh_visualixer::~mesh_visualixer(){
 	if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
+	if (normals != NULL) delete[] normals;
 }
 
 
@@ -917,6 +920,7 @@ void mesh_visualixer::onRender(){
 	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (num_elements * num_per_element + num_line_elements * num_per_line_element) * sizeof(GLuint), elements, GL_STATIC_DRAW);
   }
+
 
   //cout << "total elements buffered: " << num_elements * num_per_element + num_line_elements * num_per_line_element << endl;
   // enable point size specification
@@ -1143,6 +1147,12 @@ void mesh_model_visualixer::onRender(){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, (num_elements * num_per_element) * sizeof(GLuint), elements, GL_STATIC_DRAW);
   }
 
+
+	// create a normal buffer
+	glGenBuffers(1, &normalbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+	glBufferData(GL_ARRAY_BUFFER, num_normals*sizeof(GLfloat)*3,  normals, GL_STATIC_DRAW);
+
   //cout << "total elements buffered: " << num_elements * num_per_element<< endl;
   // enable point size specification
   //glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
@@ -1155,6 +1165,105 @@ void mesh_model_visualixer::onRender(){
   glEnable(GL_DEPTH_TEST);
 
   return;
+}
+
+void visualixer::onShaders(){
+
+  // create and compile the vertex shader
+  vertexShader = glCreateShader(GL_VERTEX_SHADER);
+  const GLchar * vssource = this->VertexShaderSource();
+  glShaderSource(vertexShader, 1, &(vssource), NULL);
+  glCompileShader(vertexShader);
+
+  GLint status;
+  GLint logLength;
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
+	if (status != GL_TRUE){
+		cout << "vertex shader failed to compile" << endl;
+		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH , &logLength);
+		if (logLength > 1) {
+		    GLchar* compiler_log = (GLchar*)malloc(logLength);
+		    glGetShaderInfoLog(vertexShader, logLength, 0, compiler_log);
+		    printf("%s\n", compiler_log);
+		    free (compiler_log);
+		}
+	}
+
+  // create and compile the fragment shader
+  fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+  const GLchar * fssource = this->FragmentShaderSource();
+  glShaderSource(fragmentShader, 1, &(fssource), NULL);
+  glCompileShader(fragmentShader);
+
+  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &status);
+	if (status != GL_TRUE){
+		cout << "fragment shader failed to compile" << endl;
+		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH , &logLength);
+		if (logLength > 1) {
+		    GLchar* compiler_log = (GLchar*)malloc(logLength);
+		    glGetShaderInfoLog(fragmentShader, logLength, 0, compiler_log);
+		    printf("%s\n", compiler_log);
+		    free (compiler_log);
+		}
+	}
+
+
+  // link the vertex and fragment shader into a shader program
+  shaderProgram = glCreateProgram();
+  glAttachShader(shaderProgram, vertexShader);
+  glAttachShader(shaderProgram, fragmentShader);
+  glBindFragDataLocation(shaderProgram, 0, "outColor");
+  glLinkProgram(shaderProgram);
+  glUseProgram(shaderProgram);
+
+  // Specify the layout of the vertex data
+  //cout << "num_vertices: " << num_vertices << " num_vertex_points: " << num_vertex_points << " num_per_vertex: " << num_per_vertex << endl;
+  GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
+  glEnableVertexAttribArray(posAttrib);
+  glVertexAttribPointer(posAttrib, num_vertex_points, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), 0);
+
+  GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
+  glEnableVertexAttribArray(colAttrib);
+  glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), (void*)(num_vertex_points * sizeof(GLfloat)));
+
+  GLint normAttrib = glGetAttribLocation(shaderProgram, "normal");
+  glEnableVertexAttribArray(normAttrib);
+//glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+	glVertexAttribPointer(
+	    normAttrib, 3, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat),                                // stride
+	    (void*)0                          // array buffer offset
+	);
+
+  rotdeg = 0;
+	model = glm::rotate(model, rotdeg, glm::vec3(0.0f, 0.0f, 1.0f)); // angle in radians to suppress some output
+	uniModel = glGetUniformLocation(shaderProgram, "model");
+	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+
+	// Set up view matrix
+	zoom_level = 1.0f;
+	zoom_scale = 1.0f;
+	up_vec = glm::vec3(0.0f, 1.0f, 0.0f);
+	// calculate the eye z position so that it can view the whole scene
+	if (xmax - xmin > ymax - ymin) eyez_init = (xmax-xmin) + zmax;
+	else eyez_init = (ymax - ymin) + zmax;
+	//cout << "centroid is: " << model_centroid[0] << ", " << model_centroid[1] << ", " << model_centroid[2] << endl;
+	focus_vec = glm::vec3(model_centroid[0], model_centroid[1], model_centroid[2]);
+	eye_vec = glm::vec3(model_centroid[0], model_centroid[1], eyez_init);
+  view = glm::lookAt(
+    eye_vec, // camera position
+    focus_vec, // the position to be looking at
+    up_vec  // the up vector
+  );
+  recalcCamera();
+
+  uniView = glGetUniformLocation(shaderProgram, "view");
+  glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
+
+  // set up projection matrix
+  proj = glm::perspective(0.785f, float(DEFAULT_WIDTH)/float(DEFAULT_HEIGHT), 0.05f, 100000.0f);
+  uniProj = glGetUniformLocation(shaderProgram, "proj");
+  glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
+
 }
 
 bool mesh_model_visualixer::MainLoop(){

@@ -188,6 +188,10 @@ public:
 	void set_test_case();
 
 protected:
+
+	GLfloat * normals;
+	GLuint normalbuffer, num_normals;
+
 	void onRender();
 	bool MainLoop();
 	void onExit();

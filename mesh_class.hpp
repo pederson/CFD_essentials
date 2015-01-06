@@ -59,33 +59,33 @@ public:
   void calc_extents();
 
   // member data accessors
-  MeshType get_mesh_type();
+  MeshType get_mesh_type(){return mesh_type;};
   void set_mesh_type(MeshType type);
-  unsigned int get_num_dims();
+  unsigned int get_num_dims(){return num_dims;};
   void set_num_dims(unsigned int ndims);
-  unsigned int get_num_nodes();
+  unsigned int get_num_nodes(){return mesh_nodes.size();};
   void set_num_nodes(unsigned int number_of_nodes);
   void set_offsets(double x_off, double y_off = 0, double z_off = 0);
 
-  double get_offset_x();
-  double get_offset_y();
-  double get_offset_z();
+  double get_offset_x(){return x_offset;};
+  double get_offset_y(){return y_offset;};
+  double get_offset_z(){return z_offset;};
 
   void set_offset_x(double offset_x);
   void set_offset_y(double offset_y);
   void set_offset_z(double offset_z);
 
-  double get_xmin();
+  double get_xmin(){return xmin;};
   void set_xmin(double x_min);
-  double get_ymin();
+  double get_ymin(){return ymin;};
   void set_ymin(double y_min);
-  double get_zmin();
+  double get_zmin(){return zmin;};
   void set_zmin(double z_min);
-  double get_xmax();
+  double get_xmax(){return xmax;};
   void set_xmax(double x_max);
-  double get_ymax();
+  double get_ymax(){return ymax;};
   void set_ymax(double y_max);
-  double get_zmax();
+  double get_zmax(){return zmax;};
   void set_zmax(double z_max);
 
   // node access and manipulation
@@ -115,6 +115,9 @@ private:
   // nodes and keys
   std::vector<unsigned int> node_keys; // contains keys to the nodes
   std::map<unsigned int, Node *> mesh_nodes; // contains pointers to Node structures as a list (so that the mesh is refinable)
+
+  // physical properties on the mesh
+  //std::vector<std::string> phys_properties;
 };
 
 

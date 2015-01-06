@@ -114,17 +114,9 @@ void Mesh::calc_extents(){
   return;
 }
 
-MeshType Mesh::get_mesh_type(){
-  return mesh_type;
-}
-
 void Mesh::set_mesh_type(MeshType type){
   mesh_type = type;
   return;
-}
-
-unsigned int Mesh::get_num_dims(){
-  return num_dims;
 }
 
 void Mesh::set_num_dims(unsigned int ndims){
@@ -132,9 +124,6 @@ void Mesh::set_num_dims(unsigned int ndims){
   return;
 }
 
-unsigned int Mesh::get_num_nodes(){
-  return mesh_nodes.size();
-}
 
 /************************************************************************************//**
  * \brief Set the number of nodes in the mesh
@@ -178,29 +167,9 @@ void Mesh::set_offsets(double x_off, double y_off, double z_off){
   return;
 }
 
-double Mesh::get_offset_x(){
-  return x_offset;
-}
-
-double Mesh::get_offset_y(){
-  return y_offset;
-}
-
-double Mesh::get_offset_z(){
-  return z_offset;
-}
-
-double Mesh::get_xmin(){
-  return xmin;
-}
-
 void Mesh::set_xmin(double x_min){
   xmin = x_min;
   return;
-}
-
-double Mesh::get_ymin(){
-  return ymin;
 }
 
 void Mesh::set_ymin(double y_min){
@@ -208,17 +177,9 @@ void Mesh::set_ymin(double y_min){
   return;
 }
 
-double Mesh::get_zmin(){
-  return zmin;
-}
-
 void Mesh::set_zmin(double z_min){
   zmin = z_min;
   return;
-}
-
-double Mesh::get_xmax(){
-  return xmax;
 }
 
 void Mesh::set_xmax(double x_max){
@@ -226,17 +187,9 @@ void Mesh::set_xmax(double x_max){
   return;
 }
 
-double Mesh::get_ymax(){
-  return ymax;
-}
-
 void Mesh::set_ymax(double y_max){
   ymax = y_max;
   return;
-}
-
-double Mesh::get_zmax(){
-  return zmax;
 }
 
 void Mesh::set_zmax(double z_max){
