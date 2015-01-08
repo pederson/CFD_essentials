@@ -1,7 +1,6 @@
 #include "geometric_object.hpp"
 
-//#define _TEST_
-
+#define _TEST_
 using namespace std;
 
 geometric_object_2d::geometric_object_2d(){
@@ -44,7 +43,7 @@ ellipse::ellipse(float axis_major, float axis_minor, float rot_angle, vertex_2d 
 	phys_properties = properties;
 }
 
-void circle::print_summary(){
+void ellipse::print_summary(){
 	cout << "\tShape: " << object_name << " major axis: " << axis_maj << " minor axis: " << axis_min << " rotation angle: " << rotation_angle << " center: " << center.x << ", " << center.y << endl;
 }
 
@@ -100,12 +99,16 @@ void parametric_model_2d::set_model_name(std::string mname){
 	return;
 }
 
+std::vector<double> parametric_model_2d::get_material(std::string material_name){
+	return materials.at(material_name);
+}
+
 void parametric_model_2d::add_physical_property(std::string property_name){
 	phys_property_names.push_back(property_name);
 }
 
 void parametric_model_2d::add_material(std::string material_name, std::vector<double> phys_props){
-
+	materials[material_name] = phys_props;
 }
 
 void parametric_model_2d::add_object(geometric_object_2d new_object){
@@ -213,9 +216,31 @@ mesh_model * mesh_model::read_STL(char * filename, unsigned int byte_offset){
 int main(int argc, char * argv[]){
 	// declare vars
 
+	// test 2D parametric builder
+	parametric_model_2d my_param2;
+	my_param2.set_model_name("Dylan Test Model");
+	my_param2.add_physical_property("Epsilon_rel");
+	my_param2.add_physical_property("Mu_rel");
+	my_param2.add_material("Air", {1.0, 1.0});
+	my_param2.add_material("Dielectric", {5.0, 2.0});
+
+	// test rectangle
+	my_param2.add_object(rectangle(1.0, 2.0, vertex_2d(0.0, 0.0), my_param2.get_material("Air")));
+	// test circle
+	my_param2.add_object(circle(0.75, vertex_2d(0.5, 1.0), my_param2.get_material("Dielectric")));
+	// test ellipse
+	my_param2.add_object(ellipse(0.3, 0.2, 0.0, vertex_2d(-1.0, -1.0), my_param2.get_material("Dielectric")));
+	// test triangle
+	my_param2.add_object(triangle(vertex_2d(3.0, 1.0), vertex_2d(4.0, 0.0), vertex_2d(2.0, 0.0), my_param2.get_material("Air")));
+
+
+	my_param2.print_summary();
+
+
+
+
 	// test stl reader
 	mesh_model * mytri = mesh_model::read_STL("./testfiles/brain-gear.stl");
-
 	delete mytri;
 
 }
