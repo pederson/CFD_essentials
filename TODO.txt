@@ -1,5 +1,12 @@
 TODO:
 
+- Shading and Light source for mesh model viewer
+- Support for adding physical properties with a mesh
+- Create getters and setters for everything
+- support for cylindrical and polar coordinates
+- Class for saving simulation output
+- Create separate Static Mesh and Mutable Mesh classes
+
 - Doxygen comments for everything
 X - Mesh Class
 X - Visualizer

@@ -164,6 +164,7 @@ public:
 
 protected:
 	void onRender();
+
 	bool MainLoop();
 	void onExit();
 
@@ -193,6 +194,7 @@ protected:
 	GLuint normalbuffer, num_normals;
 
 	void onRender();
+	void onShaders();
 	bool MainLoop();
 	void onExit();
 

@@ -735,13 +735,13 @@ mesh_visualixer::mesh_visualixer(){
 	color_ramp = NULL;
 	vertices = NULL;
 	elements = NULL;
-	normals = NULL;
+	//normals = NULL;
 
 	num_vertices = 0;
 	num_per_vertex = 0;
 	num_elements = 0;
 	num_line_elements = 0;
-	num_normals = 0;
+	//num_normals = 0;
 
 	model_centroid[0] = 0.0;
   model_centroid[1] = 0.0;
@@ -760,7 +760,7 @@ mesh_visualixer::~mesh_visualixer(){
 	if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
-	if (normals != NULL) delete[] normals;
+	//if (normals != NULL) delete[] normals;
 }
 
 
@@ -984,10 +984,12 @@ mesh_model_visualixer::mesh_model_visualixer(){
 	color_ramp = NULL;
 	vertices = NULL;
 	elements = NULL;
+	normals = NULL;
 
 	num_vertices = 0;
 	num_per_vertex = 0;
 	num_elements = 0;
+	num_normals = 0;
 
 	model_centroid[0] = 0.0;
   model_centroid[1] = 0.0;
@@ -1006,6 +1008,7 @@ mesh_model_visualixer::~mesh_model_visualixer(){
 	if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
+	if (normals != NULL) delete[] normals;
 }
 
 
@@ -1149,10 +1152,11 @@ void mesh_model_visualixer::onRender(){
 
 
 	// create a normal buffer
+  	if (num_normals > 0){
 	glGenBuffers(1, &normalbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
 	glBufferData(GL_ARRAY_BUFFER, num_normals*sizeof(GLfloat)*3,  normals, GL_STATIC_DRAW);
-
+	}
   //cout << "total elements buffered: " << num_elements * num_per_element<< endl;
   // enable point size specification
   //glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
@@ -1167,7 +1171,7 @@ void mesh_model_visualixer::onRender(){
   return;
 }
 
-void visualixer::onShaders(){
+void mesh_model_visualixer::onShaders(){
 
   // create and compile the vertex shader
   vertexShader = glCreateShader(GL_VERTEX_SHADER);

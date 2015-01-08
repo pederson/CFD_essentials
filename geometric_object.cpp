@@ -4,6 +4,116 @@
 
 using namespace std;
 
+geometric_object_2d::geometric_object_2d(){
+	object_name = "GeometricObject2D";
+}
+
+void geometric_object_2d::print_summary(){
+	cout << "Shape: " << object_name << "  BASE" << endl;
+}
+
+rectangle::rectangle(float width_, float height_, vertex_2d center_, std::vector<double> properties){
+	object_name = "Rectangle";
+	width = width_;
+	height = height_;
+	center = center_;
+	phys_properties = properties;
+}
+
+void rectangle::print_summary(){
+	cout << "\tShape: " << object_name << " width: " << width << " height: " << height << " center: " << center.x << ", " << center.y << endl;
+}
+
+circle::circle(float radius_, vertex_2d center_, std::vector<double> properties){
+	object_name = "Circle";
+	radius = radius_;
+	center = center_;
+	phys_properties = properties;
+}
+
+void circle::print_summary(){
+	cout << "\tShape: " << object_name << " radius: " << radius << " center: " << center.x << ", " << center.y << endl;
+}
+
+ellipse::ellipse(float axis_major, float axis_minor, float rot_angle, vertex_2d center_, std::vector<double> properties){
+	object_name = "Ellipse";
+	axis_maj = axis_major;
+	axis_min = axis_minor;
+	rotation_angle = rot_angle;
+	center = center_;
+	phys_properties = properties;
+}
+
+void circle::print_summary(){
+	cout << "\tShape: " << object_name << " major axis: " << axis_maj << " minor axis: " << axis_min << " rotation angle: " << rotation_angle << " center: " << center.x << ", " << center.y << endl;
+}
+
+triangle::triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, std::vector<double> properties){
+	object_name = "Triangle";
+	v1 = vert1;
+	v2 = vert2;
+	v3 = vert3;
+	phys_properties = properties;
+
+	center.x = (v1.x + v2.x + v3.x)/3.0;
+	center.y = (v1.y + v2.y + v3.y)/3.0;
+}
+
+void triangle::print_summary(){
+	cout << "\tShape: " << object_name << " vertex1: " << v1.x << ", " << v1.y << " vertex2: " << v2.x << ", " << v2.y << " vertex3: " << v3.x << ", " << v3.y << " center: " << center.x << ", " << center.y << endl;
+}
+
+polygon::polygon(std::vector<vertex_2d> verts, std::vector<double> properties){
+	object_name = "Polygon";
+	vertices = verts;
+
+	center.x = 0.0;
+	center.y = 0.0;
+	for (auto i=0; i<vertices.size(); i++){
+		center.x += vertices.at(i).x;
+		center.y += vertices.at(i).y;
+	}
+	center.x /= vertices.size();
+	center.y /= vertices.size();
+
+	phys_properties = properties;
+}
+
+void polygon::print_summary(){
+	cout << "\tShape: " << object_name << " # vertices: " << vertices.size() << endl;
+}
+
+parametric_model_2d::parametric_model_2d(){
+	model_name = "DefaultModelName";
+}
+
+void parametric_model_2d::print_summary(){
+	cout << "Model Name: " << model_name << endl;
+	for (auto i=0; i<ordered_object_tree.size(); i++){
+		ordered_object_tree.at(i).print_summary();
+	}
+	return;
+}
+
+void parametric_model_2d::set_model_name(std::string mname){
+	model_name = mname;
+	return;
+}
+
+void parametric_model_2d::add_physical_property(std::string property_name){
+	phys_property_names.push_back(property_name);
+}
+
+void parametric_model_2d::add_material(std::string material_name, std::vector<double> phys_props){
+
+}
+
+void parametric_model_2d::add_object(geometric_object_2d new_object){
+	ordered_object_tree.push_back(new_object);
+}
+
+
+//************************************************************************
 mesh_model::mesh_model(){
 	vertices = NULL;
 	normals = NULL;

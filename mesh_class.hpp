@@ -7,6 +7,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <string>
 
 enum MeshType{REGULAR=0, UNSTRUCTURED_TRI=1, UNSTRUCTURED_QUAD=2};
 
@@ -25,9 +26,8 @@ public:
 
   unsigned int core_group;
 
-  // physical properties
-  double epsilon; // relative dielectric constant
-  double mu; // relative permittivity constant
+  // container for physical properties
+  std::vector<double> phys_properties;
 
   void print_summary();
 
@@ -65,15 +65,6 @@ public:
   void set_num_dims(unsigned int ndims);
   unsigned int get_num_nodes(){return mesh_nodes.size();};
   void set_num_nodes(unsigned int number_of_nodes);
-  void set_offsets(double x_off, double y_off = 0, double z_off = 0);
-
-  double get_offset_x(){return x_offset;};
-  double get_offset_y(){return y_offset;};
-  double get_offset_z(){return z_offset;};
-
-  void set_offset_x(double offset_x);
-  void set_offset_y(double offset_y);
-  void set_offset_z(double offset_z);
 
   double get_xmin(){return xmin;};
   void set_xmin(double x_min);
@@ -95,6 +86,11 @@ public:
   void add_node(Node * new_node); // add node and add neighbor connections
   void remove_node(unsigned int key); // remove node and delete neighbor connections
 
+  // property interaction
+  void add_phys_property(std::string property_name);
+  //void set_phys_property(std::string property_name, double property_value);
+  unsigned int get_phys_property_position(std::string property_name);
+
 
   // grid generation and refinement
   static Mesh * create_regular_grid(double res, unsigned int num_nodes_x, unsigned int num_nodes_y = 1, 
@@ -109,7 +105,6 @@ private:
   // auxillary information
   MeshType mesh_type;
   unsigned int num_dims;
-  double x_offset, y_offset, z_offset;
   double xmin, xmax, ymin, ymax, zmin, zmax;
 
   // nodes and keys
@@ -117,7 +112,7 @@ private:
   std::map<unsigned int, Node *> mesh_nodes; // contains pointers to Node structures as a list (so that the mesh is refinable)
 
   // physical properties on the mesh
-  //std::vector<std::string> phys_properties;
+  std::vector<std::string> phys_property_names; // the name position in this vector corresponds with the position of the property value in the node
 };
 
 

@@ -18,8 +18,6 @@ Node::Node(){
 
   boundary = false;
   core_group = 0;
-  epsilon = 1.0;
-  mu = 1.0;
 }
 
 Node::~Node(){
@@ -44,10 +42,6 @@ void Node::print_summary(){
 //******************************************************************************************************
 
 Mesh::Mesh(){
-  x_offset = 0;
-  y_offset = 0;
-  z_offset = 0;
-
   xmin = 0;
   xmax = 0;
   ymin = 0;
@@ -84,9 +78,9 @@ void Mesh::print_summary(){
   cout << "  num_dims: " << num_dims << endl;
   cout << "  last key: " << node_keys.back() << endl;
   cout << "  num_nodes: " << node_keys.size() << endl;
-  cout << "  x extents: [" << xmin + x_offset << ", " << xmax + x_offset << "]" << endl;
-  cout << "  y extents: [" << ymin + y_offset << ", " << ymax + y_offset << "]" << endl;
-  cout << "  z extents: [" << zmin + z_offset << ", " << zmax + z_offset << "]" << endl;
+  cout << "  x extents: [" << xmin << ", " << xmax << "]" << endl;
+  cout << "  y extents: [" << ymin << ", " << ymax << "]" << endl;
+  cout << "  z extents: [" << zmin << ", " << zmax << "]" << endl;
 
   return;
 }
@@ -160,12 +154,14 @@ void Mesh::set_num_nodes(unsigned int number_of_nodes){
   return;
 }
 
+/*
 void Mesh::set_offsets(double x_off, double y_off, double z_off){
   x_offset = x_off;
   y_offset = y_off;
   z_offset = z_off;
   return;
 }
+*/
 
 void Mesh::set_xmin(double x_min){
   xmin = x_min;
@@ -285,6 +281,28 @@ void Mesh::remove_node(unsigned int key){
 
   return;
 }
+
+void Mesh::add_phys_property(string property_name){
+  // add property to the list
+  phys_property_names.push_back(property_name);
+
+  // make a placeholder in all of the nodes for the new property
+  for (auto i=0; i<node_keys.size(); i++){
+    mesh_nodes.at(node_keys.at(i))->phys_properties.push_back(0.0);
+  }
+
+  return;
+}
+
+unsigned int Mesh::get_phys_property_position(string property_name){
+  for (auto i=0; i<phys_property_names.size(); i++){
+    if (property_name.compare(phys_property_names.at(i))==0) return i;
+  }
+
+  cout << property_name << " is not an available property!" << endl;
+  throw -1;
+}
+
 
 /************************************************************************************//**
  * \brief Create a 1d, 2d, or 3d regular grid
