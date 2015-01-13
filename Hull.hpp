@@ -69,6 +69,8 @@ private:
   static int swap(Point &p1, Point &p2);
   static int orientation(Point p, Point q, Point r);
   static int compare(const void *vp1, const void *vp2);
+  static bool lines_intersect_query(Point p1, Point q1, Point p2, Point q2);
+  static bool on_segment_query(Point p, Point q, Point r);
 
 };
 

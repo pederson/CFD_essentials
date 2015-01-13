@@ -173,6 +173,42 @@ void Hull::construct_convex(double * x, double * y, unsigned int numpoints){
   return;
 }
 
+bool Hull::contains_point(Point p)
+{
+    // There must be at least 3 vertices in polygon[]
+    if (hull_points.size() < 3){
+      cout << "WARNING: hull is less than 3 points" << endl;
+      return false;
+    }
+ 
+    // Create a point for line segment from p to infinite
+    Point extreme = {xmax+100000, p.y};
+ 
+    // Count intersections of the above line with sides of hull
+    unsigned int count = 0, i = 0;
+    do
+    {
+        unsigned int next = (i+1)%hull_points.size();
+ 
+        // Check if the line segment from 'p' to 'extreme' intersects
+        // with the line segment from 'hull[i]' to 'hull[next]'
+        if (lines_intersect_query(hull_points.at(i), hull_points.at(next), p, extreme))
+        {
+            // If the point 'p' is colinear with line segment 'i-next',
+            // then check if it lies on segment. If it lies, return true,
+            // otherwise false
+            if (orientation(hull_points.at(i), p, hull_points.at(next)) == 0)
+               return on_segment_query(hull_points.at(i), p, hull_points.at(next));
+ 
+            count++;
+        }
+        i = next;
+    } while (i != 0);
+ 
+    // Return true if count is odd, false otherwise
+    return count&1;  // Same as (count%2 == 1)
+}
+
 Point Hull::next_to_top(stack<Point> &S){
   //cout << "about to do next to top" ;
   Point p = S.top();
@@ -216,6 +252,43 @@ int Hull::compare(const void *vp1, const void *vp2){
   return (o == 2)? -1: 1;
 }
 
+bool Hull::on_segment_query(Point p, Point q, Point r)
+{
+    if (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) &&
+            q.y <= max(p.y, r.y) && q.y >= min(p.y, r.y))
+        return true;
+    return false;
+}
+
+bool Hull::lines_intersect_query(Point p1, Point q1, Point p2, Point q2)
+{
+    // Find the four orientations needed for general and
+    // special cases
+    int o1 = orientation(p1, q1, p2);
+    int o2 = orientation(p1, q1, q2);
+    int o3 = orientation(p2, q2, p1);
+    int o4 = orientation(p2, q2, q1);
+ 
+    // General case
+    if (o1 != o2 && o3 != o4)
+        return true;
+ 
+    // Special Cases
+    // p1, q1 and p2 are colinear and p2 lies on segment p1q1
+    if (o1 == 0 && on_segment_query(p1, p2, q1)) return true;
+ 
+    // p1, q1 and p2 are colinear and q2 lies on segment p1q1
+    if (o2 == 0 && on_segment_query(p1, q2, q1)) return true;
+ 
+    // p2, q2 and p1 are colinear and p1 lies on segment p2q2
+    if (o3 == 0 && on_segment_query(p2, p1, q2)) return true;
+ 
+     // p2, q2 and q1 are colinear and q1 lies on segment p2q2
+    if (o4 == 0 && on_segment_query(p2, q1, q2)) return true;
+ 
+    return false; // Doesn't fall in any of the above cases
+}
+
 
 #ifdef _TEST_
 
@@ -245,9 +318,13 @@ int main(int argc, char * argv[]){
 
   cout << "constructed the hull" << endl;
 
-
   // output summary
   testhull->print_summary();
+
+  // test the intersect function
+  cout << "hull contains (0.5, 0.5)? " << (testhull->contains_point({0.5, 0.5})? "yup!" : "no :X") << endl;
+  cout << "hull contains (-1.0, 0.5)? " << (testhull->contains_point({-1.0, 0.5})? "yup!" : "no :X") << endl;
+  cout << "hull contains (0, 0)? " << (testhull->contains_point({0.0, 0.0})? "yup!" : "no :X") << endl;
 
   //for (unsigned int i=0; i<testhull->hull_points.size(); i++) testhull->hull_points[i].print();
 
