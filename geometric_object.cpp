@@ -1,6 +1,6 @@
 #include "geometric_object.hpp"
 
-#define _TEST_
+//#define _TEST_
 using namespace std;
 
 geometric_object_2d::geometric_object_2d(){
@@ -8,39 +8,66 @@ geometric_object_2d::geometric_object_2d(){
 }
 
 void geometric_object_2d::print_summary(){
-	cout << "Shape: " << object_name << "  BASE" << endl;
+	//cout << "printing summary" << flush;
+	cout << "Shape: " << object_name << "   Center: (" << center.x << ", " << center.y << ")" ;
+	for (auto i=0; i<parameters.size(); i++) cout << "   " << parameter_names.at(i) << ": " << parameters.at(parameter_names.at(i));
+	cout << endl;
 }
 
-rectangle::rectangle(float width_, float height_, vertex_2d center_, std::vector<double> properties){
+rectangle::rectangle(double width_, double height_, vertex_2d center_, std::vector<double> properties){
+	// common parameters
 	object_name = "Rectangle";
-	width = width_;
-	height = height_;
 	center = center_;
 	phys_properties = properties;
+
+	// rectangle specific parameters
+	parameter_names.push_back("Width");
+	parameters["Width"] = width_;
+	parameter_names.push_back("Height");
+	parameters["Height"] = height_;
+	width = width_;
+	height = height_;
+
+	
 }
 
 void rectangle::print_summary(){
 	cout << "\tShape: " << object_name << " width: " << width << " height: " << height << " center: " << center.x << ", " << center.y << endl;
 }
 
-circle::circle(float radius_, vertex_2d center_, std::vector<double> properties){
-	object_name = "Circle";
+circle::circle(double radius_, vertex_2d center_, std::vector<double> properties){
 	radius = radius_;
+
+	// common parameters
+	object_name = "Circle";
 	center = center_;
 	phys_properties = properties;
+
+	// circle specific parameters
+	parameter_names.push_back("Radius");
+	parameters["Radius"] = radius_;
 }
 
 void circle::print_summary(){
 	cout << "\tShape: " << object_name << " radius: " << radius << " center: " << center.x << ", " << center.y << endl;
 }
 
-ellipse::ellipse(float axis_major, float axis_minor, float rot_angle, vertex_2d center_, std::vector<double> properties){
+ellipse::ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, std::vector<double> properties){
+	// common parameters
 	object_name = "Ellipse";
+	center = center_;
+	phys_properties = properties;
+
+	// ellipse specific parameters
+	parameter_names.push_back("Axis_Major");
+	parameters["Axis_Major"] = axis_major;
+	parameter_names.push_back("Axis_Minor");
+	parameters["Axis_Minor"] = axis_minor;
+	parameter_names.push_back("Rotation_Angle");
+	parameters["Rotation_Angle"] = rot_angle;
 	axis_maj = axis_major;
 	axis_min = axis_minor;
 	rotation_angle = rot_angle;
-	center = center_;
-	phys_properties = properties;
 }
 
 void ellipse::print_summary(){
@@ -48,14 +75,20 @@ void ellipse::print_summary(){
 }
 
 triangle::triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, std::vector<double> properties){
+	// common parameters
 	object_name = "Triangle";
+	phys_properties = properties;
+
+	vertices.push_back(vert1);
+	vertices.push_back(vert2);
+	vertices.push_back(vert3);
+
 	v1 = vert1;
 	v2 = vert2;
 	v3 = vert3;
-	phys_properties = properties;
 
-	center.x = (v1.x + v2.x + v3.x)/3.0;
-	center.y = (v1.y + v2.y + v3.y)/3.0;
+	center.x = (vert1.x + vert2.x + vert3.x)/3.0;
+	center.y = (vert1.y + vert2.y + vert3.y)/3.0;
 }
 
 void triangle::print_summary(){
@@ -63,7 +96,10 @@ void triangle::print_summary(){
 }
 
 polygon::polygon(std::vector<vertex_2d> verts, std::vector<double> properties){
+	// common parameters
 	object_name = "Polygon";
+
+	// polygon specific parameters
 	vertices = verts;
 
 	center.x = 0.0;
@@ -90,6 +126,9 @@ void parametric_model_2d::print_summary(){
 	cout << "Model Name: " << model_name << endl;
 	for (auto i=0; i<ordered_object_tree.size(); i++){
 		ordered_object_tree.at(i).print_summary();
+		//if (ordered_object_tree.at(i).get_object_name.compare("Circle")){
+		//	cout << "Circle radius: " << endl;//<< ordered_object_tree.at(i).radius << endl;
+		//}
 	}
 	return;
 }
@@ -223,16 +262,24 @@ int main(int argc, char * argv[]){
 	my_param2.add_physical_property("Mu_rel");
 	my_param2.add_material("Air", {1.0, 1.0});
 	my_param2.add_material("Dielectric", {5.0, 2.0});
+	cout << "Finished setting materials" << endl;
 
 	// test rectangle
+	cout << "Testing rectangle..." ;
 	my_param2.add_object(rectangle(1.0, 2.0, vertex_2d(0.0, 0.0), my_param2.get_material("Air")));
+	cout << "Success!" << endl;
 	// test circle
+	cout << "Testing circle..." ;
 	my_param2.add_object(circle(0.75, vertex_2d(0.5, 1.0), my_param2.get_material("Dielectric")));
+	cout << "Success!" << endl;
 	// test ellipse
+	cout << "Testing ellipse..." ;
 	my_param2.add_object(ellipse(0.3, 0.2, 0.0, vertex_2d(-1.0, -1.0), my_param2.get_material("Dielectric")));
+	cout << "Success!" << endl;
 	// test triangle
+	cout << "Testing triangle..." ;
 	my_param2.add_object(triangle(vertex_2d(3.0, 1.0), vertex_2d(4.0, 0.0), vertex_2d(2.0, 0.0), my_param2.get_material("Air")));
-
+	cout << "Success!" << endl;
 
 	my_param2.print_summary();
 

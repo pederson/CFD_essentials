@@ -6,6 +6,7 @@ TODO:
 - support for cylindrical and polar coordinates
 - Class for saving simulation output
 - Create separate Static Mesh and Mutable Mesh classes
+- Convert everything that uses char* to use std::string instead
 
 - Doxygen comments for everything
 X - Mesh Class

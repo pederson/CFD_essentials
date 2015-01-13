@@ -24,9 +24,9 @@ enum class Material : char{
 */
 struct vertex_2d{
 	vertex_2d(){};
-	vertex_2d(float _x, float _y){x = _x; y = _y; return;};
-	float x;
-	float y;
+	vertex_2d(double _x, double _y){x = _x; y = _y; return;};
+	double x;
+	double y;
 };
 
 //********************************** 2D GEOMETRIES ***************************
@@ -37,59 +37,69 @@ public:
 
 	virtual void print_summary();
 
+	std::string get_object_name(){return object_name;};
+	std::vector<double> get_phys_properties(){return phys_properties;};
+	vertex_2d get_center(){return center;};
 	//void translate(float delta_x, float delta_y);
 	//void set_phys_property(std::string property_name, double value);
 
 protected:
+
+	// common data for all derived classes
 	std::string object_name;
 	vertex_2d center;
+	std::vector<double> phys_properties;
 
-	std::vector<double>phys_properties;
+	// container for derived class specific data
+	std::vector<std::string> parameter_names;
+	std::map<std::string, double> parameters;
 
+	// polygons only 
+	std::vector<vertex_2d> vertices;
 };
 
 class rectangle : public geometric_object_2d{
 public:
-	rectangle(float width_, float height_);
-	rectangle(float width_, float height_, vertex_2d center_);
-	rectangle(float width_, float height_, vertex_2d center_, Material mat);
-	rectangle(float width_, float height_, vertex_2d center_, std::vector<double> properties);
+	rectangle(double width_, double height_);
+	rectangle(double width_, double height_, vertex_2d center_);
+	rectangle(double width_, double height_, vertex_2d center_, Material mat);
+	rectangle(double width_, double height_, vertex_2d center_, std::vector<double> properties);
 	//~rectangle();
 
 	void print_summary();
 
 protected:
-	float width, height;
+	double width, height;
 
 };
 
 class circle : public geometric_object_2d{
 public:
-	circle(float radius_);
-	circle(float radius_, vertex_2d center_);
-	circle(float radius_, vertex_2d center_, Material mat);
-	circle(float radius_, vertex_2d center_, std::vector<double> properties);
+	circle(double radius_);
+	circle(double radius_, vertex_2d center_);
+	circle(double radius_, vertex_2d center_, Material mat);
+	circle(double radius_, vertex_2d center_, std::vector<double> properties);
 	//~circle();
 
 	void print_summary();
 
 protected:
-	float radius;
+	double radius;
 
 };
 
 class ellipse : public geometric_object_2d{
 public:
-	ellipse(float axis_major, float axis_minor, float rot_angle=0.0);
-	ellipse(float axis_major, float axis_minor, float rot_angle, vertex_2d center_);
-	ellipse(float axis_major, float axis_minor, float rot_angle, vertex_2d center_, Material mat);
-	ellipse(float axis_major, float axis_minor, float rot_angle, vertex_2d center_, std::vector<double> properties);
+	ellipse(double axis_major, double axis_minor, double rot_angle=0.0);
+	ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_);
+	ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, Material mat);
+	ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, std::vector<double> properties);
 	//~ellipse();
 
 	void print_summary();
 
 protected:
-	float axis_maj, axis_min, rotation_angle;
+	double axis_maj, axis_min, rotation_angle;
 
 };
 
