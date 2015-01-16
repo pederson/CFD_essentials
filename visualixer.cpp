@@ -1422,16 +1422,17 @@ int main(int argc, char * argv[]){
 	my_param2.add_physical_property("Mu_rel");
 	my_param2.add_material("Air", {1.0, 1.0});
 	my_param2.add_material("Dielectric", {5.0, 2.0});
-	my_param2.add_object(circle(0.75, vertex_2d(0.0, 0.0), my_param2.get_material("Dielectric")));
-	my_param2.print_summary();
-	paramesh = build_simple_mesh_2d(&my_param2, 0.1, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
-	cout << "built the simple mesh" << endl;
+	my_param2.add_material("Dielectric2", {9.0, 2.0});
+	my_param2.add_object(rectangle(0.4, 0.2, vertex_2d(0.0, 0.0), my_param2.get_material("Dielectric")));
+	my_param2.add_object(circle(0.05, vertex_2d(0.2, 0.1), my_param2.get_material("Dielectric2")));
+	my_param2.add_object(circle(0.05, vertex_2d(-0.2, 0.1), my_param2.get_material("Dielectric2")));
+	paramesh = build_simple_mesh_2d(&my_param2, 0.02, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
 	paravis->add_mesh(paramesh);
-	paravis->set_color_ramp(CRamp::DIVERGENT_2);
+	paravis->set_color_ramp(CRamp::DIVERGENT_1);
 	paravis->set_colorby(paramesh->get_phys_property_ptr("Epsilon_rel"));
 	paravis->run();
 	delete paravis;
-	//delete my_param2;
+	delete paramesh;
 
   // test the mesh model viewer
   mesh_model_visualixer * mymmodvis = new mesh_model_visualixer();
