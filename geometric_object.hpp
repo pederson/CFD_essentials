@@ -1,5 +1,5 @@
-#ifndef GEOMETRIC_OBJECT_H
-#define GEOMETRIC_OBJECT_H
+#ifndef _GEOMETRIC_OBJECT_H
+#define _GEOMETRIC_OBJECT_H
 
 #include <fstream>
 #include <iostream>
@@ -40,6 +40,8 @@ public:
 	std::string get_object_name(){return object_name;};
 	std::vector<double> get_phys_properties(){return phys_properties;};
 	vertex_2d get_center(){return center;};
+	std::map<std::string, double> get_parameters(){return parameters;};
+	std::vector<vertex_2d> get_vertices(){return vertices;};
 	//void translate(float delta_x, float delta_y);
 	//void set_phys_property(std::string property_name, double value);
 
@@ -153,6 +155,9 @@ public:
 	void add_physical_property(std::string property_name);
 	void add_material(std::string material_name, std::vector<double> phys_props);
 	void add_object(geometric_object_2d new_object);
+
+	std::vector<geometric_object_2d> get_object_tree(){return ordered_object_tree;};
+	std::vector<std::string> get_phys_property_names(){return phys_property_names;};
 
 protected:
 	std::string model_name;

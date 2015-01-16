@@ -252,6 +252,8 @@ mesh_model * mesh_model::read_STL(char * filename, unsigned int byte_offset){
 
 #ifdef _TEST_
 
+// to compile: g++ -std=c++11 geometric_object.cpp -o geometric_object_test
+
 int main(int argc, char * argv[]){
 	// declare vars
 

@@ -36,6 +36,7 @@ class Hull{
 public:
   // constructor
   Hull();
+  Hull(std::vector<Point> ordered_points);
 
   // destructor
   ~Hull();
@@ -74,6 +75,6 @@ private:
 
 };
 
-Point p0; // global used for sorting
+extern Point p0; // global used for sorting
 
 #endif

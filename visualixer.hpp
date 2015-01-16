@@ -55,7 +55,8 @@ public:
 	virtual void set_window_name(char * w_name);
 
 	virtual void set_color_ramp(CRamp ramp_name);
-  //virtual void set_color_by(float * colorby); // set a non-z color by array
+	virtual void set_colorby(float * color_by); // set a color by array
+	//virtual void set_color_by(std::string property_name); // set color by array 
   //virtual void set_custom_colors(rgb * colors);
 	//void set_lock_rotation(bool lock_mode);
 
@@ -70,8 +71,8 @@ protected:
 	char * window_name;
 	GLfloat * vertices;
 	GLuint * elements;
-	//rgb * colors;
-  ColorRamp * color_ramp;
+  	ColorRamp color_ramp;
+  	float * colorby, colorby_max, colorby_min; // one per vertex
 	float model_centroid[3]; // from [model_min, model_max]
 	float xmin, xmax, ymin, ymax, zmin, zmax;
 	unsigned int num_vertices, num_per_vertex, num_vertex_points;
@@ -121,6 +122,7 @@ protected:
 	virtual const GLchar * VertexShaderSource();
 	virtual const GLchar * FragmentShaderSource();
 	virtual void onInit();
+	virtual void onColors();
 	virtual void onRender();
 	virtual void onShaders();
 	virtual	bool MainLoop();
@@ -192,6 +194,9 @@ protected:
 
 	GLfloat * normals;
 	GLuint normalbuffer, num_normals;
+
+	const GLchar * VertexShaderSource();
+	const GLchar * FragmentShaderSource();
 
 	void onRender();
 	void onShaders();

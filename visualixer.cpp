@@ -21,7 +21,8 @@ visualixer::visualixer(){
 	visualixer_active = false;
 	window_name = "Visualixer";
 	lock_rotation = false;
-	color_ramp = NULL;
+	//color_ramp = NULL;
+	colorby = NULL;
 	vertices = NULL;
 	elements = NULL;
 
@@ -43,7 +44,7 @@ visualixer::~visualixer(){
 	}
 
 	delete[] window_name;
-	if (color_ramp != NULL) delete[] color_ramp;
+	//if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
 }
@@ -54,24 +55,24 @@ void visualixer::set_window_name(char * w_name){
 }
 
 void visualixer::set_color_ramp(CRamp ramp_name){
-  if (color_ramp == NULL) {
-    cout << "color ramp not instantiated yet" << endl;
-    return;
-  }
+  color_ramp.set_ramp(ramp_name);
+}
 
-  color_ramp->set_ramp(ramp_name);
-  rgb ptcolor;
-  for (unsigned int i=0; i<num_vertices; i++){
-    ptcolor = color_ramp->get_ramp_color((vertices[i*num_per_vertex+2]-zmin)/(zmax - zmin));
-    vertices[i*num_per_vertex + 3] = ptcolor.R;
-    vertices[i*num_per_vertex + 4] = ptcolor.G;
-    vertices[i*num_per_vertex + 5] = ptcolor.B;
-  }
-  return;
+void visualixer::set_colorby(float * color_by){
+	colorby = color_by;
+
+	colorby_max = colorby[0]; colorby_min = colorby[0];
+	for (auto i=1; i<num_vertices; i++){
+		if (colorby[i] > colorby_max) colorby_max = colorby[i];
+		if (colorby[i] < colorby_min) colorby_min = colorby[i];
+	}
+
+	return;
 }
 
 void visualixer::run(){
 	onInit();
+	onColors();
 	onRender();
 	onShaders();
 	MainLoop();
@@ -360,6 +361,22 @@ void visualixer::onInit(){
   glfwSetCursorPosCallback(window_ptr, sCursorPosition);
 }
 
+void visualixer::onColors(){
+	if (colorby == NULL) return;
+	if (colorby_max - colorby_min == 0.0) return;
+	// modify the vertex array to incorporate user-defined colors
+	rgb ptcolor;
+
+	for (unsigned int i=0; i<num_vertices; i++){
+		ptcolor = color_ramp.get_ramp_color((colorby[i]-colorby_min)/(colorby_max - colorby_min));
+		vertices[i*num_per_vertex + 3] = ptcolor.R;
+		vertices[i*num_per_vertex + 4] = ptcolor.G;
+		vertices[i*num_per_vertex + 5] = ptcolor.B;
+	}
+
+	return;
+}
+
 void visualixer::onRender(){
 	// Create Vertex Array Object
   glGenVertexArrays(1, &vao);
@@ -574,7 +591,8 @@ cloud_visualixer::cloud_visualixer(){
 	visualixer_active = false;
 	window_name = "Cloud Visualixer";
 	lock_rotation = false;
-	color_ramp = NULL;
+	//color_ramp = NULL;
+	colorby = NULL;
 	vertices = NULL;
 	elements = NULL;
 
@@ -596,7 +614,7 @@ cloud_visualixer::~cloud_visualixer(){
 	}
 
 	delete[] window_name;
-	if (color_ramp != NULL) delete[] color_ramp;
+	//if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
 }
@@ -649,8 +667,6 @@ void cloud_visualixer::set_test_case(){
 }
 
 void cloud_visualixer::add_cloud(PointCloud * cloud){
-  color_ramp = new ColorRamp();
-
 	num_vertices = cloud->pointcount;
 	num_per_vertex = 6;
 	num_vertex_points = 3;
@@ -677,12 +693,12 @@ void cloud_visualixer::add_cloud(PointCloud * cloud){
     }
   }
   else {
-    rgb ptcolor;
+    //rgb ptcolor;
     for (unsigned int i=0; i<cloud->pointcount; i++){
-      ptcolor = color_ramp->get_ramp_color((cloud->z[i]-cloud->zmin)/(cloud->zmax - cloud->zmin));
-      vertices[i*num_per_vertex + 3] = ptcolor.R;
-      vertices[i*num_per_vertex + 4] = ptcolor.G;
-      vertices[i*num_per_vertex + 5] = ptcolor.B;
+      //ptcolor = color_ramp.get_ramp_color((cloud->z[i]-cloud->zmin)/(cloud->zmax - cloud->zmin));
+      vertices[i*num_per_vertex + 3] = 0.0;
+      vertices[i*num_per_vertex + 4] = 0.0;
+      vertices[i*num_per_vertex + 5] = 1.0;
     }
   }
 
@@ -695,6 +711,15 @@ void cloud_visualixer::add_cloud(PointCloud * cloud){
 	xmin = cloud->xmin;
 	ymin = cloud->ymin;
 	zmin = cloud->zmin;
+
+	// default color by Z
+	colorby = new float[cloud->pointcount];
+	for (auto i=0; i<cloud->pointcount; i++){
+		colorby[i] = cloud->z[i];
+	}
+	colorby_max = zmax;
+	colorby_min = zmin;
+
 	return;
 }
 
@@ -732,7 +757,8 @@ mesh_visualixer::mesh_visualixer(){
 	visualixer_active = false;
 	window_name = "Mesh Visualixer";
 	lock_rotation = false;
-	color_ramp = NULL;
+	//color_ramp = NULL;
+	colorby = NULL;
 	vertices = NULL;
 	elements = NULL;
 	//normals = NULL;
@@ -757,7 +783,7 @@ mesh_visualixer::~mesh_visualixer(){
 	}
 
 	delete[] window_name;
-	if (color_ramp != NULL) delete[] color_ramp;
+	//if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
 	//if (normals != NULL) delete[] normals;
@@ -981,7 +1007,8 @@ mesh_model_visualixer::mesh_model_visualixer(){
 	visualixer_active = false;
 	window_name = "Mesh Model Visualixer";
 	lock_rotation = false;
-	color_ramp = NULL;
+	//color_ramp = NULL;
+	colorby = NULL;
 	vertices = NULL;
 	elements = NULL;
 	normals = NULL;
@@ -1005,7 +1032,7 @@ mesh_model_visualixer::~mesh_model_visualixer(){
 	}
 
 	delete[] window_name;
-	if (color_ramp != NULL) delete[] color_ramp;
+	//if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
 	if (normals != NULL) delete[] normals;
@@ -1127,6 +1154,38 @@ void mesh_model_visualixer::set_test_case(){
 	zmin = 0;
 
 	return;
+}
+
+const GLchar * mesh_model_visualixer::VertexShaderSource(){
+	// vertex shader sources
+	const GLchar* vertexSource =
+	    "#version 140\n"
+	    "in vec3 position;"
+	    "in vec3 color;"
+	    "in vec3 normal;"
+	    "out vec3 Color;"
+	    "uniform mat4 model;"
+	    "uniform mat4 view;"
+    	"uniform mat4 proj;"
+	    "void main() {"
+	    "   Color = color;"
+      "   gl_PointSize = 2.0;"
+	    "   gl_Position = proj*view*model*vec4(position, 1.0);"
+	    "}";
+	return vertexSource;
+
+}
+
+const GLchar * mesh_model_visualixer::FragmentShaderSource(){
+  // fragment shader source
+	const GLchar* fragmentSource =
+    "#version 140\n"
+    "in vec3 Color;"
+    "out vec4 outColor;"
+    "void main() {"
+    "   outColor = vec4(Color, 1.0);"
+    "}";
+  return fragmentSource;
 }
 
 void mesh_model_visualixer::onRender(){
@@ -1318,6 +1377,10 @@ void mesh_model_visualixer::onExit(){
 //*************************************** TEST SECTION *******************************************
 //*************************************** TEST SECTION *******************************************
 //*************************************** TEST SECTION *******************************************
+
+// use cmake to compile
+#include "model2mesh.hpp"
+
 int main(int argc, char * argv[]){
 	// declare vars
 
@@ -1349,6 +1412,26 @@ int main(int argc, char * argv[]){
 	mymvis->add_mesh(mesh);
 	mymvis->run();
 	delete mymvis;
+
+	// test a mesh viewer made from a parametric model
+	mesh_visualixer * paravis = new mesh_visualixer();
+	parametric_model_2d my_param2;
+	Mesh * paramesh;
+	my_param2.set_model_name("Display Test Circle");
+	my_param2.add_physical_property("Epsilon_rel");
+	my_param2.add_physical_property("Mu_rel");
+	my_param2.add_material("Air", {1.0, 1.0});
+	my_param2.add_material("Dielectric", {5.0, 2.0});
+	my_param2.add_object(circle(0.75, vertex_2d(0.0, 0.0), my_param2.get_material("Dielectric")));
+	my_param2.print_summary();
+	paramesh = build_simple_mesh_2d(&my_param2, 0.1, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
+	cout << "built the simple mesh" << endl;
+	paravis->add_mesh(paramesh);
+	paravis->set_color_ramp(CRamp::DIVERGENT_2);
+	paravis->set_colorby(paramesh->get_phys_property_ptr("Epsilon_rel"));
+	paravis->run();
+	delete paravis;
+	//delete my_param2;
 
   // test the mesh model viewer
   mesh_model_visualixer * mymmodvis = new mesh_model_visualixer();

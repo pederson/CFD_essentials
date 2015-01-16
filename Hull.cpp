@@ -4,6 +4,8 @@
 
 using namespace std;
 
+Point p0;
+
 Point::Point(){
 
 }
@@ -38,6 +40,24 @@ void Point::print(){
 
 Hull::Hull(){
 
+}
+
+Hull::Hull(std::vector<Point> ordered_points){
+
+  if (ordered_points.size() < 3){
+    cout << "ERROR: need more than 3 points for a hull" << endl;
+    throw -1;
+  }
+
+  type = CONCAVE;
+
+  hull_points = ordered_points;
+
+  // check the direction
+  direction = CCW;
+
+  // calculate the max and min
+  calc_extents();
 }
 
   // destructor
@@ -178,6 +198,11 @@ bool Hull::contains_point(Point p)
     // There must be at least 3 vertices in polygon[]
     if (hull_points.size() < 3){
       cout << "WARNING: hull is less than 3 points" << endl;
+      return false;
+    }
+
+    // Check if the point is outside the min/max
+    if (p.x > xmax || p.x < xmin || p.y > ymax || p.y < ymin){
       return false;
     }
  

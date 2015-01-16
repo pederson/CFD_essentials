@@ -294,6 +294,14 @@ void Mesh::add_phys_property(string property_name){
   return;
 }
 
+void Mesh::set_background_properties(vector<double> properties){
+  for (auto i=0; i<mesh_nodes.size(); i++){
+    mesh_nodes.at(node_keys.at(i))->phys_properties = properties;
+  }
+
+  return;
+}
+
 unsigned int Mesh::get_phys_property_position(string property_name){
   for (auto i=0; i<phys_property_names.size(); i++){
     if (property_name.compare(phys_property_names.at(i))==0) return i;
@@ -301,6 +309,19 @@ unsigned int Mesh::get_phys_property_position(string property_name){
 
   cout << property_name << " is not an available property!" << endl;
   throw -1;
+}
+
+float * Mesh::get_phys_property_ptr(string property_name){
+  float * prop;
+
+  unsigned int pos = get_phys_property_position(property_name);
+
+  prop = new float[mesh_nodes.size()];
+  for (auto i=0; i<mesh_nodes.size(); i++){
+    prop[i] = mesh_nodes.at(node_keys.at(i))->phys_properties.at(pos);
+  }
+
+  return prop;
 }
 
 
@@ -681,11 +702,24 @@ Mesh * Mesh::create_regular_grid(double res, double xmin, double xmax, double ym
   unsigned int num_nodes_x, num_nodes_y, num_nodes_z;
   Mesh * mesh_out;
 
-  num_nodes_x = (unsigned int)((xmax-xmin)/res);
-  num_nodes_y = (unsigned int)((ymax-ymin)/res);
-  num_nodes_z = (unsigned int)((ymax-ymin)/res);
+  num_nodes_x = (unsigned int)((xmax-xmin)/res) + 1;
+  num_nodes_y = (unsigned int)((ymax-ymin)/res) + 1;
+  num_nodes_z = (unsigned int)((zmax-zmin)/res) + 1;
+
+  //cout << "nx: " << num_nodes_x << "  ny: " << num_nodes_y << "  nz: " << num_nodes_z << endl;
 
   mesh_out = create_regular_grid(res, num_nodes_x, num_nodes_y, num_nodes_z);
+
+  // translate to the correct centerpoint
+  Node * nd;
+  for (auto i=0; i<mesh_out->get_num_nodes(); i++){
+    nd = mesh_out->get_node_ptr(mesh_out->get_node_key(i));
+
+    nd->x += xmin;
+    nd->y += ymin;
+    nd->z += zmin;
+  }
+  mesh_out->calc_extents();
 
   return mesh_out;
 }

@@ -60,24 +60,25 @@ public:
 
   // member data accessors
   MeshType get_mesh_type(){return mesh_type;};
-  void set_mesh_type(MeshType type);
   unsigned int get_num_dims(){return num_dims;};
-  void set_num_dims(unsigned int ndims);
   unsigned int get_num_nodes(){return mesh_nodes.size();};
+  void set_mesh_type(MeshType type);
+  void set_num_dims(unsigned int ndims);
   void set_num_nodes(unsigned int number_of_nodes);
 
   double get_xmin(){return xmin;};
-  void set_xmin(double x_min);
   double get_ymin(){return ymin;};
-  void set_ymin(double y_min);
   double get_zmin(){return zmin;};
-  void set_zmin(double z_min);
   double get_xmax(){return xmax;};
-  void set_xmax(double x_max);
   double get_ymax(){return ymax;};
-  void set_ymax(double y_max);
   double get_zmax(){return zmax;};
+  void set_xmin(double x_min);
+  void set_ymin(double y_min);
+  void set_zmin(double z_min);
+  void set_xmax(double x_max);
+  void set_ymax(double y_max);
   void set_zmax(double z_max);
+
 
   // node access and manipulation
   Node * get_node_ptr(unsigned int key);
@@ -90,6 +91,8 @@ public:
   void add_phys_property(std::string property_name);
   //void set_phys_property(std::string property_name, double property_value);
   unsigned int get_phys_property_position(std::string property_name);
+  void set_background_properties(std::vector<double> properties);
+  float * get_phys_property_ptr(std::string property_name);
 
 
   // grid generation and refinement
