@@ -16,9 +16,11 @@
 
 #include <sys/mman.h>
 
+/*
 enum class Material : char{
 	Air, Metal, End_of_List
 };
+*/
 
 /* Make this so that I can sequentially add items on top of eachother 
 */
@@ -62,9 +64,9 @@ protected:
 
 class rectangle : public geometric_object_2d{
 public:
-	rectangle(double width_, double height_);
-	rectangle(double width_, double height_, vertex_2d center_);
-	rectangle(double width_, double height_, vertex_2d center_, Material mat);
+	//rectangle(double width_, double height_);
+	//rectangle(double width_, double height_, vertex_2d center_);
+	//rectangle(double width_, double height_, vertex_2d center_, Material mat);
 	rectangle(double width_, double height_, vertex_2d center_, std::vector<double> properties);
 	//~rectangle();
 
@@ -77,9 +79,9 @@ protected:
 
 class circle : public geometric_object_2d{
 public:
-	circle(double radius_);
-	circle(double radius_, vertex_2d center_);
-	circle(double radius_, vertex_2d center_, Material mat);
+	//circle(double radius_);
+	//circle(double radius_, vertex_2d center_);
+	//circle(double radius_, vertex_2d center_, Material mat);
 	circle(double radius_, vertex_2d center_, std::vector<double> properties);
 	//~circle();
 
@@ -92,9 +94,9 @@ protected:
 
 class ellipse : public geometric_object_2d{
 public:
-	ellipse(double axis_major, double axis_minor, double rot_angle=0.0);
-	ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_);
-	ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, Material mat);
+	//ellipse(double axis_major, double axis_minor, double rot_angle=0.0);
+	//ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_);
+	//ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, Material mat);
 	ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, std::vector<double> properties);
 	//~ellipse();
 
@@ -107,8 +109,8 @@ protected:
 
 class triangle : public geometric_object_2d{
 public:
-	triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3);
-	triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, Material mat);
+	//triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3);
+	//triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, Material mat);
 	triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, std::vector<double> properties);
 	//~triangle();
 
@@ -121,8 +123,8 @@ protected:
 
 class polygon : public geometric_object_2d{
 public:
-	polygon(std::vector<vertex_2d> verts);
-	polygon(std::vector<vertex_2d> verts, Material mat);
+	//polygon(std::vector<vertex_2d> verts);
+	//polygon(std::vector<vertex_2d> verts, Material mat);
 	polygon(std::vector<vertex_2d> verts, std::vector<double> properties);
 	//~polygon();
 

@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <string>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -64,13 +65,16 @@ public:
   PointCloud * subset(bool *keep);
   PointCloud * subset(unsigned int * keep_inds, unsigned int keep_count);
 
-  static PointCloud * read_LAS(char * filename, unsigned int byte_offset=0);
+  static PointCloud * read_LAS(std::string filename, unsigned int byte_offset=0);
+  
+
 
 protected:
 
 private:
 
-  void write_LAS(char * filename);
+  void read_LAS_internal(std::string filename, unsigned int byte_offset=0);
+  void write_LAS(std::string filename);
 
 };
 

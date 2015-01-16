@@ -42,5 +42,21 @@ private:
 
 };
 
+class Color{
+public:
+
+  static rgb Red();
+  static rgb Blue();
+  static rgb Green();
+  static rgb Orange();
+  static rgb Yellow();
+  static rgb Violet();
+  static rgb Pink();
+  static rgb White();
+  static rgb Black();
+  static rgb Brown();
+
+};
+
 
 #endif
