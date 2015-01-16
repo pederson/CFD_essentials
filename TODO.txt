@@ -1,19 +1,23 @@
 TODO:
 
 - Shading and Light source for mesh model viewer
-- Support for adding physical properties with a mesh
 - Create getters and setters for everything
 - support for cylindrical and polar coordinates
 - Class for saving simulation output
 - Create separate Static Mesh and Mutable Mesh classes
 - Convert everything that uses char* to use std::string instead
+- add a ::print_detailed() function to classes for detailed debugging
+- figure out a good way to store base data, optional data, and user-defined data in classes
+	- idea: store it all in raw pointer arrays
+	- access the raw data by a ::.data(std::string field) call
+- make constructors that work with raw data pointers
 
 - Doxygen comments for everything
 X - Mesh Class
 X - Visualizer
 - Equation setter
 - Property setter
-- Geometry setter
+X - Geometry setter
 - Boundary conditions/ Initial Conditions
 - Matrix equation assembler (parallelizable)
 - Matrix equation solver (parallelizable)
