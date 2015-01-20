@@ -60,13 +60,18 @@ Hull::Hull(std::vector<Point> ordered_points){
   calc_extents();
 }
 
+Hull::Hull(double * x, double * y, unsigned int numpoints){
+
+}
+
   // destructor
 Hull::~Hull(){
 
 }
 
-void Hull::print_summary(){
-  cout << "Hull summary:" << endl;
+void Hull::print_summary() const{
+  cout << " " << endl;
+  cout << "************** Hull summary **************" << endl;
   if (hull_points.size() < 1) {
     cout << "Hull is empty!" << endl;
     return;
@@ -79,6 +84,29 @@ void Hull::print_summary(){
   cout << "  pointcount: " << hull_points.size() << endl;
   cout << "  x extents: [" << xmin << ", " << xmax << "]" << endl;
   cout << "  y extents: [" << ymin << ", " << ymax << "]" << endl;
+  cout << "******************************************" << endl;
+  cout << " " << endl;
+
+  return;
+}
+
+void Hull::print_detailed() const{
+  cout << " " << endl;
+  cout << "************** Hull details **************" << endl;
+  if (hull_points.size() < 1) {
+    cout << "Hull is empty!" << endl;
+    return;
+  }
+
+  cout << "  type: ";
+  if (type==CONVEX) cout << "CONVEX" << endl;
+  else if (type==CONCAVE) cout << "CONCAVE" << endl;
+  else cout << "UNKNOWN" << endl;
+  cout << "  pointcount: " << hull_points.size() << endl;
+  cout << "  x extents: [" << xmin << ", " << xmax << "]" << endl;
+  cout << "  y extents: [" << ymin << ", " << ymax << "]" << endl;
+  cout << "******************************************" << endl;
+  cout << " " << endl;
 
   return;
 }
@@ -193,8 +221,7 @@ void Hull::construct_convex(double * x, double * y, unsigned int numpoints){
   return;
 }
 
-bool Hull::contains_point(Point p)
-{
+bool Hull::contains_point(Point p) const{
     // There must be at least 3 vertices in polygon[]
     if (hull_points.size() < 3){
       cout << "WARNING: hull is less than 3 points" << endl;

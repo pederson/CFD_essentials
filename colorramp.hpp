@@ -28,7 +28,7 @@ public:
 
   void cycle_ramp();
   void set_ramp(CRamp ramp_name);
-  rgb get_ramp_color(float norm_value);
+  rgb get_ramp_color(float norm_value) const;
 
 private:
 

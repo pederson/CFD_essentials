@@ -131,7 +131,7 @@ void ColorRamp::set_ramp(CRamp ramp_name){
   return;
 }
 
-rgb ColorRamp::get_ramp_color(float norm_value){
+rgb ColorRamp::get_ramp_color(float norm_value) const{
   rgb out;
 
   if (rgb_interpolation){

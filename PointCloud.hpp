@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <map>
+#include <vector>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -44,41 +46,44 @@ struct rgb48{
 class PointCloud{
 public:
 
-  PointCloud(unsigned int numpts=0);
+  PointCloud(unsigned int numpts);
   ~PointCloud();
 
   // base member data accessors
   unsigned int size() const {return pointcount;};
-  const double * x_ptr() const {return x;};
-  const double * y_ptr() const {return y;};
-  const double * z_ptr() const {return z;};
-  //double x(unsigned int i) {return x[i];};
-  //double y(unsigned int i) {return y[i];};
-  //double z(unsigned int i) {return z[i];};
   double x_max() const {return xmax;};
   double x_min() const {return xmin;};
   double y_max() const {return ymax;};
   double y_min() const {return ymin;};
   double z_max() const {return zmax;};
   double z_min() const {return zmin;};
+  const double * x_ptr() const {return x;};
+  const double * y_ptr() const {return y;};
+  const double * z_ptr() const {return z;};
+  //double x(unsigned int i) {return x[i];};
+  //double y(unsigned int i) {return y[i];};
+  //double z(unsigned int i) {return z[i];};
+  
 
   // optional member data accessors
   const double * gpstime_ptr() const {return gpstime;};
-  const unsigned short * intensity_ptr() {return intensity;};
-  const unsigned char * classification_ptr() {return classification;};
-  const rgb48 * RGB_ptr() {return RGB;};
+  const unsigned short * intensity_ptr() const {return intensity;};
+  const unsigned char * classification_ptr() const {return classification;};
+  const rgb48 * RGB_ptr() const {return RGB;};
 
   // user-defined member data accessors
-  const double * data(std::string field);
+  const double * data(std::string field) const {return extra_data.at(field);};
 
   //// old stuff
   void print_summary() const;
   void print_detailed() const;
 
+  // mutators
   void add_intensity();
   void add_classification();
   void add_gpstime();
   void add_RGB();  
+  void add_extra_data(std::string fieldname);
 
   PointCloud * subset(bool *keep);
   PointCloud * subset(unsigned int * keep_inds, unsigned int keep_count);
@@ -97,6 +102,8 @@ private:
   unsigned short *intensity;
   unsigned char *classification;
   rgb48 * RGB;
+  std::vector<std::string> extra_data_names;
+  std::map<std::string, double *> extra_data;
 
   void calc_extents();  
 

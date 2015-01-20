@@ -43,6 +43,9 @@ PointCloud::~PointCloud(){
   if (intensity != NULL) delete[] intensity;
   if (classification != NULL) delete[] classification;
   if (RGB != NULL) delete[] RGB;
+  if (extra_data.size() > 0){
+    for (unsigned int i=0; i<extra_data.size(); i++) delete[] extra_data.at(extra_data_names.at(i));
+  }
 }
 
 void PointCloud::print_summary() const{
@@ -56,6 +59,11 @@ void PointCloud::print_summary() const{
   if (intensity !=NULL) cout << "                   intensity" << endl;
   if (classification !=NULL) cout << "                   classification" << endl;
   if (RGB !=NULL) cout << "                   RGB" << endl;
+  if (extra_data.size() > 0){
+    for (unsigned int i=0; i<extra_data.size(); i++){
+      cout << "                   " << extra_data_names.at(i) << endl;
+    }
+  }
   cout << "  data extents:" << endl;
   cout << "       x:[" << xmin << ", " << xmax << "]" << endl;
   cout << "       y:[" << ymin << ", " << ymax << "]" << endl;
@@ -78,6 +86,11 @@ void PointCloud::print_detailed() const{
   if (intensity !=NULL) cout << "                   intensity" << endl;
   if (classification !=NULL) cout << "                   classification" << endl;
   if (RGB !=NULL) cout << "                   RGB" << endl;
+  if (extra_data.size() > 0){
+    for (unsigned int i=0; i<extra_data.size(); i++){
+      cout << "                   " << extra_data_names.at(i) << endl;
+    }
+  }
   cout << "  data extents:" << endl;
   cout << "       x:[" << xmin << ", " << xmax << "]   Range: " << xmax-xmin << endl;
   cout << "       y:[" << ymin << ", " << ymax << "]   Range: " << ymax-ymin << endl;
@@ -130,6 +143,13 @@ void PointCloud::add_RGB(){
   if (RGB != NULL) cout << "RGB already exists!" << endl;
   else RGB = new rgb48[pointcount];
 }
+
+void PointCloud::add_extra_data(std::string fieldname){
+  extra_data[fieldname] = new double[pointcount];
+  extra_data_names.push_back(fieldname);
+  return;
+}
+
 
 
 PointCloud * PointCloud::read_LAS(string filename, unsigned int byte_offset){

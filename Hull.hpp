@@ -37,18 +37,19 @@ public:
   // constructor
   Hull();
   Hull(std::vector<Point> ordered_points);
+  Hull(double * x, double * y, unsigned int numpoints);
 
   // destructor
   ~Hull();
 
   // member functions
-  void print_summary();
-  void calc_extents();
+  void print_summary() const;
+  void print_detailed() const;
 
   void construct_convex(std::vector<Point> allpts);
   void construct_convex(double * x, double * y, unsigned int numpoints);
 
-  bool contains_point(Point query);
+  bool contains_point(Point query) const;
 
   Hull * Union(Hull * other_Hull);
   Hull * Intersect(Hull * other_Hull);
@@ -65,6 +66,8 @@ private:
   HullType type;
   Orient direction; // direction of ordering (CCW or CW)
   double xmin, xmax, ymin, ymax;
+
+  void calc_extents();
 
   static Point next_to_top(std::stack<Point> &S);
   static int swap(Point &p1, Point &p2);
