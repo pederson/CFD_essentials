@@ -12,11 +12,19 @@ TODO:
 	- access the raw data by a ::.data(std::string field) call
 - make constructors that work with raw data pointers
 
+- follow these rules: https://www.doc.ic.ac.uk/lab/cplus/c++.rules/chap7.html
+	- inline member functions
+	- copy constructor
+	- const member functions
+	- virtual destructor for base classes
+	- assignment operator
+	- always const reference to member data from public member functions
+
 - Doxygen comments for everything
 X - Mesh Class
 X - Visualizer
 - Equation setter
-- Property setter
+X - Property setter
 X - Geometry setter
 - Boundary conditions/ Initial Conditions
 - Matrix equation assembler (parallelizable)

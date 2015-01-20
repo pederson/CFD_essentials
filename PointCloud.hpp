@@ -47,15 +47,26 @@ public:
   PointCloud(unsigned int numpts=0);
   ~PointCloud();
 
-  double *x, *y, *z, *gpstime;
-  double xmin, xmax, ymin, ymax, zmin, zmax, gpst_min, gpst_max;
-  unsigned int pointcount;
-  unsigned short *intensity;
-  unsigned char *classification;
-  rgb48 * RGB;
+  // base member data accessors
+  unsigned int pointcount() const;
+  const double * x_ptr() const;
+  const double * y_ptr() const;
+  const double * z_ptr() const;
+  inline double x(unsigned int i);
+  inline double y(unsigned int i);
+  inline double z(unsigned int i);
 
-  void print_summary();
-  void calc_extents();
+  // optional member data accessors
+  const double * gpstime_ptr();
+  const unsigned short * intensity_ptr();
+  const unsigned char * classification_ptr();
+  const rgb48 * RGB_ptr();
+
+  // user-defined member data accessors
+  const double * data(std::string field);
+
+  //// old stuff
+  void print_summary() const;
 
   void add_intensity();
   void add_classification();
@@ -64,17 +75,25 @@ public:
 
   PointCloud * subset(bool *keep);
   PointCloud * subset(unsigned int * keep_inds, unsigned int keep_count);
+  PointCloud * copy();
 
   static PointCloud * read_LAS(std::string filename, unsigned int byte_offset=0);
-  
+  void write_LAS(std::string filename);
 
 
 protected:
 
 private:
+  double *x, *y, *z, *gpstime;
+  double xmin, xmax, ymin, ymax, zmin, zmax, gpst_min, gpst_max;
+  unsigned int pointcount;
+  unsigned short *intensity;
+  unsigned char *classification;
+  rgb48 * RGB;
+
+  void calc_extents();
 
   void read_LAS_internal(std::string filename, unsigned int byte_offset=0);
-  void write_LAS(std::string filename);
 
 };
 
