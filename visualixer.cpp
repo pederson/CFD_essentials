@@ -667,14 +667,18 @@ void cloud_visualixer::set_test_case(){
 }
 
 void cloud_visualixer::add_cloud(PointCloud * cloud){
-	num_vertices = cloud->pointcount;
+	const double *x, *y, *z;
+	num_vertices = cloud->size();
 	num_per_vertex = 6;
 	num_vertex_points = 3;
+	x = cloud->x_ptr();
+	y = cloud->y_ptr();
+	z = cloud->z_ptr();
 	vertices = new GLfloat[num_vertices*num_per_vertex];
 	for (unsigned int i=0; i<num_vertices; i++){
-		vertices[i*num_per_vertex] = cloud->x[i];
-		vertices[i*num_per_vertex + 1] = cloud->y[i];
-		vertices[i*num_per_vertex + 2] = cloud->z[i];
+		vertices[i*num_per_vertex] = x[i];
+		vertices[i*num_per_vertex + 1] = y[i];
+		vertices[i*num_per_vertex + 2] = z[i];
 
 	}
 
@@ -685,16 +689,18 @@ void cloud_visualixer::add_cloud(PointCloud * cloud){
 		elements[i] = i;
 	}
 
-  if (cloud->RGB != NULL){
-    for (unsigned int i=0; i<cloud->pointcount; i){
-      vertices[i*num_per_vertex + 3] = cloud->RGB[i].R/65,535;
-      vertices[i*num_per_vertex + 4] = cloud->RGB[i].G/65,535;
-      vertices[i*num_per_vertex + 5] = cloud->RGB[i].B/65,535;
+	const rgb48 * RGB = cloud->RGB_ptr();
+  if (RGB != NULL){
+  	
+    for (unsigned int i=0; i<num_vertices; i){
+      vertices[i*num_per_vertex + 3] = RGB[i].R/65,535;
+      vertices[i*num_per_vertex + 4] = RGB[i].G/65,535;
+      vertices[i*num_per_vertex + 5] = RGB[i].B/65,535;
     }
   }
   else {
     //rgb ptcolor;
-    for (unsigned int i=0; i<cloud->pointcount; i++){
+    for (unsigned int i=0; i<num_vertices; i++){
       //ptcolor = color_ramp.get_ramp_color((cloud->z[i]-cloud->zmin)/(cloud->zmax - cloud->zmin));
       vertices[i*num_per_vertex + 3] = 0.0;
       vertices[i*num_per_vertex + 4] = 0.0;
@@ -702,20 +708,20 @@ void cloud_visualixer::add_cloud(PointCloud * cloud){
     }
   }
 
-	model_centroid[0] = (cloud->xmax + cloud->xmin)/2.0;
-	model_centroid[1] = (cloud->ymax + cloud->ymin)/2.0;
-	model_centroid[2] = (cloud->zmax + cloud->zmin)/2.0;
-	xmax = cloud->xmax;
-	ymax = cloud->ymax;
-	zmax = cloud->zmax;
-	xmin = cloud->xmin;
-	ymin = cloud->ymin;
-	zmin = cloud->zmin;
+	model_centroid[0] = (cloud->x_max() + cloud->x_min())/2.0;
+	model_centroid[1] = (cloud->y_max() + cloud->y_min())/2.0;
+	model_centroid[2] = (cloud->z_max() + cloud->z_min())/2.0;
+	xmax = cloud->x_max();
+	ymax = cloud->y_max();
+	zmax = cloud->z_max();
+	xmin = cloud->x_min();
+	ymin = cloud->y_min();
+	zmin = cloud->z_min();
 
 	// default color by Z
-	colorby = new float[cloud->pointcount];
-	for (auto i=0; i<cloud->pointcount; i++){
-		colorby[i] = cloud->z[i];
+	colorby = new float[num_vertices];
+	for (auto i=0; i<num_vertices; i++){
+		colorby[i] = z[i];
 	}
 	colorby_max = zmax;
 	colorby_min = zmin;

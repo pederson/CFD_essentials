@@ -45,8 +45,9 @@ PointCloud::~PointCloud(){
   if (RGB != NULL) delete[] RGB;
 }
 
-void PointCloud::print_summary(){
-  cout << "Point Cloud Summary:" << endl;
+void PointCloud::print_summary() const{
+  cout << " " << endl;
+  cout << "********** Point Cloud Summary **********" << endl;
   cout << "  pointcount: " << pointcount << endl;
   cout << "  existing fields: x" << endl;
   cout << "                   y" << endl;
@@ -60,6 +61,30 @@ void PointCloud::print_summary(){
   cout << "       y:[" << ymin << ", " << ymax << "]" << endl;
   cout << "       z:[" << zmin << ", " << zmax << "]" << endl;
   if (gpstime != NULL) cout << "       gpstime:[" << gpst_min << ", " << gpst_max << "]" << endl;
+  cout << "******************************************" << endl;
+  cout << " " << endl;
+
+  return;
+}
+
+void PointCloud::print_detailed() const{
+  cout << " " << endl;
+  cout << "********** Point Cloud Details **********" << endl;
+  cout << "  pointcount: " << pointcount << endl;
+  cout << "  existing fields: x" << endl;
+  cout << "                   y" << endl;
+  cout << "                   z" << endl;
+  if (gpstime !=NULL) cout << "                   gpstime" << endl;
+  if (intensity !=NULL) cout << "                   intensity" << endl;
+  if (classification !=NULL) cout << "                   classification" << endl;
+  if (RGB !=NULL) cout << "                   RGB" << endl;
+  cout << "  data extents:" << endl;
+  cout << "       x:[" << xmin << ", " << xmax << "]   Range: " << xmax-xmin << endl;
+  cout << "       y:[" << ymin << ", " << ymax << "]   Range: " << ymax-ymin << endl;
+  cout << "       z:[" << zmin << ", " << zmax << "]   Range: " << zmax-zmin << endl;
+  if (gpstime != NULL) cout << "       gpstime:[" << gpst_min << ", " << gpst_max << "]" << endl;
+  cout << "******************************************" << endl;
+  cout << " " << endl;
 
   return;
 }
@@ -108,6 +133,9 @@ void PointCloud::add_RGB(){
 
 
 PointCloud * PointCloud::read_LAS(string filename, unsigned int byte_offset){
+
+  cout << "filename is " << filename << endl;
+
   // define vars
   bool fieldexist=false;
   char signature[4];
@@ -874,19 +902,18 @@ PointCloud * PointCloud::subset(unsigned int * keep_inds, unsigned int keep_coun
 
 #ifdef _TEST_
 
+// compile with:
+// g++ -std=c++11 PointCloud.cpp -o pointcloud_test
+
 int main(int argc, char * argv[]){
   // declare vars
   PointCloud * cloud, * cloud_sub;
   unsigned int * keep_inds;
 
   // take one command line argument as the las file name and read it
-  cloud = PointCloud::read_LAS(argv[1]);
-
-  // output summary info
+  cloud = PointCloud::read_LAS("testfiles/ComplexSRSInfo.las");
   cloud->print_summary();
-
-  cloud->calc_extents();
-  cloud->print_summary();
+  cloud->print_detailed();
 
   // test the subset function
   keep_inds = new unsigned int[4];

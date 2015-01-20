@@ -48,25 +48,32 @@ public:
   ~PointCloud();
 
   // base member data accessors
-  unsigned int pointcount() const;
-  const double * x_ptr() const;
-  const double * y_ptr() const;
-  const double * z_ptr() const;
-  inline double x(unsigned int i);
-  inline double y(unsigned int i);
-  inline double z(unsigned int i);
+  unsigned int size() const {return pointcount;};
+  const double * x_ptr() const {return x;};
+  const double * y_ptr() const {return y;};
+  const double * z_ptr() const {return z;};
+  //double x(unsigned int i) {return x[i];};
+  //double y(unsigned int i) {return y[i];};
+  //double z(unsigned int i) {return z[i];};
+  double x_max() const {return xmax;};
+  double x_min() const {return xmin;};
+  double y_max() const {return ymax;};
+  double y_min() const {return ymin;};
+  double z_max() const {return zmax;};
+  double z_min() const {return zmin;};
 
   // optional member data accessors
-  const double * gpstime_ptr();
-  const unsigned short * intensity_ptr();
-  const unsigned char * classification_ptr();
-  const rgb48 * RGB_ptr();
+  const double * gpstime_ptr() const {return gpstime;};
+  const unsigned short * intensity_ptr() {return intensity;};
+  const unsigned char * classification_ptr() {return classification;};
+  const rgb48 * RGB_ptr() {return RGB;};
 
   // user-defined member data accessors
   const double * data(std::string field);
 
   //// old stuff
   void print_summary() const;
+  void print_detailed() const;
 
   void add_intensity();
   void add_classification();
@@ -91,7 +98,7 @@ private:
   unsigned char *classification;
   rgb48 * RGB;
 
-  void calc_extents();
+  void calc_extents();  
 
   void read_LAS_internal(std::string filename, unsigned int byte_offset=0);
 
