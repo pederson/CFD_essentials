@@ -20,12 +20,14 @@ TODO:
 	- assignment operator
 	- always const reference to member data from public member functions
 
+- Interface for libMesh, Eigen, Boost, CGAL, and any other third party libraries that are useful
+
 - Doxygen comments for everything
 X - Mesh Class
 X - Visualizer
 - Equation setter
 X - Property setter
-X - Geometry setter
+X - Geometry builder
 - Boundary conditions/ Initial Conditions
 - Matrix equation assembler (parallelizable)
 - Matrix equation solver (parallelizable)

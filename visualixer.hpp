@@ -161,7 +161,7 @@ public:
 	mesh_visualixer();
 	~mesh_visualixer();
 
-	void add_mesh(Mesh * mesh);
+	void add_mesh(Mutable_Mesh * mesh);
 	void set_test_case();
 
 protected:

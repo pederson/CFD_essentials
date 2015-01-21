@@ -41,7 +41,7 @@ void Node::print_summary(){
 
 //******************************************************************************************************
 
-Mesh::Mesh(){
+Mutable_Mesh::Mutable_Mesh(){
   xmin = 0;
   xmax = 0;
   ymin = 0;
@@ -50,7 +50,7 @@ Mesh::Mesh(){
   zmax = 0;
 }
 
-Mesh::~Mesh(){
+Mutable_Mesh::~Mutable_Mesh(){
   if (node_keys.size() > 0){
     unsigned int nnodes = node_keys.size();
     for (unsigned int i=0; i<nnodes; i++) {
@@ -63,7 +63,7 @@ Mesh::~Mesh(){
  * \brief Print a brief summary of Mesh values
  * 
  ***************************************************************************************/
-void Mesh::print_summary(){
+void Mutable_Mesh::print_summary(){
   cout << "Mesh Summary: " << endl;
   if (node_keys.size() == 0){
     cout << "  Mesh is empty!" << endl;
@@ -89,7 +89,7 @@ void Mesh::print_summary(){
  * \brief Recalculate x,y,z extents of the node data
  *
  ***************************************************************************************/
-void Mesh::calc_extents(){
+void Mutable_Mesh::calc_extents(){
   // declare vars
   Node * this_node;
   this_node = mesh_nodes.at(node_keys.at(0));
@@ -108,12 +108,12 @@ void Mesh::calc_extents(){
   return;
 }
 
-void Mesh::set_mesh_type(MeshType type){
+void Mutable_Mesh::set_mesh_type(MeshType type){
   mesh_type = type;
   return;
 }
 
-void Mesh::set_num_dims(unsigned int ndims){
+void Mutable_Mesh::set_num_dims(unsigned int ndims){
   num_dims = ndims;
   return;
 }
@@ -128,7 +128,7 @@ void Mesh::set_num_dims(unsigned int ndims){
  *  \param number_of_nodes : number of nodes to extend to
  *
  ***************************************************************************************/
-void Mesh::set_num_nodes(unsigned int number_of_nodes){
+void Mutable_Mesh::set_num_nodes(unsigned int number_of_nodes){
   unsigned int new_key, begin_size;
 
   if (number_of_nodes < node_keys.size()){
@@ -163,32 +163,32 @@ void Mesh::set_offsets(double x_off, double y_off, double z_off){
 }
 */
 
-void Mesh::set_xmin(double x_min){
+void Mutable_Mesh::set_xmin(double x_min){
   xmin = x_min;
   return;
 }
 
-void Mesh::set_ymin(double y_min){
+void Mutable_Mesh::set_ymin(double y_min){
   ymin = y_min;
   return;
 }
 
-void Mesh::set_zmin(double z_min){
+void Mutable_Mesh::set_zmin(double z_min){
   zmin = z_min;
   return;
 }
 
-void Mesh::set_xmax(double x_max){
+void Mutable_Mesh::set_xmax(double x_max){
   xmax = x_max;
   return;
 }
 
-void Mesh::set_ymax(double y_max){
+void Mutable_Mesh::set_ymax(double y_max){
   ymax = y_max;
   return;
 }
 
-void Mesh::set_zmax(double z_max){
+void Mutable_Mesh::set_zmax(double z_max){
   zmax = z_max;
   return;
 }
@@ -200,7 +200,7 @@ void Mesh::set_zmax(double z_max){
  *  \param key : key to the desired node pointer
  *
  ***************************************************************************************/
-Node * Mesh::get_node_ptr(unsigned int key){
+Node * Mutable_Mesh::get_node_ptr(unsigned int key){
   return mesh_nodes.at(key);
 }
 
@@ -211,7 +211,7 @@ Node * Mesh::get_node_ptr(unsigned int key){
  *  \param i : index of key within all keys
  *
  ***************************************************************************************/
-unsigned int Mesh::get_node_key(unsigned int i){
+unsigned int Mutable_Mesh::get_node_key(unsigned int i){
   return node_keys.at(i);
 }
 
@@ -222,7 +222,7 @@ unsigned int Mesh::get_node_key(unsigned int i){
  *  \param new_node : node to insert (can be a "new Node()")
  *
  ***************************************************************************************/
-void Mesh::add_node(Node * new_node){
+void Mutable_Mesh::add_node(Node * new_node){
   unsigned int new_key;
   new_key = node_keys.back()+1;
   node_keys.push_back(new_key);
@@ -247,7 +247,7 @@ void Mesh::add_node(Node * new_node){
  *  \param key : key of Node to remove
  *
  ***************************************************************************************/
-void Mesh::remove_node(unsigned int key){
+void Mutable_Mesh::remove_node(unsigned int key){
   // declare vars
   unsigned int nneighbs, nneighb_j, i;
 
@@ -282,7 +282,7 @@ void Mesh::remove_node(unsigned int key){
   return;
 }
 
-void Mesh::add_phys_property(string property_name){
+void Mutable_Mesh::add_phys_property(string property_name){
   // add property to the list
   phys_property_names.push_back(property_name);
 
@@ -294,7 +294,7 @@ void Mesh::add_phys_property(string property_name){
   return;
 }
 
-void Mesh::set_background_properties(vector<double> properties){
+void Mutable_Mesh::set_background_properties(vector<double> properties){
   for (auto i=0; i<mesh_nodes.size(); i++){
     mesh_nodes.at(node_keys.at(i))->phys_properties = properties;
   }
@@ -302,7 +302,7 @@ void Mesh::set_background_properties(vector<double> properties){
   return;
 }
 
-unsigned int Mesh::get_phys_property_position(string property_name){
+unsigned int Mutable_Mesh::get_phys_property_position(string property_name){
   for (auto i=0; i<phys_property_names.size(); i++){
     if (property_name.compare(phys_property_names.at(i))==0) return i;
   }
@@ -311,7 +311,7 @@ unsigned int Mesh::get_phys_property_position(string property_name){
   throw -1;
 }
 
-float * Mesh::get_phys_property_ptr(string property_name){
+float * Mutable_Mesh::get_phys_property_ptr(string property_name){
   float * prop;
 
   unsigned int pos = get_phys_property_position(property_name);
@@ -335,10 +335,10 @@ float * Mesh::get_phys_property_ptr(string property_name){
  *  \param num_nodes_z : number of nodes in z direction
  *
  ***************************************************************************************/
-Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
+Mutable_Mesh * Mutable_Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
                       unsigned int num_nodes_z){
   // declare vars
-  Mesh * mesh_out;
+  Mutable_Mesh * mesh_out;
   Node * node_spawn;
   unsigned int nodes_total;
   unsigned int glob_idx;
@@ -346,7 +346,7 @@ Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned 
   // do some input checking
 
   // fill in the extra member data
-  mesh_out = new Mesh();
+  mesh_out = new Mutable_Mesh();
   mesh_out->set_mesh_type(REGULAR);
   nodes_total = num_nodes_x*num_nodes_y*num_nodes_z;
   mesh_out->set_num_nodes(nodes_total);
@@ -697,10 +697,10 @@ Mesh * Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned 
  *  \param zmin : min z value
  *
  ***************************************************************************************/
-Mesh * Mesh::create_regular_grid(double res, double xmin, double xmax, double ymin, double ymax,
+Mutable_Mesh * Mutable_Mesh::create_regular_grid(double res, double xmin, double xmax, double ymin, double ymax,
                       double zmin, double zmax){
   unsigned int num_nodes_x, num_nodes_y, num_nodes_z;
-  Mesh * mesh_out;
+  Mutable_Mesh * mesh_out;
 
   num_nodes_x = (unsigned int)((xmax-xmin)/res) + 1;
   num_nodes_y = (unsigned int)((ymax-ymin)/res) + 1;
@@ -732,7 +732,7 @@ int main(int argc, char * argv[]){
 
   // test constructor
   cout << "testing mesh constructor..." << flush;
-  Mesh * mymesh = new Mesh();
+  Mutable_Mesh * mymesh = new Mutable_Mesh();
   cout << "succeeded" << endl;
 
   // test num nodes setting
@@ -742,7 +742,7 @@ int main(int argc, char * argv[]){
 
   // test creation of a regular mesh
   cout << "testing regular grid creation..." << flush;
-  Mesh * mesh_reg_1d = Mesh::create_regular_grid(0.1, 100);
+  Mutable_Mesh * mesh_reg_1d = Mutable_Mesh::create_regular_grid(0.1, 100);
   cout << "succeeded" << endl;
   mesh_reg_1d->print_summary();
   mesh_reg_1d->get_node_ptr(50)->print_summary();

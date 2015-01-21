@@ -796,7 +796,7 @@ mesh_visualixer::~mesh_visualixer(){
 }
 
 
-void mesh_visualixer::add_mesh(Mesh * mesh){
+void mesh_visualixer::add_mesh(Mutable_Mesh * mesh){
 	Node * node;
 	std::map<unsigned int, unsigned int> key_to_index_map;
 
@@ -1413,7 +1413,7 @@ int main(int argc, char * argv[]){
 
 	// test the mesh viewer
 	mesh_visualixer * mymvis = new mesh_visualixer();
-	Mesh * mesh = Mesh::create_regular_grid(0.1, (unsigned int)50, (unsigned int)50);//, (unsigned int)30);
+	Mutable_Mesh * mesh = Mutable_Mesh::create_regular_grid(0.1, (unsigned int)50, (unsigned int)50);//, (unsigned int)30);
 	//mymvis->set_test_case();
 	mymvis->add_mesh(mesh);
 	mymvis->run();
@@ -1422,7 +1422,7 @@ int main(int argc, char * argv[]){
 	// test a mesh viewer made from a parametric model
 	mesh_visualixer * paravis = new mesh_visualixer();
 	parametric_model_2d my_param2;
-	Mesh * paramesh;
+	Mutable_Mesh * paramesh;
 	my_param2.set_model_name("Display Test Circle");
 	my_param2.add_physical_property("Epsilon_rel");
 	my_param2.add_physical_property("Mu_rel");

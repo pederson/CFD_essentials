@@ -5,10 +5,10 @@
 using namespace std;
 
 // define the functions that build a mesh from a parametric model
-Mesh * build_simple_mesh_2d(parametric_model_2d * model,  double res, double xmin, double xmax, double ymin, double ymax, vector<double> bg_properties){
+Mutable_Mesh * build_simple_mesh_2d(parametric_model_2d * model,  double res, double xmin, double xmax, double ymin, double ymax, vector<double> bg_properties){
 
 	// first create a regular grid
-	Mesh * outmesh = Mesh::create_regular_grid(res, xmin, xmax, ymin, ymax);
+	Mutable_Mesh * outmesh = Mutable_Mesh::create_regular_grid(res, xmin, xmax, ymin, ymax);
 
 	// transfer property names to the mesh
 	vector<string> prop_names = model->get_phys_property_names();
@@ -28,7 +28,7 @@ Mesh * build_simple_mesh_2d(parametric_model_2d * model,  double res, double xmi
 	return outmesh;
 }
 
-void add_shape_to_mesh(Mesh * meshmodel, geometric_object_2d * shape, double res){
+void add_shape_to_mesh(Mutable_Mesh * meshmodel, geometric_object_2d * shape, double res){
 	// convert the shape to a hull
 	Hull * shull = approximate_parametric_shape_2d(shape, res);
 	Node * n;
@@ -48,7 +48,7 @@ void add_shape_to_mesh(Mesh * meshmodel, geometric_object_2d * shape, double res
 	return;
 }
 
-//Mesh * build_delaunay_mesh_2d(parametric_model_2d * model, double xmin, double xmax, double ymin, double ymax, double res);
+//Mutable_Mesh * build_delaunay_mesh_2d(parametric_model_2d * model, double xmin, double xmax, double ymin, double ymax, double res);
 
 Hull * approximate_parametric_shape_2d(geometric_object_2d * shape, double res){
 
