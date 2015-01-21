@@ -1,4 +1,4 @@
-#include "./visualixer.hpp"
+#include "Visualixer.hpp"
 
 using namespace std;
 
@@ -1385,7 +1385,7 @@ void mesh_model_visualixer::onExit(){
 //*************************************** TEST SECTION *******************************************
 
 // use cmake to compile
-#include "model2mesh.hpp"
+#include "Converter.hpp"
 
 int main(int argc, char * argv[]){
 	// declare vars

@@ -1,5 +1,5 @@
-#ifndef COLORRAMP_H
-#define COLORRAMP_H
+#ifndef _COLORRAMP_H
+#define _COLORRAMP_H
 
 #include <stdlib.h>
 #include <iostream>

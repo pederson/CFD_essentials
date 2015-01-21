@@ -2,9 +2,9 @@
 #define _VISUALIXER_H
 
 #include "PointCloud.hpp"
-#include "mesh_class.hpp"
-#include "geometric_object.hpp"
-#include "colorramp.hpp"
+#include "Mesh.hpp"
+#include "GeometricObject.hpp"
+#include "ColorRamp.hpp"
 
 #include <iostream>
 #include <vector>

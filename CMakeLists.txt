@@ -7,7 +7,7 @@ FIND_PACKAGE( PkgConfig REQUIRED )
 PKG_SEARCH_MODULE( GLFW3 REQUIRED glfw3 )
 
 INCLUDE_DIRECTORIES( ${GLFW3_INCLUDE_DIR} )
-ADD_EXECUTABLE( visualixer_test visualixer.cpp PointCloud.cpp mesh_class.cpp geometric_object.cpp colorramp.cpp model2mesh.cpp Hull.cpp)
+ADD_EXECUTABLE( visualixer_test Visualixer.cpp PointCloud.cpp Mesh.cpp GeometricObject.cpp ColorRamp.cpp Converter.cpp Hull.cpp)
 
 FOREACH(item ${GLFW3_STATIC_LIBRARIES})
     MESSAGE(STATUS "  using lib: " ${item})

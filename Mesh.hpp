@@ -1,5 +1,5 @@
-#ifndef _MESH_CLASS_H
-#define _MESH_CLASS_H
+#ifndef _MESH_H
+#define _MESH_H
 
 #include <stdlib.h>
 
@@ -62,27 +62,27 @@ public:
   
 
   // metadata access
-  MeshType get_mesh_type() const {return _mesh_type;};
-  unsigned int get_num_dims() const {return _num_dims;};
-  unsigned int nodecount() const {return 0;};
-  unsigned int elementcount() const {return 0;};
+  MeshType mesh_type() const {return _mesh_type;};
+  unsigned int num_dims() const {return _num_dims;};
+  unsigned int nodecount() const {return _nodecount;};
+  unsigned int elementcount() const {return _elementcount;};
 
-  double x_min() const {return _xmin;};
-  double y_min() const {return _ymin;};
-  double z_min() const {return _zmin;};
-  double x_max() const {return _xmax;};
-  double y_max() const {return _ymax;};
-  double z_max() const {return _zmax;};
+  double xmin() const {return _xmin;};
+  double ymin() const {return _ymin;};
+  double zmin() const {return _zmin;};
+  double xmax() const {return _xmax;};
+  double ymax() const {return _ymax;};
+  double zmax() const {return _zmax;};
 
 
   // node access
-  const Node * node_ptr(unsigned int i) const;
+  const Node node(unsigned int i) const {return _nodes[i];};
 
   // property interaction
   void add_phys_property(std::string property_name, double * property_vals);
-  
-  void set_background_properties(std::vector<double> properties);
-  float * get_phys_property_ptr(std::string property_name);
+  void reset_all_properties(std::vector<double> properties);
+  void reset_property(std::string property_name, double reset_val);
+  //float * get_phys_property_ptr(std::string property_name);
 
 
   // grid generation and refinement
@@ -97,7 +97,7 @@ protected:
 private:
   // metadata
   MeshType _mesh_type;
-  unsigned int _num_dims;
+  unsigned int _num_dims, _nodecount, _elementcount;
   double _xmin, _xmax, _ymin, _ymax, _zmin, _zmax;
 
   // nodes and keys

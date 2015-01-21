@@ -1,4 +1,4 @@
-#include "model2mesh.hpp"
+#include "Converter.hpp"
 
 //#define _TEST_
 

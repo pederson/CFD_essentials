@@ -1,4 +1,4 @@
-#include "colorramp.hpp"
+#include "ColorRamp.hpp"
 
 using namespace std;
 

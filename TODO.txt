@@ -24,6 +24,8 @@ TODO:
 
 - make separate object files that can be used elsewhere, like Point. Or use CGAL. 
 
+- Something is wrong with the Hull->contains_point() code...
+
 - Doxygen comments for everything
 X - Mesh Class
 X - Visualizer

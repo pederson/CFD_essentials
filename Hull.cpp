@@ -258,7 +258,7 @@ bool Hull::contains_point(Point p) const{
     } while (i != 0);
  
     // Return true if count is odd, false otherwise
-    return count&1;  // Same as (count%2 == 1)
+    return (count%2 ==1);  // Same as (count%2 == 1) (count&1)
 }
 
 Point Hull::next_to_top(stack<Point> &S){
@@ -304,6 +304,8 @@ int Hull::compare(const void *vp1, const void *vp2){
   return (o == 2)? -1: 1;
 }
 
+// Given three colinear points p, q, r, the function checks if
+// point q lies on line segment 'pr'
 bool Hull::on_segment_query(Point p, Point q, Point r)
 {
     if (q.x <= max(p.x, r.x) && q.x >= min(p.x, r.x) &&
@@ -337,7 +339,7 @@ bool Hull::lines_intersect_query(Point p1, Point q1, Point p2, Point q2)
  
      // p2, q2 and q1 are colinear and q1 lies on segment p2q2
     if (o4 == 0 && on_segment_query(p2, q1, q2)) return true;
- 
+
     return false; // Doesn't fall in any of the above cases
 }
 

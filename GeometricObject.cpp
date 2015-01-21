@@ -1,4 +1,4 @@
-#include "geometric_object.hpp"
+#include "GeometricObject.hpp"
 
 //#define _TEST_
 using namespace std;

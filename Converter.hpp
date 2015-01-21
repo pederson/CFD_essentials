@@ -1,8 +1,8 @@
-#ifndef _MODEL2MESH_H
-#define _MODEL2MESH_H
+#ifndef _CONVERTER_H
+#define _CONVERTER_H
 
-#include "mesh_class.hpp"
-#include "geometric_object.hpp"
+#include "Mesh.hpp"
+#include "GeometricObject.hpp"
 #include "Hull.hpp"
 
 #include <iostream>
