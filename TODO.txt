@@ -22,6 +22,8 @@ TODO:
 
 - Interface for libMesh, Eigen, Boost, CGAL, and any other third party libraries that are useful
 
+- make separate object files that can be used elsewhere, like Point. Or use CGAL. 
+
 - Doxygen comments for everything
 X - Mesh Class
 X - Visualizer

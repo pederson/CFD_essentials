@@ -21,10 +21,9 @@ public:
 
   double x, y, z; 
   bool boundary;
+  unsigned int core_group;
 
   std::vector<unsigned int> neighbor_keys;		// keys of neighbor points
-
-  unsigned int core_group;
 
   // container for physical properties
   std::vector<double> phys_properties;
@@ -38,7 +37,7 @@ private:
 };
 
 // cell class for finite volume methods
-class Cell{
+class Mesh_Cell{
 public:
   unsigned int num_vertices;
   std::vector<unsigned int> vertices;
@@ -49,35 +48,39 @@ private:
 
 };
 
+class Mesh_Element{
+
+};
+
 class Static_Mesh{
 public:
   Static_Mesh();   // constructor
   ~Static_Mesh();    // destructor
 
-  void print_summary();
+  void print_summary() const;
+  void print_detailed() const;
   
 
-  // member data accessors
-  MeshType get_mesh_type() const {return mesh_type;};
-  unsigned int get_num_dims() const {return num_dims;};
-  unsigned int nodecount() const {return nodes.size();};
+  // metadata access
+  MeshType get_mesh_type() const {return _mesh_type;};
+  unsigned int get_num_dims() const {return _num_dims;};
+  unsigned int nodecount() const {return 0;};
   unsigned int elementcount() const {return 0;};
 
-  double x_min(){return xmin;};
-  double y_min(){return ymin;};
-  double z_min(){return zmin;};
-  double x_max(){return xmax;};
-  double y_max(){return ymax;};
-  double z_max(){return zmax;};
+  double x_min() const {return _xmin;};
+  double y_min() const {return _ymin;};
+  double z_min() const {return _zmin;};
+  double x_max() const {return _xmax;};
+  double y_max() const {return _ymax;};
+  double z_max() const {return _zmax;};
 
 
-  // node access and manipulation
-  Node * get_node_ptr(unsigned int i);
+  // node access
+  const Node * node_ptr(unsigned int i) const;
 
   // property interaction
-  void add_phys_property(std::string property_name);
-  //void set_phys_property(std::string property_name, double property_value);
-  unsigned int get_phys_property_position(std::string property_name);
+  void add_phys_property(std::string property_name, double * property_vals);
+  
   void set_background_properties(std::vector<double> properties);
   float * get_phys_property_ptr(std::string property_name);
 
@@ -92,16 +95,17 @@ public:
 protected:
 
 private:
-  // auxillary information
-  MeshType mesh_type;
-  unsigned int num_dims;
-  double xmin, xmax, ymin, ymax, zmin, zmax;
+  // metadata
+  MeshType _mesh_type;
+  unsigned int _num_dims;
+  double _xmin, _xmax, _ymin, _ymax, _zmin, _zmax;
 
   // nodes and keys
-  std::vector<Node *> nodes; // contains keys to the nodes
+  Node * _nodes; // contains keys to the nodes
 
-  // physical properties on the mesh
-  std::vector<std::string> phys_property_names; // the name position in this vector corresponds with the position of the property value in the node
+  // user-defined propertie for the mesh
+  std::vector<std::string> _phys_property_names; // the name position in this vector corresponds with the position of the property value in the node
+  std::map<std::string, double *> _properties;
 
   void calc_extents();
 
