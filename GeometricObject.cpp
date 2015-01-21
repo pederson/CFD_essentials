@@ -168,7 +168,7 @@ mesh_model::~mesh_model(){
 	if(vertex_inds != NULL) delete[] vertex_inds;
 }
 
-mesh_model * mesh_model::read_STL(char * filename, unsigned int byte_offset){
+mesh_model * mesh_model::read_STL(string filename, unsigned int byte_offset){
 	// declare vars
 	mesh_model * outmesh;
 	int fd;
@@ -176,7 +176,7 @@ mesh_model * mesh_model::read_STL(char * filename, unsigned int byte_offset){
 	char * stlmap;
 
 	// open file and fast forward
-	fd = open(filename, O_RDONLY);
+	fd = open(filename.c_str(), O_RDONLY);
 	if (fd < 0){
 		cout << "Error opening file in read_STL" << endl;
 	throw -1;

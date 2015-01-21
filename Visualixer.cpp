@@ -257,7 +257,7 @@ void visualixer::onMouseRightDrag(double xpos, double ypos){
 }
 
 void visualixer::onMouseMiddleDrag(double xpos, double ypos){
-	cout << "dragging middle mouse button" << endl;
+	//cout << "dragging middle mouse button" << endl;
 }
 
 void visualixer::onKeyDown(unsigned char key, int x, int y){

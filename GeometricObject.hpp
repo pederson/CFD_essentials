@@ -223,7 +223,7 @@ public:
 	mesh_model();
 	~mesh_model();
 
-	static mesh_model * read_STL(char * filename, unsigned int byte_offset=0);
+	static mesh_model * read_STL(std::string filename, unsigned int byte_offset=0);
 
 
 	unsigned int * vertex_inds; // 3 inds per triangle

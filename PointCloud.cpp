@@ -154,8 +154,6 @@ void PointCloud::add_extra_data(std::string fieldname){
 
 PointCloud * PointCloud::read_LAS(string filename, unsigned int byte_offset){
 
-  cout << "filename is " << filename << endl;
-
   // define vars
   bool fieldexist=false;
   char signature[4];
