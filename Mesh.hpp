@@ -12,7 +12,7 @@
 #include <fstream>
 
 
-enum MeshType{REGULAR=0, UNSTRUCTURED_TRI=1, UNSTRUCTURED_QUAD=2};
+enum MeshType{REGULAR=0, UNSTRUCTURED_TRI=1, UNSTRUCTURED_QUAD=2, MESH_UNKNOWN};
 enum ElementType{EMPTY, POINT, LINE, TRIANGLE, QUADRANGLE, TETRAHEDRON, UNKNOWN};
 
 class Node{
@@ -130,8 +130,8 @@ public:
   // metadata access
   MeshType mesh_type() const {return _mesh_type;};
   unsigned int num_dims() const {return _num_dims;};
-  unsigned int nodecount() const {return _nodecount;};
-  unsigned int elementcount() const {return _elementcount;};
+  unsigned int nodecount() const {return _nodes.size();};
+  unsigned int elementcount() const {return _elements.size();};
 
   double xmin() const {return _xmin;};
   double ymin() const {return _ymin;};
@@ -144,11 +144,18 @@ public:
   // node access
   const Mesh_Node node(unsigned int i) const {return _nodes[i];};
 
-  // property interaction
+  // property interaction and access
+  const double & x();
+  const double & y();
+  const double & z();
+  const bool & boundary();
+  const unsigned int & core_group();
+  const unsigned int & num_connections();
+  const double & data(std::string fieldname) const;
+
   void add_phys_property(std::string property_name, double * property_vals);
-  void reset_all_properties(std::vector<double> properties);
-  void reset_property(std::string property_name, double reset_val);
-  //float * get_phys_property_ptr(std::string property_name);
+  void add_phys_property(std::string proprety_name, double init_val);
+  void reset_property(std::string property_name, double reset_val=0.0);
 
 
   // grid generation and refinement
@@ -169,15 +176,22 @@ public:
 private:
   // metadata
   MeshType _mesh_type;
-  unsigned int _num_dims, _nodecount, _elementcount;
+  unsigned int _num_dims;
   double _xmin, _xmax, _ymin, _ymax, _zmin, _zmax;
 
   // nodes and elements
-  Mesh_Node * _nodes; // array of nodes
+  std::vector<Mesh_Node> _nodes; // array of nodes
+  std::vector<Mesh_Element> _elements; // array of elements
 
   // user-defined propertie for the mesh
   std::vector<std::string> _phys_property_names; // the name position in this vector corresponds with the position of the property value in the node
-  std::map<std::string, double *> _properties;
+  std::map<std::string, std::vector<double>> _phys_properties;
+
+  // other properties conveniently placed in arrays (on demand) in order to return data
+  std::vector<bool> _boundary;
+  std::vector<double> _x, _y, _z;
+  std::vector<unsigned int> _core_group, _num_connections;
+
 
   void calc_extents();
 

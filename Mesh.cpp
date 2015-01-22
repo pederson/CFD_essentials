@@ -51,6 +51,7 @@ double Mesh_Node::area_tri(Mesh_Node * node1, Mesh_Node * node2, Mesh_Node * nod
               (node1->x()*node3->y() - node3->x()*node1->y()));
 }
 //******************************************************************************************************
+
 Mesh_Element::Mesh_Element(std::vector<unsigned int> vertex_inds){
   _vertex_inds = vertex_inds;
   recalc_type();
@@ -133,7 +134,14 @@ void Mesh_Element::recalc_type(){
 
 //******************************************************************************************************
 Static_Mesh::Static_Mesh(){
-
+  _xmin = 0;
+  _xmax = 0;
+  _ymin = 0;
+  _ymax = 0;
+  _zmin = 0;
+  _zmax = 0;
+  _mesh_type = MESH_UNKNOWN;
+  _num_dims = 0;
 }
 
 Static_Mesh::~Static_Mesh(){
@@ -148,22 +156,125 @@ void Static_Mesh::print_detailed() const{
 
 }
 
+const double & Static_Mesh::x(){
+  if (_x.size() != _nodes.size()){
+    _x.clear();
+    _x.resize(_nodes.size());
+    for (unsigned int i=0; i<_nodes.size(); i++){
+      _x.at(i) = _nodes.at(i).x();
+    }
+  }
+  return _x.front();
+}
+
+
+const double & Static_Mesh::y(){
+  if (_y.size() != _nodes.size()){
+    _y.clear();
+    _y.resize(_nodes.size());
+    for (unsigned int i=0; i<_nodes.size(); i++){
+      _y.at(i) = _nodes.at(i).y();
+    }
+  }
+  return _y.front();
+}
+
+const double & Static_Mesh::z(){
+  if (_z.size() != _nodes.size()){
+    _z.clear();
+    _z.resize(_nodes.size());
+    for (unsigned int i=0; i<_nodes.size(); i++){
+      _z.at(i) = _nodes.at(i).z();
+    }
+  }
+  return _z.front();
+}
+
+
+const bool & Static_Mesh::boundary(){
+  if (_boundary.size() != _nodes.size()){
+    _boundary.clear();
+    _boundary.resize(_nodes.size());
+    for (unsigned int i=0; i<_nodes.size(); i++){
+      _boundary.at(i) = _nodes.at(i).boundary();
+    }
+  }
+  return _boundary.front();
+}
+
+
+const unsigned int & Static_Mesh::core_group(){
+  if (_core_group.size() != _nodes.size()){
+    _core_group.clear();
+    _core_group.resize(_nodes.size());
+    for (unsigned int i=0; i<_nodes.size(); i++){
+      _core_group.at(i) = _nodes.at(i).core_group();
+    }
+  }
+  return _core_group.front();
+}
+
+const unsigned int & Static_Mesh::num_connections(){
+  if (_num_connections.size() != _nodes.size()){
+    _num_connections.clear();
+    _num_connections.resize(_nodes.size());
+    for (unsigned int i=0; i<_nodes.size(); i++){
+      _num_connections.at(i) = _nodes.at(i).num_connections();
+    }
+  }
+  return _num_connections.front();
+}
+
+const double & Static_Mesh::data(std::string fieldname) const{
+
+  if (_phys_properties.at(fieldname).size() != _nodes.size()){
+    cout << "physical properties size doesn't match nodes size!" << endl;
+    throw -1;
+  }
+
+  return _phys_properties.at(fieldname).front();
+}
+
 /*
-void Static_Mesh::add_phys_property(std::string property_name, double * property_vals);
-void Static_Mesh::reset_all_properties(std::vector<double> properties);
-void Static_Mesh::reset_property(std::string property_name, double reset_val);
+void add_phys_property(std::string property_name, double & property_vals){
+  
+}
+
+void add_phys_property(std::string proprety_name, double init_val){
+
+}
+
+void reset_property(std::string property_name, double reset_val=0.0){
+
+}
+
+/*
 Static_Mesh * Static_Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned int num_nodes_y = 1, 
-                    unsigned int num_nodes_z = 1); // create a regular grid of points and store it in the mesh
+                    unsigned int num_nodes_z = 1){
+
+}
+
 Static_Mesh * Static_Mesh::create_regular_grid(double res, double xmin, double xmax, double ymin=0.0, double ymax=0.0,
-                    double zmin=0.0, double zmax=0.0);
-Static_Mesh * Static_Mesh::read_MSH(std::string filename, unsigned int byte_offset=0);
+                    double zmin=0.0, double zmax=0.0){
+
+}
+
+Static_Mesh * Static_Mesh::read_MSH(std::string filename, unsigned int byte_offset=0){
+
+}
+
+/*
 Static_Mesh * Static_Mesh::read_NEU(std::string filename, unsigned int byte_offset=0);
 Static_Mesh * Static_Mesh::read_CAS(std::string filename, unsigned int byte_offset=0);
 void Static_Mesh::write_MSH(std::string filename) const;
 void Static_Mesh::write_NEU(std::string filename) const;
 void Static_Mesh::write_CAS(std::string filename) const;
-void calc_extents();
 */
+
+void Static_Mesh::calc_extents(){
+
+}
+
 
 //******************************************************************************************************
 

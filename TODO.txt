@@ -31,6 +31,7 @@ TODO:
 
 - Doxygen comments for everything
 - Equation setter
+- Chemistry setter and data (lxcat?)
 - Boundary conditions/ Initial Conditions
 - Source setter
 - Matrix equation assembler (parallelizable)
