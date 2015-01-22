@@ -2,6 +2,7 @@
 #define _MESH_H
 
 #include <stdlib.h>
+#include <math.h>
 
 #include <iostream>
 #include <vector>
@@ -9,6 +10,7 @@
 #include <map>
 #include <string>
 #include <fstream>
+
 
 enum MeshType{REGULAR=0, UNSTRUCTURED_TRI=1, UNSTRUCTURED_QUAD=2};
 enum ElementType{EMPTY, POINT, LINE, TRIANGLE, QUADRANGLE, TETRAHEDRON, UNKNOWN};
@@ -59,7 +61,8 @@ public:
   // utils
   void print_summary() const;
   void print_detailed() const;
-  double dist_sq()
+  static double dist_sq(Mesh_Node * node1, Mesh_Node * node2);
+  static double area_tri(Mesh_Node * node1, Mesh_Node * node2, Mesh_Node * node3);
 
   // member data access
   double x() const {return _x;};
@@ -104,7 +107,7 @@ public:
 
   // mutators
   void remove_vertex(unsigned int vert_ind);
-  void add_vertex(unsigned int vert_ind, unsigned int position=0);
+  void add_vertex(unsigned int vert_ind, int position=-1);
 
 private:
   std::vector<unsigned int> _vertex_inds;

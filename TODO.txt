@@ -1,17 +1,5 @@
 TODO:
 
-- Shading and Light source for mesh model viewer
-- Create getters and setters for everything
-- support for cylindrical and polar coordinates
-- Class for saving simulation output
-- Create separate Static Mesh and Mutable Mesh classes
-X - Convert everything that uses char* to use std::string instead
-- add a ::print_detailed() function to classes for detailed debugging
-- figure out a good way to store base data, optional data, and user-defined data in classes
-	- idea: store it all in raw pointer arrays
-	- access the raw data by a ::.data(std::string field) call
-- make constructors that work with raw data pointers
-
 - follow these rules: https://www.doc.ic.ac.uk/lab/cplus/c++.rules/chap7.html
 	- inline member functions
 	- copy constructor
@@ -19,6 +7,18 @@ X - Convert everything that uses char* to use std::string instead
 	- virtual destructor for base classes
 	- assignment operator
 	- always const reference to member data from public member functions
+
+- Shading and Light source for mesh model viewer
+- Create getters and setters for everything (encapsulation)
+- support for cylindrical and polar coordinates
+- Class for saving simulation output
+- Create separate Static Mesh and Mutable Mesh classes
+
+- add a ::print_detailed() function to classes for detailed debugging
+- figure out a good way to store base data, optional data, and user-defined data in classes
+	- idea: store it all in raw pointer arrays
+	- access the raw data by a ::.data(std::string field) call
+- make constructors that work with raw data pointers
 
 - Interface for libMesh, Eigen, Boost, CGAL, and any other third party libraries that are useful
 
@@ -30,12 +30,16 @@ X - Convert everything that uses char* to use std::string instead
 - Check out AutoCAD .dxf file format for parametric models. Also look at .obj and .ply formats. Look at .step and .iges files for 3D models
 
 - Doxygen comments for everything
-X - Mesh Class
-X - Visualizer
 - Equation setter
-X - Property setter
-X - Geometry builder
 - Boundary conditions/ Initial Conditions
 - Source setter
 - Matrix equation assembler (parallelizable)
 - Matrix equation solver (parallelizable)
+
+
+:::::::Done:::::::
+X - Mesh Class
+X - Visualizer
+X - Property setter
+X - Geometry builder
+X - Convert everything that uses char* to use std::string instead

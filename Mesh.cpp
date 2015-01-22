@@ -38,6 +38,18 @@ void Mesh_Node::print_detailed() const{
         << "   num_connections: " << _num_connections
         << "   core_group: " << _core_group << endl;
 }
+
+double Mesh_Node::dist_sq(Mesh_Node * node1, Mesh_Node * node2){
+  return (node1->x()-node2->x())*(node1->x()-node2->x()) + 
+          (node1->y()-node2->y())*(node1->y()-node2->y()) + 
+          (node1->z()-node2->z())*(node1->z()-node2->z());
+}
+
+double Mesh_Node::area_tri(Mesh_Node * node1, Mesh_Node * node2, Mesh_Node * node3){
+  return fabs((node2->x()*node1->y() - node1->x()*node2->y()) + 
+              (node3->x()*node2->y() - node2->x()*node3->y()) + 
+              (node1->x()*node3->y() - node3->x()*node1->y()));
+}
 //******************************************************************************************************
 Mesh_Element::Mesh_Element(std::vector<unsigned int> vertex_inds){
   _vertex_inds = vertex_inds;
@@ -66,24 +78,29 @@ void Mesh_Element::print_detailed() const{
   return;
 }
 
-double Mesh_Element::area() const{
-
-}
-
-double Mesh_Element::perimeter() const{
-
-}
-
 void Mesh_Element::remove_vertex(unsigned int vert_ind){
-
+  for (unsigned int i=0; i<_vertex_inds.size(); i++){
+    if (_vertex_inds.at(i) == vert_ind){
+      // remove index
+      _vertex_inds.erase(_vertex_inds.begin()+i);
+      break;
+    }
+  }
+  recalc_type();
 }
 
-void Mesh_Element::add_vertex(unsigned int vert_ind, unsigned int position=0){
-
+void Mesh_Element::add_vertex(unsigned int vert_ind, int position){
+  if (position == -1){
+    _vertex_inds.push_back(vert_ind);
+  }
+  else{
+    _vertex_inds.insert(_vertex_inds.begin() + position, vert_ind);
+  }
   recalc_type();
 }
  
 void Mesh_Element::recalc_type(){
+  cout << "doing a recalc doesn't have a defined behavior yet!" << endl;
   switch (_vertex_inds.size()){
     case 0:
       _element_type = EMPTY;
@@ -113,6 +130,40 @@ void Mesh_Element::recalc_type(){
       _element_type = UNKNOWN;
   }
 }
+
+//******************************************************************************************************
+Static_Mesh::Static_Mesh(){
+
+}
+
+Static_Mesh::~Static_Mesh(){
+
+}
+
+void Static_Mesh::print_summary() const{
+
+}
+
+void Static_Mesh::print_detailed() const{
+
+}
+
+/*
+void Static_Mesh::add_phys_property(std::string property_name, double * property_vals);
+void Static_Mesh::reset_all_properties(std::vector<double> properties);
+void Static_Mesh::reset_property(std::string property_name, double reset_val);
+Static_Mesh * Static_Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned int num_nodes_y = 1, 
+                    unsigned int num_nodes_z = 1); // create a regular grid of points and store it in the mesh
+Static_Mesh * Static_Mesh::create_regular_grid(double res, double xmin, double xmax, double ymin=0.0, double ymax=0.0,
+                    double zmin=0.0, double zmax=0.0);
+Static_Mesh * Static_Mesh::read_MSH(std::string filename, unsigned int byte_offset=0);
+Static_Mesh * Static_Mesh::read_NEU(std::string filename, unsigned int byte_offset=0);
+Static_Mesh * Static_Mesh::read_CAS(std::string filename, unsigned int byte_offset=0);
+void Static_Mesh::write_MSH(std::string filename) const;
+void Static_Mesh::write_NEU(std::string filename) const;
+void Static_Mesh::write_CAS(std::string filename) const;
+void calc_extents();
+*/
 
 //******************************************************************************************************
 
