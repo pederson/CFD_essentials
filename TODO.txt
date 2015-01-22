@@ -8,6 +8,8 @@ TODO:
 	- assignment operator
 	- always const reference to member data from public member functions
 
+- Change functions to accept const references instead of pointers
+- Change functions to output const references instead of pointers
 - Shading and Light source for mesh model viewer
 - Create getters and setters for everything (encapsulation)
 - support for cylindrical and polar coordinates
