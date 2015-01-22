@@ -11,6 +11,111 @@
 
 using namespace std;
 
+
+Mesh_Node::Mesh_Node(double x, double y, double z, bool boundary, unsigned int num_connections, unsigned int core_group){
+  _x = x;
+  _y = y;
+  _z = z;
+  _boundary = boundary;
+  _num_connections = num_connections;
+  _core_group = core_group;
+}
+
+Mesh_Node::~Mesh_Node(){
+
+}
+
+void Mesh_Node::print_summary() const {
+  cout << "      Node: (" << _x << ", " << _y << ", " << _z 
+        << ")    boundary?: " << (_boundary? "yes" : "no") 
+        << "   num_connections: " << _num_connections
+        << "   core_group: " << _core_group << endl;
+}
+
+void Mesh_Node::print_detailed() const{
+  cout << "      Node: (" << _x << ", " << _y << ", " << _z 
+        << ")    boundary?: " << (_boundary? "yes" : "no") 
+        << "   num_connections: " << _num_connections
+        << "   core_group: " << _core_group << endl;
+}
+//******************************************************************************************************
+Mesh_Element::Mesh_Element(std::vector<unsigned int> vertex_inds){
+  _vertex_inds = vertex_inds;
+  recalc_type();
+}
+
+Mesh_Element::~Mesh_Element(){
+
+}
+
+void Mesh_Element::print_summary() const{
+  cout << " Mesh Element: " << _vertex_inds.size() << " vertices: ";
+  for (unsigned int i=0; i<_vertex_inds.size(); i++){
+    cout << _vertex_inds.at(i) << ", ";
+  }
+  cout << endl;
+  return;
+}
+
+void Mesh_Element::print_detailed() const{
+  cout << " Mesh Element: " << _vertex_inds.size() << " vertices: ";
+  for (unsigned int i=0; i<_vertex_inds.size(); i++){
+    cout << _vertex_inds.at(i) << ", ";
+  }
+  cout << endl;
+  return;
+}
+
+double Mesh_Element::area() const{
+
+}
+
+double Mesh_Element::perimeter() const{
+
+}
+
+void Mesh_Element::remove_vertex(unsigned int vert_ind){
+
+}
+
+void Mesh_Element::add_vertex(unsigned int vert_ind, unsigned int position=0){
+
+  recalc_type();
+}
+ 
+void Mesh_Element::recalc_type(){
+  switch (_vertex_inds.size()){
+    case 0:
+      _element_type = EMPTY;
+      break;
+
+    case 1:
+      _element_type = POINT;
+      break;
+
+    case 2:
+      _element_type = LINE;
+      break;
+
+    case 3:
+      _element_type = TRIANGLE;
+      break;
+
+    case 4:
+      _element_type = QUADRANGLE;
+      break;
+
+    case 5:
+      _element_type = UNKNOWN;
+      break;
+
+    otherwise:
+      _element_type = UNKNOWN;
+  }
+}
+
+//******************************************************************************************************
+
 Node::Node(){
   x = 0;
   y = 0; 

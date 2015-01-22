@@ -8,8 +8,10 @@
 #include <list>
 #include <map>
 #include <string>
+#include <fstream>
 
 enum MeshType{REGULAR=0, UNSTRUCTURED_TRI=1, UNSTRUCTURED_QUAD=2};
+enum ElementType{EMPTY, POINT, LINE, TRIANGLE, QUADRANGLE, TETRAHEDRON, UNKNOWN};
 
 class Node{
 public:
@@ -48,9 +50,70 @@ private:
 
 };
 
-class Mesh_Element{
+
+class Mesh_Node{
+public:
+  Mesh_Node(double x, double y, double z=0.0, bool boundary=false, unsigned int num_connections=0, unsigned int core_group=false);
+  ~Mesh_Node();
+
+  // utils
+  void print_summary() const;
+  void print_detailed() const;
+  double dist_sq()
+
+  // member data access
+  double x() const {return _x;};
+  double y() const {return _y;};
+  double z() const {return _z;};
+  unsigned int num_connections() const {return _num_connections;};
+  unsigned int core_group() const {return _core_group;};
+  bool boundary() const {return _boundary;};
+
+  // mutators
+  void add_connection() {_num_connections++;};
+  void remove_connection() {_num_connections--;};
+  void set_x(double xval) {_x = xval;};
+  void set_y(double yval) {_y = yval;};
+  void set_z(double zval) {_z = zval;};
+  void set_boundary(bool boundary) {_boundary = boundary;};
+  void set_core_group(unsigned int core_group) {_core_group = core_group;};
+  void set_num_connections(unsigned int num_connections) {_num_connections = num_connections;};
+
+private:
+  double _x, _y, _z; 
+  bool _boundary;
+  unsigned int _core_group, _num_connections;
 
 };
+
+
+class Mesh_Element{
+public:
+  Mesh_Element(std::vector<unsigned int> vertex_inds);
+  ~Mesh_Element();
+
+  // utils
+  void print_summary() const;
+  void print_detailed() const;
+  double area() const;
+  double perimeter() const;
+
+  // member data access
+  unsigned int num_vertices() const {return _vertex_inds.size();};
+  std::vector<unsigned int> vertex_inds() const {return _vertex_inds;};
+
+  // mutators
+  void remove_vertex(unsigned int vert_ind);
+  void add_vertex(unsigned int vert_ind, unsigned int position=0);
+
+private:
+  std::vector<unsigned int> _vertex_inds;
+  ElementType _element_type; // 
+
+  void recalc_type();
+
+};
+
 
 class Static_Mesh{
 public:
@@ -76,7 +139,7 @@ public:
 
 
   // node access
-  const Node node(unsigned int i) const {return _nodes[i];};
+  const Mesh_Node node(unsigned int i) const {return _nodes[i];};
 
   // property interaction
   void add_phys_property(std::string property_name, double * property_vals);
@@ -92,7 +155,13 @@ public:
                       double zmin=0.0, double zmax=0.0);
   //static Mesh * create_unstructured_tri_simple();
 
-protected:
+  // reading and writing files
+  static Static_Mesh * read_MSH(std::string filename, unsigned int byte_offset=0);
+  static Static_Mesh * read_NEU(std::string filename, unsigned int byte_offset=0);
+  static Static_Mesh * read_CAS(std::string filename, unsigned int byte_offset=0);
+  void write_MSH(std::string filename) const;
+  void write_NEU(std::string filename) const;
+  void write_CAS(std::string filename) const;
 
 private:
   // metadata
@@ -100,8 +169,8 @@ private:
   unsigned int _num_dims, _nodecount, _elementcount;
   double _xmin, _xmax, _ymin, _ymax, _zmin, _zmax;
 
-  // nodes and keys
-  Node * _nodes; // contains keys to the nodes
+  // nodes and elements
+  Mesh_Node * _nodes; // array of nodes
 
   // user-defined propertie for the mesh
   std::vector<std::string> _phys_property_names; // the name position in this vector corresponds with the position of the property value in the node
