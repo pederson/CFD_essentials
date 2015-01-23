@@ -5,19 +5,16 @@
 using namespace std;
 
 // define the functions that build a mesh from a parametric model
-Mutable_Mesh * build_simple_mesh_2d(parametric_model_2d * model,  double res, double xmin, double xmax, double ymin, double ymax, vector<double> bg_properties){
+Static_Mesh * build_simple_mesh_2d(parametric_model_2d * model,  double res, double xmin, double xmax, double ymin, double ymax, vector<double> bg_properties){
 
 	// first create a regular grid
-	Mutable_Mesh * outmesh = Mutable_Mesh::create_regular_grid(res, xmin, xmax, ymin, ymax);
+	Static_Mesh * outmesh = Static_Mesh::create_regular_grid(res, xmin, xmax, ymin, ymax);
 
-	// transfer property names to the mesh
+	// transfer background properties to the mesh
 	vector<string> prop_names = model->get_phys_property_names();
 	for (auto i=0; i<prop_names.size(); i++){
-		outmesh->add_phys_property(prop_names.at(i));
+		outmesh->add_phys_property(prop_names.at(i), bg_properties.at(i));
 	}
-
-	// set background props
-	outmesh->set_background_properties(bg_properties);
 
 	vector<geometric_object_2d> shape_tree = model->get_object_tree();
 	// perform point-in-polygon queries for each part of the parametric model
@@ -28,19 +25,19 @@ Mutable_Mesh * build_simple_mesh_2d(parametric_model_2d * model,  double res, do
 	return outmesh;
 }
 
-void add_shape_to_mesh(Mutable_Mesh * meshmodel, geometric_object_2d * shape, double res){
+void add_shape_to_mesh(Static_Mesh * mesh, geometric_object_2d * shape, double res){
 	// convert the shape to a hull
 	Hull * shull = approximate_parametric_shape_2d(shape, res);
-	Node * n;
+	Mesh_Node * n;
 
 	// do a point in polygon search for each mesh point
-	unsigned int nnodes = meshmodel->get_num_nodes();
+	unsigned int nnodes = mesh->nodecount();
 	for (auto i=0; i<nnodes; i++){
-		n = meshmodel->get_node_ptr(meshmodel->get_node_key(i));
+		n = mesh->node(i);
 
 		// add the shape properties if it returns true
-		if (shull->contains_point({n->x, n->y})){
-			n->phys_properties = shape->get_phys_properties();
+		if (shull->contains_point({n->x(), n->y()})){
+			n->setphys_properties = shape->get_phys_properties();
 		}
 	}
 

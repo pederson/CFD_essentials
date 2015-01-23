@@ -199,6 +199,12 @@ private:
 
 };
 
+class prism: public geometric_object{
+public:
+
+private:
+};
+
 class cone: public geometric_object{
 public:
 

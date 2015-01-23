@@ -795,7 +795,79 @@ mesh_visualixer::~mesh_visualixer(){
 	//if (normals != NULL) delete[] normals;
 }
 
+void mesh_visualixer::add_mesh(Static_Mesh * mesh){
+	Mesh_Node nd;
+	Mesh_Element elem;
 
+	num_vertices = mesh->nodecount();
+	num_per_vertex = 6;
+	num_vertex_points = 3;
+	vertices = new GLfloat[num_vertices*num_per_vertex];
+	for (unsigned int i=0; i<num_vertices; i++){
+		nd = mesh->node(i);
+
+		vertices[i*num_per_vertex] = nd.x();
+		vertices[i*num_per_vertex + 1] = nd.y();
+		vertices[i*num_per_vertex + 2] = nd.z();
+		if (nd.boundary()){
+			vertices[i*num_per_vertex + 3] = 1.0f;
+			vertices[i*num_per_vertex + 4] = 0.0f;
+			vertices[i*num_per_vertex + 5] = 0.0f;
+		}
+		else {
+			vertices[i*num_per_vertex + 3] = 1.0f;
+			vertices[i*num_per_vertex + 4] = 1.0f;
+			vertices[i*num_per_vertex + 5] = 1.0f;
+		}
+	}
+
+	// figure out how many line elements are needed
+	// DYLAN_TODO: this should really be more rigorous and count for each element
+	//				in the mesh
+	num_line_elements = 0;
+	for (unsigned int i=0; i<mesh->elementcount(); i++){
+		elem = mesh->element(i);
+		num_line_elements += elem.num_vertices();
+	}
+
+	num_elements = num_vertices;
+	num_per_element = 1;
+	num_per_line_element = 2;
+	elements = new GLuint[num_elements*num_per_element + num_line_elements*num_per_line_element];
+	line_element_offset = num_elements*num_per_element;
+	// set the point elements
+	for (unsigned int i=0; i<num_vertices; i++){
+		elements[i] = i;
+	}
+
+	
+	unsigned int jp1, elements_added=0;
+	for (unsigned int i=0; i<mesh->elementcount(); i++){
+		elem = mesh->element(i);
+		for (unsigned int j=0; j<elem.num_vertices(); j++){
+			jp1 = (j+1)%elem.num_vertices();
+			elements[line_element_offset + elements_added*num_per_line_element] = elem.vertex_ind(j);
+			elements[line_element_offset + elements_added*num_per_line_element + 1] = elem.vertex_ind(jp1);
+
+			elements_added++;
+		}
+	}
+
+	xmax = mesh->xmax();
+	ymax = mesh->ymax();
+	zmax = mesh->zmax();
+	xmin = mesh->xmin();
+	ymin = mesh->ymin();
+	zmin = mesh->zmin();
+
+	model_centroid[0] = (xmax + xmin)/2.0;
+	model_centroid[1] = (ymax + ymin)/2.0;
+	model_centroid[2] = (zmax + zmin)/2.0;
+
+	return;
+}
+
+/*
 void mesh_visualixer::add_mesh(Mutable_Mesh * mesh){
 	Node * node;
 	std::map<unsigned int, unsigned int> key_to_index_map;
@@ -870,6 +942,7 @@ void mesh_visualixer::add_mesh(Mutable_Mesh * mesh){
 
 	return;
 }
+*/
 
 void mesh_visualixer::set_test_case(){
 	num_vertices = 100;
@@ -1411,6 +1484,7 @@ int main(int argc, char * argv[]){
 	mycvis->run();
 	delete mycvis;
 
+	/*
 	// test the mesh viewer
 	mesh_visualixer * mymvis = new mesh_visualixer();
 	Mutable_Mesh * mesh = Mutable_Mesh::create_regular_grid(0.1, (unsigned int)50, (unsigned int)50);//, (unsigned int)30);
@@ -1418,7 +1492,17 @@ int main(int argc, char * argv[]){
 	mymvis->add_mesh(mesh);
 	mymvis->run();
 	delete mymvis;
+	*/
 
+	// test the mesh viewer
+	mesh_visualixer * mymvis = new mesh_visualixer();
+	Static_Mesh * mesh = Static_Mesh::create_regular_grid_n(0.1, 50, 50);//, (unsigned int)30);
+	//mymvis->set_test_case();
+	mymvis->add_mesh(mesh);
+	mymvis->run();
+	delete mymvis;
+
+	/*
 	// test a mesh viewer made from a parametric model
 	mesh_visualixer * paravis = new mesh_visualixer();
 	parametric_model_2d my_param2;
@@ -1439,6 +1523,7 @@ int main(int argc, char * argv[]){
 	paravis->run();
 	delete paravis;
 	delete paramesh;
+	*/
 
   // test the mesh model viewer
   mesh_model_visualixer * mymmodvis = new mesh_model_visualixer();

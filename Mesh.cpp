@@ -34,14 +34,14 @@ Mesh_Node::~Mesh_Node(){
 }
 
 void Mesh_Node::print_summary() const {
-  cout << "      Node: (" << _x << ", " << _y << ", " << _z 
+  cout << "  Mesh_Node: (" << _x << ", " << _y << ", " << _z 
         << ")    boundary?: " << (_boundary? "yes" : "no") 
         << "   num_connections: " << _num_connections
         << "   core_group: " << _core_group << endl;
 }
 
 void Mesh_Node::print_detailed() const{
-  cout << "      Node: (" << _x << ", " << _y << ", " << _z 
+  cout << "  Mesh_Node: (" << _x << ", " << _y << ", " << _z 
         << ")    boundary?: " << (_boundary? "yes" : "no") 
         << "   num_connections: " << _num_connections
         << "   core_group: " << _core_group << endl;
@@ -74,9 +74,9 @@ Mesh_Element::~Mesh_Element(){
 }
 
 void Mesh_Element::print_summary() const{
-  cout << " Mesh Element: " << _vertex_inds.size() << " vertices: ";
+  cout << "  Mesh_Element: num_elements: " << _vertex_inds.size() << " vertices: ";
   for (unsigned int i=0; i<_vertex_inds.size(); i++){
-    cout << _vertex_inds.at(i) << ", ";
+    cout << _vertex_inds.at(i) << "  ";
   }
   cout << endl;
   return;
@@ -161,7 +161,32 @@ Static_Mesh::~Static_Mesh(){
 }
 
 void Static_Mesh::print_summary() const{
+  cout << " " << endl;
+  cout << "******** Static Mesh Summary ******** " << endl;
+  if (_nodes.size() == 0){
+    cout << "  Mesh is empty!" << endl;
+    return;
+  }
 
+  cout << "  type: ";
+  if (_mesh_type==REGULAR) cout << "REGULAR" << endl;
+  else if (_mesh_type==UNSTRUCTURED_TRI) cout << "UNSTRUCTURED TRI" << endl;
+  else if (_mesh_type==UNSTRUCTURED_QUAD) cout << "UNSTRUCTURED QUAD" << endl;
+  else cout << "MESH_UNKNOWN" << endl;
+  cout << "  num_dims: " << _num_dims << endl;
+  cout << "  last node: ";
+  _nodes.back().print_summary();
+  cout << "  last element: ";
+  _elements.back().print_summary();
+  cout << "  num_nodes: " << _nodes.size() << endl;
+  cout << "  num_elements: " << _elements.size() << endl;
+  cout << "  x extents: [" << _xmin << ", " << _xmax << "]" << endl;
+  cout << "  y extents: [" << _ymin << ", " << _ymax << "]" << endl;
+  cout << "  z extents: [" << _zmin << ", " << _zmax << "]" << endl;
+  cout << "************************************* " << endl;
+  cout << " " << endl;
+
+  return;
 }
 
 void Static_Mesh::print_detailed() const{
@@ -291,17 +316,19 @@ void Static_Mesh::reset_property(std::string property_name, double reset_val){
 }
 
 
-Static_Mesh * Static_Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
+Static_Mesh * Static_Mesh::create_regular_grid_n(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
                     unsigned int num_nodes_z){
-  Static_Mesh * mesh_out = new Static_Mesh;
+  Static_Mesh * mesh_out = new Static_Mesh();
   mesh_out->create_regular_grid_internal(res, num_nodes_x, num_nodes_y, num_nodes_z, 0.0, 0.0, 0.0);
+
+  return mesh_out;
 }
 
 
-Static_Mesh * Static_Mesh::create_regular_grid(double res, double xmin, double xmax, double ymin, double ymax,
+Static_Mesh * Static_Mesh::create_regular_grid_b(double res, double xmin, double xmax, double ymin, double ymax,
                     double zmin, double zmax){
   unsigned int num_nodes_x, num_nodes_y, num_nodes_z;
-  Static_Mesh * mesh_out = new Static_Mesh;
+  Static_Mesh * mesh_out = new Static_Mesh();
 
   num_nodes_x = (unsigned int)((xmax-xmin)/res) + 1;
   num_nodes_y = (unsigned int)((ymax-ymin)/res) + 1;
@@ -365,6 +392,9 @@ void Static_Mesh::create_regular_grid_internal(double res, unsigned int num_node
   // set boundary properties for nodes
   if (num_nodes_y==1 && num_nodes_z==1){
     i=0; j=0;
+    for (k=0; k<num_nodes_x; k++){
+      _nodes.at(k).set_num_connections(2);
+    }
     _nodes.at(0).set_boundary(true);
     _nodes.at(0).set_num_connections(1);
     _nodes.at(num_nodes_x-1).set_boundary(true);
@@ -398,68 +428,74 @@ void Static_Mesh::create_regular_grid_internal(double res, unsigned int num_node
         }
       }
     }
-
     _nodes.at(0).set_num_connections(3);
     _nodes.at(num_nodes_x-1).set_num_connections(3);
-    _nodes.at((num_nodes_y-1)*num_nodes_x).set_num_connections(3);
-    _nodes.at((num_nodes_y-1)*num_nodes_x+num_nodes_x-1).set_num_connections(3);
-    _nodes.at(num_nodes_z*(num_nodes_x*num_nodes_y)).set_num_connections(3);
-    _nodes.at(num_nodes_z*(num_nodes_x*num_nodes_y)+num_nodes_x-1).set_num_connections(3);
-    _nodes.at(num_nodes_z*(num_nodes_x*num_nodes_y)+(num_nodes_y-1)*num_nodes_x).set_num_connections(3);
-    _nodes.at(num_nodes_z*(num_nodes_x*num_nodes_y)+(num_nodes_y-1)*num_nodes_x+num_nodes_x-1).set_num_connections(3);
+    _nodes.at((num_nodes_y)*(num_nodes_x)-1).set_num_connections(3);
+    _nodes.at((num_nodes_y-1)*(num_nodes_x)+1).set_num_connections(3);
+
+    _nodes.at((num_nodes_z-1)*(num_nodes_x)*(num_nodes_y)-1).set_num_connections(3);
+    _nodes.at((num_nodes_z-1)*(num_nodes_x)*(num_nodes_y)-1 + num_nodes_x-1).set_num_connections(3);
+    _nodes.at((num_nodes_z-1)*(num_nodes_x)*(num_nodes_y)-1 + (num_nodes_y)*(num_nodes_x)-1).set_num_connections(3);
+    _nodes.at((num_nodes_z)*(num_nodes_x)*(num_nodes_y)-1).set_num_connections(3);
   }
   
 
   // create elements
   unsigned int blf, tlf, brf, trf, blb, tlb, brb, trb, nex, ney, nez; 
+  
   if (num_nodes_y==1 && num_nodes_z==1){
     nex = num_nodes_x-1;
-    _elements.resize(nex);
+    _elements.resize((num_nodes_x-1));
+    i=0; j=0;
     for (k=0; k<_elements.size(); k++){
+      glidx = i*(nex*ney) + j*(nex) + k;
       blf = k;
       brf = k+1;
-      _elements.at(i).set_vertex_inds({blf, brf});
-      _elements.at(i).set_element_type(LINE);
+      _elements.at(glidx).set_vertex_inds({blf, brf});
+      _elements.at(glidx).set_element_type(LINE);
     }
   }
   else if (num_nodes_z==1){
     nex = num_nodes_x-1;
     ney = num_nodes_y-1;
-    _elements.resize((num_nodes_x-1)*(num_nodes_y-1)*(num_nodes_z-1));
+    _elements.resize((num_nodes_x-1)*(num_nodes_y-1));
     for (j=0; j<ney; j++){
       for (k=0; k<nex; k++){
+        glidx = i*(nex*ney) + j*(nex) + k;
         blf = k;
         brf = k+1;
-        trf = (nex+1)*j + k+1;
-        tlf = (nex+1)*j + k;
-        _elements.at(i).set_vertex_inds({blf, brf, trf, tlf});
-        _elements.at(i).set_element_type(QUADRANGLE);
+        trf = (nex+1)*(j+1) + k+1;
+        tlf = (nex+1)*(j+1) + k;
+        _elements.at(glidx).set_vertex_inds({blf, brf, trf, tlf});
+        _elements.at(glidx).set_element_type(QUADRANGLE);
       }
     }
   }
   else{
+    cout << "made it here" << endl;
+    _elements.resize((num_nodes_x-1)*(num_nodes_y-1)*(num_nodes_z-1));
     nex = num_nodes_x-1;
     ney = num_nodes_y-1;
     nez = num_nodes_z-1;
     for (i=0; i<nez; i++){
       for (j=0; j<ney; j++){
         for (k=0; k<nex; k++){
+          glidx = i*(nex*ney) + j*(nex) + k;
           blf = k;
           brf = k+1;
-          trf = (nex+1)*j + k+1;
-          tlf = (nex+1)*j + k;
-          blb = (nex+1)*(ney+1)*i + k;
-          brb = (nex+1)*(ney+1)*i + k+1;
-          trb = (nex+1)*(ney+1)*i + k+1 + (nex+1)*j;
-          tlb = (nex+1)*(ney+1)*i + k + (nex+1)*j;
-          _elements.at(i).set_vertex_inds({blf, brf, trf, tlf, blb, brb, trb, tlb});
-          _elements.at(i).set_element_type(HEXAHEDRON);
+          trf = (nex+1)*(j+1) + k+1;
+          tlf = (nex+1)*(j+1) + k;
+          blb = (nex+1)*(ney+1)*(i+1) + k;
+          brb = (nex+1)*(ney+1)*(i+1) + k+1;
+          trb = (nex+1)*(ney+1)*(i+1) + k+1 + (nex+1)*(j+1);
+          tlb = (nex+1)*(ney+1)*(i+1) + k + (nex+1)*(j+1);
+          _elements.at(glidx).set_vertex_inds({blf, brf, trf, tlf, blb, brb, trb, tlb});
+          _elements.at(glidx).set_element_type(HEXAHEDRON);
         }
       }
     }
   }
   
-
   Mesh_Node nd;
   // translate to the correct centerpoint
   for (auto i=0; i<_nodes.size(); i++){
@@ -487,13 +523,6 @@ void Static_Mesh::calc_extents(){
   }
   return;
 }
-
-
-
-
-
-
-
 
 
 
@@ -1226,11 +1255,14 @@ Mutable_Mesh * Mutable_Mesh::create_regular_grid(double res, double xmin, double
 
 #ifdef _TEST_
 
+// to compile: g++ -std=c++11 Mesh.cpp -o mesh_test
+
 int main(int argc, char * argv[]){
 
   // test constructor
   cout << "testing mesh constructor..." << flush;
   Mutable_Mesh * mymesh = new Mutable_Mesh();
+  //Static_Mesh * mymesh = new Static_Mesh();
   cout << "succeeded" << endl;
 
   // test num nodes setting
@@ -1244,6 +1276,14 @@ int main(int argc, char * argv[]){
   cout << "succeeded" << endl;
   mesh_reg_1d->print_summary();
   mesh_reg_1d->get_node_ptr(50)->print_summary();
+
+  // test creation of a regular mesh
+  cout << "testing regular grid creation..." << flush;
+  Static_Mesh * mesh_reg_1ds = Static_Mesh::create_regular_grid_n(0.1, 100, 50, 10);
+  cout << "succeeded" << endl;
+  mesh_reg_1ds->print_summary();
+  mesh_reg_1ds->node(50).print_summary();
+  mesh_reg_1ds->element(50).print_summary();
 
   // test the node addition
   cout << "testing node insertion..." << flush;

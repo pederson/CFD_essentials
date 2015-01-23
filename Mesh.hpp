@@ -105,6 +105,7 @@ public:
 
   // member data access
   unsigned int num_vertices() const {return _vertex_inds.size();};
+  unsigned int vertex_ind(unsigned int i) const {return _vertex_inds.at(i);};
   std::vector<unsigned int> vertex_inds() const {return _vertex_inds;};
 
   // mutators
@@ -161,12 +162,13 @@ public:
   void add_phys_property(std::string property_name, const double & property_vals);
   void add_phys_property(std::string proprety_name, double init_val);
   void reset_property(std::string property_name, double reset_val=0.0);
+  void set_phys_property(std::string property_name, unsigned int i, double val){_phys_properties.at(property_name).at(i) = val;};
 
 
   // grid generation and refinement
-  static Static_Mesh * create_regular_grid(double res, unsigned int num_nodes_x, unsigned int num_nodes_y = 1, 
+  static Static_Mesh * create_regular_grid_n(double res, unsigned int num_nodes_x, unsigned int num_nodes_y = 1, 
                       unsigned int num_nodes_z = 1); // create a regular grid of points and store it in the mesh
-  static Static_Mesh * create_regular_grid(double res, double xmin, double xmax, double ymin=0.0, double ymax=0.0,
+  static Static_Mesh * create_regular_grid_b(double res, double xmin, double xmax, double ymin=0.0, double ymax=0.0,
                       double zmin=0.0, double zmax=0.0);
   
   //static Mesh * create_unstructured_tri_simple();
