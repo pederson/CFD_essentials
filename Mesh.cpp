@@ -11,6 +11,14 @@
 
 using namespace std;
 
+Mesh_Node::Mesh_Node(){
+  _x = 0.0;
+  _y = 0.0;
+  _z = 0.0;
+  _boundary = false;
+  _core_group = 0;
+  _num_connections = 0;
+}
 
 Mesh_Node::Mesh_Node(double x, double y, double z, bool boundary, unsigned int num_connections, unsigned int core_group){
   _x = x;
@@ -51,6 +59,10 @@ double Mesh_Node::area_tri(Mesh_Node * node1, Mesh_Node * node2, Mesh_Node * nod
               (node1->x()*node3->y() - node3->x()*node1->y()));
 }
 //******************************************************************************************************
+
+Mesh_Element::Mesh_Element(){
+  _element_type = EMPTY;
+}
 
 Mesh_Element::Mesh_Element(std::vector<unsigned int> vertex_inds){
   _vertex_inds = vertex_inds;
@@ -235,35 +247,82 @@ const double & Static_Mesh::data(std::string fieldname) const{
   return _phys_properties.at(fieldname).front();
 }
 
+void Static_Mesh::add_phys_property(std::string property_name, const double & property_vals){
+  for (unsigned int i=0; i<_phys_property_names.size(); i++){
+    if (_phys_property_names.at(i).compare(property_name) == 0){
+      cout << property_name << " is already in the mesh... doing nothing" << endl;
+      return;
+    }
+  }
+
+  vector<double> prop;
+  const double * valptr = &property_vals;
+  prop.assign(_nodes.size(), 0.0);
+  for (unsigned int i=0; i<_nodes.size(); i++) prop.at(i) = valptr[i];
+  _phys_property_names.push_back(property_name);
+  _phys_properties[property_name] = prop;
+  return;
+}
+
+void Static_Mesh::add_phys_property(std::string property_name, double init_val){
+  for (unsigned int i=0; i<_phys_property_names.size(); i++){
+    if (_phys_property_names.at(i).compare(property_name) == 0){
+      cout << property_name << " is already in the mesh... doing nothing" << endl;
+      return;
+    }
+  }
+
+  vector<double> prop;
+  prop.assign(_nodes.size(), init_val);
+  _phys_property_names.push_back(property_name);
+  _phys_properties[property_name] = prop;
+  return;
+}
+
+void Static_Mesh::reset_property(std::string property_name, double reset_val){
+  for (unsigned int i=0; i<_phys_property_names.size(); i++){
+    if (_phys_property_names.at(i).compare(property_name) == 0){
+      cout << property_name << " is already in the mesh... doing nothing" << endl;
+      return;
+    }
+  }
+
+  return;
+}
+
+
+Static_Mesh * Static_Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
+                    unsigned int num_nodes_z){
+  Static_Mesh * mesh_out = new Static_Mesh;
+  mesh_out->create_regular_grid_internal(res, num_nodes_x, num_nodes_y, num_nodes_z, 0.0, 0.0, 0.0);
+}
+
+
+Static_Mesh * Static_Mesh::create_regular_grid(double res, double xmin, double xmax, double ymin, double ymax,
+                    double zmin, double zmax){
+  unsigned int num_nodes_x, num_nodes_y, num_nodes_z;
+  Static_Mesh * mesh_out = new Static_Mesh;
+
+  num_nodes_x = (unsigned int)((xmax-xmin)/res) + 1;
+  num_nodes_y = (unsigned int)((ymax-ymin)/res) + 1;
+  num_nodes_z = (unsigned int)((zmax-zmin)/res) + 1;
+
+  //cout << "nx: " << num_nodes_x << "  ny: " << num_nodes_y << "  nz: " << num_nodes_z << endl;
+  double xcen, ycen, zcen;
+  xcen = (xmin + xmax)/2.0;
+  ycen = (ymin + ymax)/2.0;
+  zcen = (zmin + zmax)/2.0;
+  mesh_out->create_regular_grid_internal(res, num_nodes_x, num_nodes_y, num_nodes_z, xcen, ycen, zcen);
+
+  return mesh_out;
+}
+
+
 /*
-void add_phys_property(std::string property_name, double & property_vals){
+Static_Mesh * Static_Mesh::read_MSH(std::string filename, unsigned int byte_offset=0){
   
 }
 
-void add_phys_property(std::string proprety_name, double init_val){
-
-}
-
-void reset_property(std::string property_name, double reset_val=0.0){
-
-}
-
-/*
-Static_Mesh * Static_Mesh::create_regular_grid(double res, unsigned int num_nodes_x, unsigned int num_nodes_y = 1, 
-                    unsigned int num_nodes_z = 1){
-
-}
-
-Static_Mesh * Static_Mesh::create_regular_grid(double res, double xmin, double xmax, double ymin=0.0, double ymax=0.0,
-                    double zmin=0.0, double zmax=0.0){
-
-}
-
-Static_Mesh * Static_Mesh::read_MSH(std::string filename, unsigned int byte_offset=0){
-
-}
-
-/*
 Static_Mesh * Static_Mesh::read_NEU(std::string filename, unsigned int byte_offset=0);
 Static_Mesh * Static_Mesh::read_CAS(std::string filename, unsigned int byte_offset=0);
 void Static_Mesh::write_MSH(std::string filename) const;
@@ -271,9 +330,181 @@ void Static_Mesh::write_NEU(std::string filename) const;
 void Static_Mesh::write_CAS(std::string filename) const;
 */
 
-void Static_Mesh::calc_extents(){
+void Static_Mesh::create_regular_grid_internal(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
+                      unsigned int num_nodes_z,
+                      double xcen, double ycen, double zcen){
+  // declare vars
 
+  // do some input checking
+
+  // initialize things and fill in metadata
+  _mesh_type = REGULAR;
+  _nodes.resize(num_nodes_x*num_nodes_y*num_nodes_z);
+  if (num_nodes_y==1 && num_nodes_z==1){
+    _num_dims = 1;
+  }
+  else if (num_nodes_z==1){
+    _num_dims = 2;
+  }
+  else{
+    _num_dims = 3;
+  }
+
+  // create nodes
+  unsigned int glidx, i, j, k;
+  for (i=0; i<num_nodes_z; i++){
+    for (j=0; j<num_nodes_y; j++){
+      for (k=0; k<num_nodes_x; k++){
+        glidx = i*(num_nodes_x*num_nodes_y) + j*(num_nodes_x) + k;
+        _nodes.at(glidx).set_z(double(i)*res);
+        _nodes.at(glidx).set_y(double(j)*res);
+        _nodes.at(glidx).set_x(double(k)*res);
+      }
+    }
+  }
+  // set boundary properties for nodes
+  if (num_nodes_y==1 && num_nodes_z==1){
+    i=0; j=0;
+    _nodes.at(0).set_boundary(true);
+    _nodes.at(0).set_num_connections(1);
+    _nodes.at(num_nodes_x-1).set_boundary(true);
+    _nodes.at(num_nodes_x-1).set_num_connections(1);
+  }
+  else if (num_nodes_z==1){
+    i=0;
+    for (j=0; j<num_nodes_y; j++){
+      for (k=0; k<num_nodes_x; k++){
+        glidx = i*(num_nodes_x*num_nodes_y) + j*(num_nodes_x) + k;
+        if (k==0 || k==num_nodes_x-1 || j==0 || j==num_nodes_y-1){
+          _nodes.at(glidx).set_boundary(true);
+          _nodes.at(glidx).set_num_connections(3);
+        }
+      }
+    }
+    _nodes.at(0).set_num_connections(2);
+    _nodes.at(num_nodes_x-1).set_num_connections(2);
+    _nodes.at((num_nodes_y-1)*num_nodes_x).set_num_connections(2);
+    _nodes.at((num_nodes_y-1)*num_nodes_x+num_nodes_x-1).set_num_connections(2);
+  }
+  else{
+    for (i=0; i<num_nodes_z; i++){
+      for (j=0; j<num_nodes_y; j++){
+        for (k=0; k<num_nodes_x; k++){
+          glidx = i*(num_nodes_x*num_nodes_y) + j*(num_nodes_x) + k;
+          if (k==0 || k==num_nodes_x-1 || j==0 || j==num_nodes_y-1 || i==0 || i==num_nodes_z-1){
+            _nodes.at(glidx).set_boundary(true);
+            _nodes.at(glidx).set_num_connections(5);
+          }
+        }
+      }
+    }
+
+    _nodes.at(0).set_num_connections(3);
+    _nodes.at(num_nodes_x-1).set_num_connections(3);
+    _nodes.at((num_nodes_y-1)*num_nodes_x).set_num_connections(3);
+    _nodes.at((num_nodes_y-1)*num_nodes_x+num_nodes_x-1).set_num_connections(3);
+    _nodes.at(num_nodes_z*(num_nodes_x*num_nodes_y)).set_num_connections(3);
+    _nodes.at(num_nodes_z*(num_nodes_x*num_nodes_y)+num_nodes_x-1).set_num_connections(3);
+    _nodes.at(num_nodes_z*(num_nodes_x*num_nodes_y)+(num_nodes_y-1)*num_nodes_x).set_num_connections(3);
+    _nodes.at(num_nodes_z*(num_nodes_x*num_nodes_y)+(num_nodes_y-1)*num_nodes_x+num_nodes_x-1).set_num_connections(3);
+  }
+  
+
+  // create elements
+  unsigned int blf, tlf, brf, trf, blb, tlb, brb, trb, nex, ney, nez; 
+  if (num_nodes_y==1 && num_nodes_z==1){
+    nex = num_nodes_x-1;
+    _elements.resize(nex);
+    for (k=0; k<_elements.size(); k++){
+      blf = k;
+      brf = k+1;
+      _elements.at(i).set_vertex_inds({blf, brf});
+      _elements.at(i).set_element_type(LINE);
+    }
+  }
+  else if (num_nodes_z==1){
+    nex = num_nodes_x-1;
+    ney = num_nodes_y-1;
+    _elements.resize((num_nodes_x-1)*(num_nodes_y-1)*(num_nodes_z-1));
+    for (j=0; j<ney; j++){
+      for (k=0; k<nex; k++){
+        blf = k;
+        brf = k+1;
+        trf = (nex+1)*j + k+1;
+        tlf = (nex+1)*j + k;
+        _elements.at(i).set_vertex_inds({blf, brf, trf, tlf});
+        _elements.at(i).set_element_type(QUADRANGLE);
+      }
+    }
+  }
+  else{
+    nex = num_nodes_x-1;
+    ney = num_nodes_y-1;
+    nez = num_nodes_z-1;
+    for (i=0; i<nez; i++){
+      for (j=0; j<ney; j++){
+        for (k=0; k<nex; k++){
+          blf = k;
+          brf = k+1;
+          trf = (nex+1)*j + k+1;
+          tlf = (nex+1)*j + k;
+          blb = (nex+1)*(ney+1)*i + k;
+          brb = (nex+1)*(ney+1)*i + k+1;
+          trb = (nex+1)*(ney+1)*i + k+1 + (nex+1)*j;
+          tlb = (nex+1)*(ney+1)*i + k + (nex+1)*j;
+          _elements.at(i).set_vertex_inds({blf, brf, trf, tlf, blb, brb, trb, tlb});
+          _elements.at(i).set_element_type(HEXAHEDRON);
+        }
+      }
+    }
+  }
+  
+
+  Mesh_Node nd;
+  // translate to the correct centerpoint
+  for (auto i=0; i<_nodes.size(); i++){
+    nd = _nodes.at(i);
+    nd.set_x(nd.x() + xcen);
+    nd.set_y(nd.y() + ycen);
+    nd.set_z(nd.z() + zcen);
+  }
+  calc_extents();
+
+  return;
 }
+
+void Static_Mesh::calc_extents(){
+  // declare vars
+
+  _xmax = _nodes.at(0).x(); _xmin = _nodes.at(0).x(); _ymax = _nodes.at(0).y(); _ymin = _nodes.at(0).y(); _zmax = _nodes.at(0).z(); _zmin = _nodes.at(0).z();
+  for (unsigned int i=1; i<_nodes.size(); i++){
+    if (_nodes.at(i).x() > _xmax) _xmax = _nodes.at(i).x();
+    if (_nodes.at(i).x() < _xmin) _xmin = _nodes.at(i).x();
+    if (_nodes.at(i).y() > _ymax) _ymax = _nodes.at(i).y();
+    if (_nodes.at(i).y() < _ymin) _ymin = _nodes.at(i).y();
+    if (_nodes.at(i).z() > _zmax) _zmax = _nodes.at(i).z();
+    if (_nodes.at(i).z() < _zmin) _zmin = _nodes.at(i).z();
+  }
+  return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //******************************************************************************************************

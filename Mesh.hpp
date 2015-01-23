@@ -13,7 +13,7 @@
 
 
 enum MeshType{REGULAR=0, UNSTRUCTURED_TRI=1, UNSTRUCTURED_QUAD=2, MESH_UNKNOWN};
-enum ElementType{EMPTY, POINT, LINE, TRIANGLE, QUADRANGLE, TETRAHEDRON, UNKNOWN};
+enum ElementType{EMPTY, POINT, LINE, TRIANGLE, QUADRANGLE, TETRAHEDRON, HEXAHEDRON, PRISM, PYRAMID, UNKNOWN};
 
 class Node{
 public:
@@ -55,6 +55,7 @@ private:
 
 class Mesh_Node{
 public:
+  Mesh_Node();
   Mesh_Node(double x, double y, double z=0.0, bool boundary=false, unsigned int num_connections=0, unsigned int core_group=false);
   ~Mesh_Node();
 
@@ -92,6 +93,7 @@ private:
 
 class Mesh_Element{
 public:
+  Mesh_Element();
   Mesh_Element(std::vector<unsigned int> vertex_inds);
   ~Mesh_Element();
 
@@ -108,6 +110,8 @@ public:
   // mutators
   void remove_vertex(unsigned int vert_ind);
   void add_vertex(unsigned int vert_ind, int position=-1);
+  void set_vertex_inds(std::vector<unsigned int> vertex_inds) {_vertex_inds = vertex_inds;};
+  void set_element_type(ElementType type) {_element_type = type;};
 
 private:
   std::vector<unsigned int> _vertex_inds;
@@ -141,8 +145,9 @@ public:
   double zmax() const {return _zmax;};
 
 
-  // node access
-  const Mesh_Node node(unsigned int i) const {return _nodes[i];};
+  // node and element access
+  Mesh_Node & node(unsigned int i) {return _nodes.at(i);};
+  Mesh_Element & element(unsigned int i) {return _elements.at(i);};
 
   // property interaction and access
   const double & x();
@@ -153,7 +158,7 @@ public:
   const unsigned int & num_connections();
   const double & data(std::string fieldname) const;
 
-  void add_phys_property(std::string property_name, double * property_vals);
+  void add_phys_property(std::string property_name, const double & property_vals);
   void add_phys_property(std::string proprety_name, double init_val);
   void reset_property(std::string property_name, double reset_val=0.0);
 
@@ -163,6 +168,7 @@ public:
                       unsigned int num_nodes_z = 1); // create a regular grid of points and store it in the mesh
   static Static_Mesh * create_regular_grid(double res, double xmin, double xmax, double ymin=0.0, double ymax=0.0,
                       double zmin=0.0, double zmax=0.0);
+  
   //static Mesh * create_unstructured_tri_simple();
 
   // reading and writing files
@@ -192,7 +198,9 @@ private:
   std::vector<double> _x, _y, _z;
   std::vector<unsigned int> _core_group, _num_connections;
 
-
+  void create_regular_grid_internal(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
+                      unsigned int num_nodes_z,
+                      double xcen=0.0, double ycen=0.0, double zcen=0.0);
   void calc_extents();
 
 };
