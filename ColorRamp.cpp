@@ -138,9 +138,9 @@ rgb ColorRamp::get_ramp_color(float norm_value) const{
     cout << "woops: rgb interpolation not yet functional" << endl;
   }
   else{
-    out = ramp[(unsigned int)(norm_value*(num_values+1))];
+    if (norm_value == 1.0) out = ramp[(unsigned int)(norm_value*(num_values-1))];
+    else out = ramp[(unsigned int)(norm_value*(num_values))];
   }
-
   return out;
 }
 

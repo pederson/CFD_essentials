@@ -215,6 +215,9 @@ void visualixer::onKeyboard(int key, int scancode, int action, int modifiers){
 	        up_vec
 	    	);
 	}
+	else if (key == GLFW_KEY_C && action == GLFW_PRESS){
+		cycleColorRamp();
+	}
 }
 
 void visualixer::onCursorPosition(double xpos, double ypos){
@@ -302,6 +305,15 @@ void visualixer::recalcCamera(){
 	cout << "camera_side: " << camera_side.x << ", " << camera_side.y << ", " << camera_side.z << endl;
 	cout << "camera_up: " << camera_up.x << ", " << camera_up.y << ", " << camera_up.z << endl;
 	*/
+}
+
+void visualixer::cycleColorRamp(){
+	if (colorby==NULL) return;
+	color_ramp.cycle_ramp();
+	onColors();
+	onRender();
+	onShaders();
+	return;
 }
 
 
@@ -399,7 +411,7 @@ void visualixer::onRender(){
   glGenBuffers (1, &vbo);
 
   // visualizer specific data definitions
-  // this one happens to be XYRGB
+  // this one happens to be XYZRGB
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, num_vertices * num_per_vertex * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
@@ -1530,8 +1542,8 @@ int main(int argc, char * argv[]){
 	my_param2.add_object(rectangle(0.05, 0.1, {0.0, 0.35}, my_param2.get_material("Air")));
 	paramesh = build_simple_mesh_2d(&my_param2, 0.02, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
 	paravis->add_mesh(paramesh);
-	paravis->set_color_ramp(CRamp::DIVERGENT_1);
-	paravis->set_colorby(&paramesh->data("Epsilon_rel"));
+	paravis->set_color_ramp(CRamp::DIVERGENT_9);
+	paravis->set_colorby(&paramesh->data("Mu_rel"));
 	paravis->run();
 	delete paravis;
 	delete paramesh;

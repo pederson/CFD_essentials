@@ -117,6 +117,7 @@ protected:
 	virtual void onReshape(int new_width, int new_height);
 	virtual void SetFullscreen(bool bFullscreen);
 	virtual void recalcCamera();
+	virtual void cycleColorRamp();
 
 
 	// functions related to the context creation and main loop rendering
