@@ -57,6 +57,39 @@ void visualixer::set_color_ramp(CRamp ramp_name){
   color_ramp.set_ramp(ramp_name);
 }
 
+
+template <class T>
+void visualixer::set_colorby(const T * color_by){
+	if (colorby == NULL) colorby = new float[num_vertices];
+	for (unsigned int i=0; i<num_vertices; i++) colorby[i] = float(color_by[i]);
+
+
+	colorby_max = colorby[0]; colorby_min = colorby[0];
+	for (auto i=1; i<num_vertices; i++){
+		if (colorby[i] > colorby_max) colorby_max = colorby[i];
+		if (colorby[i] < colorby_min) colorby_min = colorby[i];
+	}
+
+	return;
+}
+
+/*
+void visualixer::set_colorby(const bool * color_by){
+	if (colorby == NULL) colorby = new float[num_vertices];
+	for (unsigned int i=0; i<num_vertices; i++){
+		if (color_by[i]) colorby[i] = 1.0;
+		else colorby[i] = 0.0;
+	}
+
+	colorby_max = colorby[0]; colorby_min = colorby[0];
+	for (auto i=1; i<num_vertices; i++){
+		if (colorby[i] > colorby_max) colorby_max = colorby[i];
+		if (colorby[i] < colorby_min) colorby_min = colorby[i];
+	}
+
+	return;
+}
+
 void visualixer::set_colorby(const float * color_by){
 	if (colorby == NULL) colorby = new float[num_vertices];
 	for (unsigned int i=0; i<num_vertices; i++) colorby[i] = float(color_by[i]);
@@ -82,6 +115,10 @@ void visualixer::set_colorby(const double * color_by){
 
 	return;
 }
+*/
+
+
+
 
 void visualixer::run(){
 	onInit();
@@ -1508,16 +1545,6 @@ int main(int argc, char * argv[]){
 	mycvis->run();
 	delete mycvis;
 
-	/*
-	// test the mesh viewer
-	mesh_visualixer * mymvis = new mesh_visualixer();
-	Mutable_Mesh * mesh = Mutable_Mesh::create_regular_grid(0.1, (unsigned int)50, (unsigned int)50);//, (unsigned int)30);
-	//mymvis->set_test_case();
-	mymvis->add_mesh(mesh);
-	mymvis->run();
-	delete mymvis;
-	*/
-
 	// test the mesh viewer
 	mesh_visualixer * mymvis = new mesh_visualixer();
 	Static_Mesh * mesh = Static_Mesh::create_regular_grid_n(0.1, 50, 50, 10);//, (unsigned int)30);
@@ -1543,7 +1570,8 @@ int main(int argc, char * argv[]){
 	paramesh = build_simple_mesh_2d(&my_param2, 0.02, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
 	paravis->add_mesh(paramesh);
 	paravis->set_color_ramp(CRamp::DIVERGENT_9);
-	paravis->set_colorby(&paramesh->data("Mu_rel"));
+	paravis->set_colorby(&paramesh->data("Epsilon_rel"));
+	//paravis->set_colorby(&paramesh->num_connections());
 	paravis->run();
 	delete paravis;
 	delete paramesh;

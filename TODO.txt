@@ -1,14 +1,17 @@
 TODO:
 
-- follow these rules: https://www.doc.ic.ac.uk/lab/cplus/c++.rules/chap7.html
+- follow these conventions: https://www.doc.ic.ac.uk/lab/cplus/c++.rules/chap7.html
 	- inline member functions
 	- copy constructor
 	- const member functions
 	- virtual destructor for base classes
 	- assignment operator
 	- always const reference to member data from public member functions
+	- private member data should be prefixed with "_" and the public
+	  data access should be a const & function with the same name but
+	  without the "_" (e.g. _xdata and xdata()) 
 
-- Change functions to accept const references instead of pointers
+- Change functions to accept const pointers and then copy the data
 - Change functions to output const references instead of pointers
 - Shading and Light source for mesh model viewer
 - Create getters and setters for everything (encapsulation)
@@ -17,16 +20,17 @@ TODO:
 - Create separate Static Mesh and Mutable Mesh classes
 
 - add a ::print_detailed() function to classes for detailed debugging
-- figure out a good way to store base data, optional data, and user-defined data in classes
-	- idea: store it all in raw pointer arrays
-	- access the raw data by a ::.data(std::string field) call
-- make constructors that work with raw data pointers
+	- idea: store it all in vectors
+	- query the size to determine if 
+	- access the user-defined data (const reference) by a ::.data(std::string field) call
+- make constructors that work with raw data const pointers
 
 - Interface for libMesh, Eigen, Boost, CGAL, and any other third party libraries that are useful
 
-- make separate object files that can be used elsewhere, like Point. Or use CGAL. 
+- make separate object files that can be used elsewhere, like Point. Or use CGAL.
 
 - Something is wrong with the Hull->contains_point() code...
+- color by boundary doesn't work properly
 
 - Check out the Fluent .cas, .msh and .neu files to see how they are stored. Maybe also be able to read these in and print them out. Also check out Ansys .cmdb and .dsdb format.
 - Check out AutoCAD .dxf file format for parametric models. Also look at .obj and .ply formats. Look at .step and .iges files for 3D models

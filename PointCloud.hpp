@@ -96,12 +96,20 @@ public:
 protected:
 
 private:
-  double *x, *y, *z, *gpstime;
+  // metadata
   double xmin, xmax, ymin, ymax, zmin, zmax, gpst_min, gpst_max;
   unsigned int pointcount;
+
+  // required data
+  double *x, *y, *z;
+
+  // optional data
+  double *gpstime;
   unsigned short *intensity;
   unsigned char *classification;
   rgb48 * RGB;
+
+  // user-defined data
   std::vector<std::string> extra_data_names;
   std::map<std::string, double *> extra_data;
 
