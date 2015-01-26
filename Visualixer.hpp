@@ -8,7 +8,7 @@
 
 #include <iostream>
 #include <vector>
-//#include <thread>
+#include <string>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,11 +51,12 @@ public:
 	virtual ~visualixer();
 
 	// getters and setters
-	virtual char * get_window_name() {return window_name;};
-	virtual void set_window_name(char * w_name);
+	virtual std::string get_window_name() {return window_name;};
+	virtual void set_window_name(std::string w_name);
 
 	virtual void set_color_ramp(CRamp ramp_name);
-	virtual void set_colorby(float * color_by); // set a color by array
+	virtual void set_colorby(const float * color_by); // set a color by array
+	virtual void set_colorby(const double * color_by);
 	//virtual void set_color_by(std::string property_name); // set color by array 
   //virtual void set_custom_colors(rgb * colors);
 	//void set_lock_rotation(bool lock_mode);
@@ -68,7 +69,7 @@ public:
 protected:
 	// model related data
 	GLFWwindow * window_ptr;
-	char * window_name;
+	std::string window_name;
 	GLfloat * vertices;
 	GLuint * elements;
   	ColorRamp color_ramp;

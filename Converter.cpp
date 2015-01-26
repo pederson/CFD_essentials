@@ -8,7 +8,7 @@ using namespace std;
 Static_Mesh * build_simple_mesh_2d(parametric_model_2d * model,  double res, double xmin, double xmax, double ymin, double ymax, vector<double> bg_properties){
 
 	// first create a regular grid
-	Static_Mesh * outmesh = Static_Mesh::create_regular_grid(res, xmin, xmax, ymin, ymax);
+	Static_Mesh * outmesh = Static_Mesh::create_regular_grid_b(res, xmin, xmax, ymin, ymax);
 
 	// transfer background properties to the mesh
 	vector<string> prop_names = model->get_phys_property_names();
@@ -19,25 +19,27 @@ Static_Mesh * build_simple_mesh_2d(parametric_model_2d * model,  double res, dou
 	vector<geometric_object_2d> shape_tree = model->get_object_tree();
 	// perform point-in-polygon queries for each part of the parametric model
 	for (auto i=0; i<shape_tree.size(); i++){
-		add_shape_to_mesh(outmesh, &shape_tree.at(i), res);
+		add_shape_to_mesh(outmesh, &shape_tree.at(i), model, res);
 	}
 
 	return outmesh;
 }
 
-void add_shape_to_mesh(Static_Mesh * mesh, geometric_object_2d * shape, double res){
+void add_shape_to_mesh(Static_Mesh * mesh, geometric_object_2d * shape, parametric_model_2d * model, double res){
 	// convert the shape to a hull
 	Hull * shull = approximate_parametric_shape_2d(shape, res);
-	Mesh_Node * n;
+	Mesh_Node n;
+
+	vector<string> propnames = model->get_phys_property_names();
+	vector<double> shapeprops = shape->get_phys_properties();
 
 	// do a point in polygon search for each mesh point
 	unsigned int nnodes = mesh->nodecount();
 	for (auto i=0; i<nnodes; i++){
-		n = mesh->node(i);
-
-		// add the shape properties if it returns true
-		if (shull->contains_point({n->x(), n->y()})){
-			n->setphys_properties = shape->get_phys_properties();
+		n = mesh->node(i);		// add the shape properties if it returns true
+		if (shull->contains_point({n.x(), n.y()})){
+			for (unsigned int j=0; j<propnames.size(); j++)
+				mesh->set_phys_property(propnames.at(j), i, shapeprops.at(j));
 		}
 	}
 

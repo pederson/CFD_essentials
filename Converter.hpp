@@ -30,7 +30,7 @@ Static_Mesh * build_simple_mesh_2d(parametric_model_2d * model,  double res, dou
 //Mesh * build_delaunay_mesh_2d(parametric_model_2d * model, double xmin, double xmax, double ymin, double ymax, double res);
 
 // helpers
-void add_shape_to_mesh(Mutable_Mesh * mesh, geometric_object_2d * shape, double res);
+void add_shape_to_mesh(Static_Mesh * mesh, geometric_object_2d * shape, parametric_model_2d * model, double res);
 Hull * approximate_parametric_shape_2d(geometric_object_2d * model, double res);
 
 

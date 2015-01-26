@@ -21,7 +21,6 @@ visualixer::visualixer(){
 	visualixer_active = false;
 	window_name = "Visualixer";
 	lock_rotation = false;
-	//color_ramp = NULL;
 	colorby = NULL;
 	vertices = NULL;
 	elements = NULL;
@@ -43,13 +42,13 @@ visualixer::~visualixer(){
 		}
 	}
 
-	delete[] window_name;
+	//delete[] window_name;
 	//if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
 }
 
-void visualixer::set_window_name(char * w_name){
+void visualixer::set_window_name(string w_name){
 	window_name = w_name;
 	return;
 }
@@ -58,8 +57,22 @@ void visualixer::set_color_ramp(CRamp ramp_name){
   color_ramp.set_ramp(ramp_name);
 }
 
-void visualixer::set_colorby(float * color_by){
-	colorby = color_by;
+void visualixer::set_colorby(const float * color_by){
+	if (colorby == NULL) colorby = new float[num_vertices];
+	for (unsigned int i=0; i<num_vertices; i++) colorby[i] = float(color_by[i]);
+
+	colorby_max = colorby[0]; colorby_min = colorby[0];
+	for (auto i=1; i<num_vertices; i++){
+		if (colorby[i] > colorby_max) colorby_max = colorby[i];
+		if (colorby[i] < colorby_min) colorby_min = colorby[i];
+	}
+
+	return;
+}
+
+void visualixer::set_colorby(const double * color_by){
+	if (colorby == NULL) colorby = new float[num_vertices];
+	for (unsigned int i=0; i<num_vertices; i++) colorby[i] = float(color_by[i]);
 
 	colorby_max = colorby[0]; colorby_min = colorby[0];
 	for (auto i=1; i<num_vertices; i++){
@@ -339,7 +352,7 @@ void visualixer::onInit(){
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
 
-	window_ptr = glfwCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, window_name, NULL, NULL); // Windowed
+	window_ptr = glfwCreateWindow(DEFAULT_WIDTH, DEFAULT_HEIGHT, window_name.c_str(), NULL, NULL); // Windowed
 	//GLFWwindow* window = glfwCreateWindow(400, 300, "OpenGL", glfwGetPrimaryMonitor(), NULL); // Fullscreen
 	if ( !window_ptr ) {
 		cout << "failed to create window" << endl;
@@ -591,7 +604,6 @@ cloud_visualixer::cloud_visualixer(){
 	visualixer_active = false;
 	window_name = "Cloud Visualixer";
 	lock_rotation = false;
-	//color_ramp = NULL;
 	colorby = NULL;
 	vertices = NULL;
 	elements = NULL;
@@ -613,7 +625,7 @@ cloud_visualixer::~cloud_visualixer(){
 		}
 	}
 
-	delete[] window_name;
+	//delete[] window_name;
 	//if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
@@ -788,7 +800,7 @@ mesh_visualixer::~mesh_visualixer(){
 		}
 	}
 
-	delete[] window_name;
+	//delete[] window_name;
 	//if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
@@ -1110,7 +1122,7 @@ mesh_model_visualixer::~mesh_model_visualixer(){
 		}
 	}
 
-	delete[] window_name;
+	//delete[] window_name;
 	//if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
@@ -1496,17 +1508,17 @@ int main(int argc, char * argv[]){
 
 	// test the mesh viewer
 	mesh_visualixer * mymvis = new mesh_visualixer();
-	Static_Mesh * mesh = Static_Mesh::create_regular_grid_n(0.1, 50, 50);//, (unsigned int)30);
+	Static_Mesh * mesh = Static_Mesh::create_regular_grid_n(0.1, 50, 50, 10);//, (unsigned int)30);
 	//mymvis->set_test_case();
 	mymvis->add_mesh(mesh);
 	mymvis->run();
 	delete mymvis;
 
-	/*
+	
 	// test a mesh viewer made from a parametric model
 	mesh_visualixer * paravis = new mesh_visualixer();
 	parametric_model_2d my_param2;
-	Mutable_Mesh * paramesh;
+	Static_Mesh * paramesh;
 	my_param2.set_model_name("Display Test Circle");
 	my_param2.add_physical_property("Epsilon_rel");
 	my_param2.add_physical_property("Mu_rel");
@@ -1519,11 +1531,11 @@ int main(int argc, char * argv[]){
 	paramesh = build_simple_mesh_2d(&my_param2, 0.02, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
 	paravis->add_mesh(paramesh);
 	paravis->set_color_ramp(CRamp::DIVERGENT_1);
-	paravis->set_colorby(paramesh->get_phys_property_ptr("Epsilon_rel"));
+	paravis->set_colorby(&paramesh->data("Epsilon_rel"));
 	paravis->run();
 	delete paravis;
 	delete paramesh;
-	*/
+	
 
   // test the mesh model viewer
   mesh_model_visualixer * mymmodvis = new mesh_model_visualixer();

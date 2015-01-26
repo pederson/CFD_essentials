@@ -272,7 +272,7 @@ const double & Static_Mesh::data(std::string fieldname) const{
   return _phys_properties.at(fieldname).front();
 }
 
-void Static_Mesh::add_phys_property(std::string property_name, const double & property_vals){
+void Static_Mesh::add_phys_property(std::string property_name, const double * property_vals){
   for (unsigned int i=0; i<_phys_property_names.size(); i++){
     if (_phys_property_names.at(i).compare(property_name) == 0){
       cout << property_name << " is already in the mesh... doing nothing" << endl;
@@ -281,9 +281,9 @@ void Static_Mesh::add_phys_property(std::string property_name, const double & pr
   }
 
   vector<double> prop;
-  const double * valptr = &property_vals;
+  //const double * valptr = &property_vals;
   prop.assign(_nodes.size(), 0.0);
-  for (unsigned int i=0; i<_nodes.size(); i++) prop.at(i) = valptr[i];
+  for (unsigned int i=0; i<_nodes.size(); i++) prop.at(i) = property_vals[i];
   _phys_property_names.push_back(property_name);
   _phys_properties[property_name] = prop;
   return;
@@ -462,8 +462,8 @@ void Static_Mesh::create_regular_grid_internal(double res, unsigned int num_node
     for (j=0; j<ney; j++){
       for (k=0; k<nex; k++){
         glidx = i*(nex*ney) + j*(nex) + k;
-        blf = k;
-        brf = k+1;
+        blf = (nex+1)*(j) + k;
+        brf = (nex+1)*(j) + k+1;
         trf = (nex+1)*(j+1) + k+1;
         tlf = (nex+1)*(j+1) + k;
         _elements.at(glidx).set_vertex_inds({blf, brf, trf, tlf});
@@ -481,28 +481,33 @@ void Static_Mesh::create_regular_grid_internal(double res, unsigned int num_node
       for (j=0; j<ney; j++){
         for (k=0; k<nex; k++){
           glidx = i*(nex*ney) + j*(nex) + k;
-          blf = k;
-          brf = k+1;
-          trf = (nex+1)*(j+1) + k+1;
-          tlf = (nex+1)*(j+1) + k;
-          blb = (nex+1)*(ney+1)*(i+1) + k;
-          brb = (nex+1)*(ney+1)*(i+1) + k+1;
-          trb = (nex+1)*(ney+1)*(i+1) + k+1 + (nex+1)*(j+1);
-          tlb = (nex+1)*(ney+1)*(i+1) + k + (nex+1)*(j+1);
+          blf = (nex+1)*(ney+1)*(i) + (nex+1)*(j) + k;
+          brf = (nex+1)*(ney+1)*(i) + (nex+1)*(j) + k+1;
+          trf = (nex+1)*(ney+1)*(i) + (nex+1)*(j+1) + k+1;
+          tlf = (nex+1)*(ney+1)*(i) + (nex+1)*(j+1) + k;
+          blb = (nex+1)*(ney+1)*(i+1) + (nex+1)*(j) + k;
+          brb = (nex+1)*(ney+1)*(i+1) + (nex+1)*(j) + k+1;
+          trb = (nex+1)*(ney+1)*(i+1) + (nex+1)*(j+1) + k+1;
+          tlb = (nex+1)*(ney+1)*(i+1) + (nex+1)*(j+1) + k;
           _elements.at(glidx).set_vertex_inds({blf, brf, trf, tlf, blb, brb, trb, tlb});
           _elements.at(glidx).set_element_type(HEXAHEDRON);
         }
       }
     }
   }
-  
-  Mesh_Node nd;
+
+  // translate the center to 0,0
+  double xc, yc, zc;
+  xc = ((num_nodes_x-1)*res)/2.0;
+  yc = ((num_nodes_y-1)*res)/2.0;
+  zc = ((num_nodes_z-1)*res)/2.0;
+
   // translate to the correct centerpoint
   for (auto i=0; i<_nodes.size(); i++){
-    nd = _nodes.at(i);
-    nd.set_x(nd.x() + xcen);
-    nd.set_y(nd.y() + ycen);
-    nd.set_z(nd.z() + zcen);
+    //nd = _nodes.at(i);
+    _nodes.at(i).set_x(_nodes.at(i).x() + xcen - xc);
+    _nodes.at(i).set_y(_nodes.at(i).y() + ycen - yc);
+    _nodes.at(i).set_z(_nodes.at(i).z() + zcen - zc);
   }
   calc_extents();
 
