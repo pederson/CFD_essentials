@@ -149,6 +149,7 @@ public:
   // node and element access
   Mesh_Node & node(unsigned int i) {return _nodes.at(i);};
   Mesh_Element & element(unsigned int i) {return _elements.at(i);};
+  Mesh_Node & regular_node(unsigned int i, unsigned int j=0, unsigned int k=0);
 
   // property interaction and access
   const double & x();
@@ -186,6 +187,7 @@ private:
   MeshType _mesh_type;
   unsigned int _num_dims;
   double _xmin, _xmax, _ymin, _ymax, _zmin, _zmax;
+  unsigned int _num_nodes_x, _num_nodes_y, _num_nodes_z;
 
   // nodes and elements
   std::vector<Mesh_Node> _nodes; // array of nodes
@@ -203,6 +205,8 @@ private:
   void create_regular_grid_internal(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
                       unsigned int num_nodes_z,
                       double xcen=0.0, double ycen=0.0, double zcen=0.0);
+
+  unsigned int reg_inds_to_glob_ind(unsigned int i, unsigned int j=0, unsigned int k=0);
   void calc_extents();
 
 };

@@ -193,6 +193,10 @@ void Static_Mesh::print_detailed() const{
 
 }
 
+Mesh_Node & Static_Mesh::regular_node(unsigned int i, unsigned int j, unsigned int k){
+  return _nodes.at(reg_inds_to_glob_ind(i,j,k));
+}
+
 const double & Static_Mesh::x(){
   if (_x.size() != _nodes.size()){
     _x.clear();
@@ -365,6 +369,9 @@ void Static_Mesh::create_regular_grid_internal(double res, unsigned int num_node
   // do some input checking
 
   // initialize things and fill in metadata
+  _num_nodes_x = num_nodes_x;
+  _num_nodes_y = num_nodes_y;
+  _num_nodes_z = num_nodes_z;
   _mesh_type = REGULAR;
   _nodes.resize(num_nodes_x*num_nodes_y*num_nodes_z);
   if (num_nodes_y==1 && num_nodes_z==1){
@@ -382,7 +389,8 @@ void Static_Mesh::create_regular_grid_internal(double res, unsigned int num_node
   for (i=0; i<num_nodes_z; i++){
     for (j=0; j<num_nodes_y; j++){
       for (k=0; k<num_nodes_x; k++){
-        glidx = i*(num_nodes_x*num_nodes_y) + j*(num_nodes_x) + k;
+        //glidx = i*(num_nodes_x*num_nodes_y) + j*(num_nodes_x) + k;
+        glidx = reg_inds_to_glob_ind(k,j,i);
         _nodes.at(glidx).set_z(double(i)*res);
         _nodes.at(glidx).set_y(double(j)*res);
         _nodes.at(glidx).set_x(double(k)*res);
@@ -512,6 +520,10 @@ void Static_Mesh::create_regular_grid_internal(double res, unsigned int num_node
   calc_extents();
 
   return;
+}
+
+unsigned int Static_Mesh::reg_inds_to_glob_ind(unsigned int i, unsigned int j, unsigned int k){
+  return k*(_num_nodes_x*_num_nodes_y) + j*(_num_nodes_x) + i;
 }
 
 void Static_Mesh::calc_extents(){
