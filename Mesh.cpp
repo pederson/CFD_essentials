@@ -369,6 +369,7 @@ void Static_Mesh::create_regular_grid_internal(double res, unsigned int num_node
   // do some input checking
 
   // initialize things and fill in metadata
+  _res = res;
   _num_nodes_x = num_nodes_x;
   _num_nodes_y = num_nodes_y;
   _num_nodes_z = num_nodes_z;

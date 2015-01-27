@@ -14,6 +14,7 @@
 enum BC_Type{DIRICHLET, NEUMANN, CAUCHY, PERIODIC}
 class BoundaryConditions{
 public:
+	BoundaryConditions(Static_Mesh * mesh, BC_Type type, std::string property, double val);
 	BoundaryConditions();
 	~BoundaryConditions();
 
