@@ -62,6 +62,18 @@ protected:
 	std::vector<vertex_2d> vertices;
 };
 
+/*
+class gaussian_2d : public geometric_object{
+public:
+	gaussian_2d(double sigma_x, double sigma_y, double amplitude, double min_val, vertex_2d center_, std::vector<double> properties);
+
+protected:
+
+
+};
+*/
+
+
 class rectangle : public geometric_object_2d{
 public:
 	//rectangle(double width_, double height_);
@@ -156,16 +168,21 @@ public:
 	
 	void add_physical_property(std::string property_name);
 	void add_material(std::string material_name, std::vector<double> phys_props);
-	void add_object(geometric_object_2d new_object);
+	void add_object(geometric_object_2d * new_object);
 
-	std::vector<geometric_object_2d> get_object_tree(){return ordered_object_tree;};
+	//std::vector<geometric_object_2d> get_object_tree(){return ordered_object_tree;};
+	std::vector<void *> get_object_tree(){return ordered_object_tree;};
 	std::vector<std::string> get_phys_property_names(){return phys_property_names;};
 
 protected:
 	std::string model_name;
-	std::vector<geometric_object_2d> ordered_object_tree;
+	//std::vector<geometric_object_2d> ordered_object_tree;
+	std::vector<void *> ordered_object_tree;
+	std::vector<std::string> object_tree_names;
 	std::vector<std::string> phys_property_names;
 	std::map<std::string, std::vector<double> > materials;
+
+	void add_object(void * new_object, std::string object_name);
 
 };
 

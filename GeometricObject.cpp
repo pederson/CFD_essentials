@@ -9,7 +9,8 @@ geometric_object_2d::geometric_object_2d(){
 
 void geometric_object_2d::print_summary(){
 	//cout << "printing summary" << flush;
-	cout << "Shape: " << object_name << "   Center: (" << center.x << ", " << center.y << ")" ;
+	cout << "\tShape: " << object_name << "   Center: (" << center.x << ", " << center.y << ")" ;
+	cout << " base print summary" << endl;
 	for (auto i=0; i<parameters.size(); i++) cout << "   " << parameter_names.at(i) << ": " << parameters.at(parameter_names.at(i));
 	cout << endl;
 }
@@ -123,13 +124,40 @@ parametric_model_2d::parametric_model_2d(){
 }
 
 void parametric_model_2d::print_summary(){
+	cout << " " << endl;
+	cout << "********* Parametric Model Summary **********" << endl;
 	cout << "Model Name: " << model_name << endl;
 	for (auto i=0; i<ordered_object_tree.size(); i++){
-		ordered_object_tree.at(i).print_summary();
+		//ordered_object_tree.at(i).print_summary();
+		if (object_tree_names.at(i).compare("Rectangle") == 0){
+			//geometric_object_2d * geobj = static_cast<geometric_object_2d *>(ordered_object_tree.at(i));
+			//rectangle * obj = dynamic_cast<rectangle *>(geobj);
+			//obj->print_summary();
+			((rectangle *)ordered_object_tree.at(i))->print_summary();
+		}
+		else if(object_tree_names.at(i).compare("Circle") == 0){
+			//circle * circ = (circle *) ordered_object_tree.at(i);
+			//circ->print_summary();
+			((circle *)ordered_object_tree.at(i))->print_summary();
+		}
+		else if(object_tree_names.at(i).compare("Ellipse") == 0){
+			((ellipse *)ordered_object_tree.at(i))->print_summary();
+		}
+		else if(object_tree_names.at(i).compare("Triangle") == 0){
+			((triangle *)ordered_object_tree.at(i))->print_summary();
+		}
+		else if(object_tree_names.at(i).compare("Polygon") == 0){
+			((polygon *) ordered_object_tree.at(i))->print_summary();
+		}
+		else {
+			((geometric_object_2d *) ordered_object_tree.at(i))->print_summary();
+		}
 		//if (ordered_object_tree.at(i).get_object_name.compare("Circle")){
 		//	cout << "Circle radius: " << endl;//<< ordered_object_tree.at(i).radius << endl;
 		//}
 	}
+	cout << "*********************************************" << endl;
+	cout << " " << endl;
 	return;
 }
 
@@ -150,8 +178,37 @@ void parametric_model_2d::add_material(std::string material_name, std::vector<do
 	materials[material_name] = phys_props;
 }
 
-void parametric_model_2d::add_object(geometric_object_2d new_object){
+void parametric_model_2d::add_object(geometric_object_2d * new_object){
+	if (new_object->get_object_name().compare("Rectangle") == 0){
+		rectangle * obj = dynamic_cast<rectangle *> (new_object);
+		add_object((void *)(obj), "Rectangle");
+	}
+	else if(new_object->get_object_name().compare("Circle") == 0){
+		circle * obj = dynamic_cast<circle *> (new_object);
+		add_object((void *)obj, "Circle");
+	}
+	else if(new_object->get_object_name().compare("Ellipse") == 0){
+		ellipse * obj = dynamic_cast<ellipse *> (new_object);
+		add_object((void *)obj, "Ellipse");
+	}
+	else if(new_object->get_object_name().compare("Triangle") == 0){
+		triangle * obj = dynamic_cast<triangle *> (new_object);
+		add_object((void *)obj, "Triangle");
+	}
+	else if(new_object->get_object_name().compare("Polygon") == 0){
+		polygon * obj = dynamic_cast<polygon *> (new_object);
+		add_object((void *)obj, "Polygon");
+	}
+	else {
+		add_object((void *) new_object, new_object->get_object_name());
+	}
+	
+}
+
+void parametric_model_2d::add_object(void * new_object, string object_name){
+	object_tree_names.push_back(object_name);
 	ordered_object_tree.push_back(new_object);
+	
 }
 
 
@@ -252,7 +309,7 @@ mesh_model * mesh_model::read_STL(string filename, unsigned int byte_offset){
 
 #ifdef _TEST_
 
-// to compile: g++ -std=c++11 geometric_object.cpp -o geometric_object_test
+// to compile: g++ -std=c++11 GeometricObject.cpp -o GeometricObject_test
 
 int main(int argc, char * argv[]){
 	// declare vars
@@ -268,19 +325,23 @@ int main(int argc, char * argv[]){
 
 	// test rectangle
 	cout << "Testing rectangle..." ;
-	my_param2.add_object(rectangle(1.0, 2.0, vertex_2d(0.0, 0.0), my_param2.get_material("Air")));
+	rectangle newrect = rectangle(1.0, 2.0, vertex_2d(0.0, 0.0), my_param2.get_material("Air"));
+	my_param2.add_object(&newrect);
 	cout << "Success!" << endl;
 	// test circle
 	cout << "Testing circle..." ;
-	my_param2.add_object(circle(0.75, vertex_2d(0.5, 1.0), my_param2.get_material("Dielectric")));
+	circle newcirc = circle(0.75, vertex_2d(0.5, 1.0), my_param2.get_material("Dielectric"));
+	my_param2.add_object(&newcirc);
 	cout << "Success!" << endl;
 	// test ellipse
 	cout << "Testing ellipse..." ;
-	my_param2.add_object(ellipse(0.3, 0.2, 0.0, vertex_2d(-1.0, -1.0), my_param2.get_material("Dielectric")));
+	ellipse newell = ellipse(0.3, 0.2, 0.0, vertex_2d(-1.0, -1.0), my_param2.get_material("Dielectric"));
+	my_param2.add_object(&newell);
 	cout << "Success!" << endl;
 	// test triangle
 	cout << "Testing triangle..." ;
-	my_param2.add_object(triangle(vertex_2d(3.0, 1.0), vertex_2d(4.0, 0.0), vertex_2d(2.0, 0.0), my_param2.get_material("Air")));
+	triangle newtri = triangle(vertex_2d(3.0, 1.0), vertex_2d(4.0, 0.0), vertex_2d(2.0, 0.0), my_param2.get_material("Air"));
+	my_param2.add_object(&newtri);
 	cout << "Success!" << endl;
 
 	my_param2.print_summary();
