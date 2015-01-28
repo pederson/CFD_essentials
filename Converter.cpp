@@ -16,10 +16,10 @@ Static_Mesh * build_simple_mesh_2d(parametric_model_2d * model,  double res, dou
 		outmesh->add_phys_property(prop_names.at(i), bg_properties.at(i));
 	}
 
-	vector<geometric_object_2d> shape_tree = model->get_object_tree();
+	vector<void *> shape_tree = model->get_object_tree();
 	// perform point-in-polygon queries for each part of the parametric model
 	for (auto i=0; i<shape_tree.size(); i++){
-		add_shape_to_mesh(outmesh, &shape_tree.at(i), model, res);
+		add_shape_to_mesh(outmesh, (geometric_object_2d *)shape_tree.at(i), model, res);
 	}
 
 	return outmesh;
@@ -27,19 +27,41 @@ Static_Mesh * build_simple_mesh_2d(parametric_model_2d * model,  double res, dou
 
 void add_shape_to_mesh(Static_Mesh * mesh, geometric_object_2d * shape, parametric_model_2d * model, double res){
 	// convert the shape to a hull
-	Hull * shull = approximate_parametric_shape_2d(shape, res);
-	Mesh_Node n;
-
 	vector<string> propnames = model->get_phys_property_names();
-	vector<double> shapeprops = shape->get_phys_properties();
-
+	
 	// do a point in polygon search for each mesh point
 	unsigned int nnodes = mesh->nodecount();
-	for (auto i=0; i<nnodes; i++){
-		n = mesh->node(i);		// add the shape properties if it returns true
-		if (shull->contains_point({n.x(), n.y()})){
-			for (unsigned int j=0; j<propnames.size(); j++)
-				mesh->set_phys_property(propnames.at(j), i, shapeprops.at(j));
+	if (shape->get_object_name().compare("Gaussian_2D") == 0){
+
+		gaussian_2d * gauss = dynamic_cast<gaussian_2d *>(shape);
+		double sx, sy, minval, amp;
+		const double * x, *y;
+		x = &mesh->x();
+		y = &mesh->y();
+
+		sx = gauss->sigma_x();
+		sy = gauss->sigma_y();
+		minval = gauss->min_val();
+		amp = gauss->amplitude();
+		vertex_2d cen = gauss->get_center();
+
+		for (auto i=0; i<nnodes; i++){
+			for (unsigned int j=0; j<propnames.size(); j++){
+				mesh->set_phys_property(propnames.at(j), i, amp*exp(-((x[i] - cen.x)*(x[i] - cen.x)/(2*sx*sx) + (y[i] - cen.y)*(y[i] - cen.y)/(2*sy*sy))) + minval);
+			}
+		}
+
+	}
+	else{
+		Hull * shull = approximate_parametric_shape_2d(shape, res);
+		Mesh_Node n;
+		vector<double> shapeprops = shape->get_phys_properties();
+		for (auto i=0; i<nnodes; i++){
+			n = mesh->node(i);		// add the shape properties if it returns true
+			if (shull->contains_point({n.x(), n.y()})){
+				for (unsigned int j=0; j<propnames.size(); j++)
+					mesh->set_phys_property(propnames.at(j), i, shapeprops.at(j));
+			}
 		}
 	}
 

@@ -15,6 +15,22 @@ void geometric_object_2d::print_summary(){
 	cout << endl;
 }
 
+gaussian_2d::gaussian_2d(double sigma_x, double sigma_y, double amplitude, double min_val, vertex_2d center_){
+	object_name = "Gaussian_2D";
+	center = center_;
+	//phys_properties = properties;
+
+	_sigma_x = sigma_x;
+	_sigma_y = sigma_y;
+	_amplitude = amplitude;
+	_min_val = min_val;
+}
+
+void gaussian_2d::print_summary(){
+	cout << "\tShape: " << object_name << " sigma_x: " << _sigma_x << " sigma_y: " << _sigma_y << " amplitude: " << _amplitude << " center: " << center.x << ", " << center.y << endl;
+
+}
+
 rectangle::rectangle(double width_, double height_, vertex_2d center_, std::vector<double> properties){
 	// common parameters
 	object_name = "Rectangle";

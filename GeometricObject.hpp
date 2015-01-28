@@ -62,16 +62,23 @@ protected:
 	std::vector<vertex_2d> vertices;
 };
 
-/*
-class gaussian_2d : public geometric_object{
+
+class gaussian_2d : public geometric_object_2d{
 public:
-	gaussian_2d(double sigma_x, double sigma_y, double amplitude, double min_val, vertex_2d center_, std::vector<double> properties);
+	gaussian_2d(double sigma_x, double sigma_y, double amplitude, double min_val, vertex_2d center_);
+
+	double sigma_x() const {return _sigma_x;};
+	double sigma_y() const {return _sigma_y;};
+	double amplitude() const {return _amplitude;};
+	double min_val() const {return _min_val;};
+
+	void print_summary();
 
 protected:
+	double _sigma_x, _sigma_y, _amplitude, _min_val;
 
 
 };
-*/
 
 
 class rectangle : public geometric_object_2d{
