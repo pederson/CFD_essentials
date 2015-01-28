@@ -22,7 +22,6 @@ int main(int argc, char * argv[]){
 	// convert the model into a mesh
 	paramesh = build_simple_mesh_2d(&my_param2, 0.01, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
 	
-
 	// view the mesh
 	mesh_visualixer * paravis = new mesh_visualixer();
 	paravis->add_mesh(paramesh);

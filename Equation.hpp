@@ -5,6 +5,7 @@ class Equation{
 public:
 
 private:
+	std::vector<OperatorTerm> lhs, rhs;
 
 };
 
