@@ -30,10 +30,16 @@ TODO:
 - make separate object files that can be used elsewhere, like Point. Or use CGAL.
 
 - Something is wrong with the Hull->contains_point() code...
-- color by boundary doesn't work properly
+- color by boundary doesn't work properly (b/c bool conversion to float maybe?)
 
 - Check out the Fluent .cas, .msh and .neu files to see how they are stored. Maybe also be able to read these in and print them out. Also check out Ansys .cmdb and .dsdb format.
 - Check out AutoCAD .dxf file format for parametric models. Also look at .obj and .ply formats. Look at .step and .iges files for 3D models
+
+- separate out the visualixer classes into separate files
+
+- fix the issue with the gaussian geometric object overwriting all other properties on the mesh
+
+- create an actual converter class (or decide if it is really worth it)
 
 - Doxygen comments for everything
 - Equation setter

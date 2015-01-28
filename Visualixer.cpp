@@ -2,6 +2,8 @@
 
 using namespace std;
 
+//#define _TEST_
+
 // this contains definitions for the openGL visualizer widget
 //
 // the visualizer should be able to:
@@ -57,21 +59,6 @@ void visualixer::set_color_ramp(CRamp ramp_name){
   color_ramp.set_ramp(ramp_name);
 }
 
-
-template <class T>
-void visualixer::set_colorby(const T * color_by){
-	if (colorby == NULL) colorby = new float[num_vertices];
-	for (unsigned int i=0; i<num_vertices; i++) colorby[i] = float(color_by[i]);
-
-
-	colorby_max = colorby[0]; colorby_min = colorby[0];
-	for (auto i=1; i<num_vertices; i++){
-		if (colorby[i] > colorby_max) colorby_max = colorby[i];
-		if (colorby[i] < colorby_min) colorby_min = colorby[i];
-	}
-
-	return;
-}
 
 /*
 void visualixer::set_colorby(const bool * color_by){
@@ -1518,6 +1505,7 @@ void mesh_model_visualixer::onExit(){
 //*************************************** TEST SECTION *******************************************
 //*************************************** TEST SECTION *******************************************
 
+#ifdef _TEST_
 // use cmake to compile
 #include "Converter.hpp"
 
@@ -1567,19 +1555,9 @@ int main(int argc, char * argv[]){
 	circle circout = circle(0.4, {0.0, 0.0}, my_param2.get_material("Dielectric"));
 	circle circin = circle(0.3, {0.0, 0.0}, my_param2.get_material("Air"));
 	rectangle gap = rectangle(0.05, 0.1, {0.0, 0.35}, my_param2.get_material("Air"));
-	
-	/*
-	gaussian_2d ga1 = gaussian_2d(0.1, 0.1, 10.0, 1.0, {0.0, 0.0});
-	my_param2.add_object(&ga1);
-	gaussian_2d ga2 = gaussian_2d(0.2, 0.2, 10.0, 1.0, {0.3, 0.3});
-	my_param2.add_object(&ga2);
-	gaussian_2d ga3 = gaussian_2d(0.2, 0.2, 10.0, 1.0, {-0.3, -0.3});
-	my_param2.add_object(&ga3);
-	*/
-
-	//my_param2.add_object(&circout);
-	//my_param2.add_object(&circin);
-	//my_param2.add_object(&gap);
+	my_param2.add_object(&circout);
+	my_param2.add_object(&circin);
+	my_param2.add_object(&gap);
 	paramesh = build_simple_mesh_2d(&my_param2, 0.02, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
 	paravis->add_mesh(paramesh);
 	paravis->set_color_ramp(CRamp::DIVERGENT_9);
@@ -1601,3 +1579,5 @@ int main(int argc, char * argv[]){
 	return 0;
 
 }
+
+#endif

@@ -56,8 +56,23 @@ public:
 
 	virtual void set_color_ramp(CRamp ramp_name);
 
+	//template <class T> void set_colorby(const T * color_by);
 	template <class T>
-	void set_colorby(const T * color_by);
+	void set_colorby(T const * color_by){
+		if (colorby == NULL) colorby = new float[num_vertices];
+		for (unsigned int i=0; i<num_vertices; i++) colorby[i] = float(color_by[i]);
+
+
+		colorby_max = colorby[0]; colorby_min = colorby[0];
+		for (auto i=1; i<num_vertices; i++){
+			if (colorby[i] > colorby_max) colorby_max = colorby[i];
+			if (colorby[i] < colorby_min) colorby_min = colorby[i];
+		}
+
+		return;
+	}
+
+	
 	/*
 	virtual void set_colorby(const bool * color_by);
 	virtual void set_colorby(const float * color_by); // set a color by array
