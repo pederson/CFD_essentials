@@ -34,12 +34,12 @@ TODO:
 - Check out the Fluent .cas, .msh and .neu files to see how they are stored. Maybe also be able to read these in and print them out. Also check out Ansys .cmdb and .dsdb format.
 - Check out AutoCAD .dxf file format for parametric models. Also look at .obj and .ply formats. Look at .step and .iges files for 3D models
 
-- separate out the visualixer classes into separate files
-
 - fix the issue with the gaussian geometric object overwriting all other properties on the mesh
 
 - create an actual converter class (or decide if it is really worth it)
 
+	***Visualixer todo:
+- add a labelled colorbar to the visualixer
 - Panning scale needs refinement
 - Gimbal lock is still happening during manual rotation
 
@@ -59,3 +59,4 @@ X - Property setter
 X - Geometry builder
 X - Convert everything that uses char* to use std::string instead
 X - Create separate Static Mesh and Mutable Mesh classes
+X - separate out the visualixer classes into separate files
