@@ -1,9 +1,6 @@
 #ifndef _VISUALIXER_H
 #define _VISUALIXER_H
 
-#include "PointCloud.hpp"
-#include "Mesh.hpp"
-#include "GeometricObject.hpp"
 #include "ColorRamp.hpp"
 
 #include <iostream>
@@ -41,7 +38,6 @@
 //  - visualize the geometry in 2d and 3d and move around in it
 //  - visualize parametric or mesh CAD models and move around
 //  - visualize and interact with point clouds
-
 
 //************** base visualixer class *********************
 class visualixer{
@@ -155,87 +151,11 @@ private:
 
 };
 
-//*********** Point Cloud Visualixer ****************
-// viewing point clouds
-class cloud_visualixer : public visualixer{
-public:
-	cloud_visualixer();
-	~cloud_visualixer();
-
-	void add_cloud(PointCloud * cloud);
-	void set_test_case();
-
-protected:
-	bool MainLoop();
-
-};
-
-//************** Mesh Visualixer ********************
-// viewing a mesh
-class mesh_visualixer : public visualixer{
-public:
-	mesh_visualixer();
-	~mesh_visualixer();
-
-	void add_mesh(Static_Mesh * mesh);
-	void set_test_case();
-
-protected:
-	void onRender();
-
-	bool MainLoop();
-	void onExit();
-
-	GLuint * line_elements;
-	GLuint lebo;
-	unsigned int num_line_elements, num_per_line_element, line_element_offset;
-};
 
 //************** Simuluation Visualixer *******************
 class sim_visualixer{
 
 };
 
-//**************** Mesh Model Visualixer ********************
-// viewing an mesh model geometry (like an STL model)
-class mesh_model_visualixer : public visualixer{
-public:
-	mesh_model_visualixer();
-	~mesh_model_visualixer();
-
-	void add_model(mesh_model * model);
-	void set_test_case();
-
-protected:
-
-	GLfloat * normals;
-	GLuint normalbuffer, num_normals;
-
-	const GLchar * VertexShaderSource();
-	const GLchar * FragmentShaderSource();
-
-	void onRender();
-	void onShaders();
-	bool MainLoop();
-	void onExit();
-
-};
-
-//***************** Parametric Model Visualixer ************************
-// viewing an parametric geometry (like a CAD model)
-class parametric_model_visualixer : public visualixer{
-
-	parametric_model_visualixer();
-	~parametric_model_visualixer();
-
-	//void add_model(parametric_model);
-	void set_test_case();
-
-protected:
-	void onRender();
-	bool MainLoop();
-	void onExit();
-
-};
 
 #endif

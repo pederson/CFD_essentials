@@ -1,8 +1,9 @@
-#include "../Visualixer.hpp" 
+//#include "../Visualixer.hpp" 
+#include "../VisualixerMesh.hpp"
 #include "../GeometricObject.hpp"
 #include "../Mesh.hpp" 
 #include "../Converter.hpp" 
-//#include "OperatorTerm.hpp"
+//#include "EquationTerm.hpp"
 //#include "Equation.hpp"
 //#include "Simulation.hpp"
 
@@ -33,8 +34,10 @@ int main(int argc, char * argv[]){
 
 	// create an equation
 	// -del^2(potential) = e*(e_density)/epsilon
+	//Equation poiss = Equation(EQUATION_POISSON);
 
 	// set boundary conditions
+
 
 	// create a simulation
 
