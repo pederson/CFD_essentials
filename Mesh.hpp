@@ -163,6 +163,7 @@ public:
   unsigned int reg_num_nodes_x() const {return _num_nodes_x;};
   unsigned int reg_num_nodes_y() const {return _num_nodes_y;};
   unsigned int reg_num_nodes_z() const {return _num_nodes_z;};
+  //unsigned int & reg_nodes_boundary(BoundaryLocation loc);
   unsigned int reg_inds_to_glob_ind(unsigned int i, unsigned int j=0, unsigned int k=0);
 
   void add_phys_property(std::string property_name, const double * property_vals);

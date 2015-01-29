@@ -11,7 +11,8 @@
 // boundary conditions. 
 // This could be Dirichlet, Neumann, Cauchy, periodic, or other possibilities. 
 // They could also be static or dynamic
-enum BC_Type{DIRICHLET, NEUMANN, CAUCHY, PERIODIC}
+// They could be varying or constant along the boundary
+enum BC_Type{BC_DIRICHLET, BC_NEUMANN, BC_CAUCHY, PERIODIC}
 class BoundaryConditions{
 public:
 	BoundaryConditions(Static_Mesh * mesh, BC_Type type, std::string property, double val);

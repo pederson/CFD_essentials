@@ -1,6 +1,0 @@
-Issues:
-
-3. Lots of calls are used without get/set 
-4. Panning scale needs refinement
-6. Gimbal lock is still happening during manual rotation
-7. Need lighting for Mesh Model viewer

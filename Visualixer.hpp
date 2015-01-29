@@ -72,16 +72,7 @@ public:
 		return;
 	}
 
-	
-	/*
-	virtual void set_colorby(const bool * color_by);
-	virtual void set_colorby(const float * color_by); // set a color by array
-	virtual void set_colorby(const double * color_by);
-	*/
-	
-
-	//virtual void set_color_by(std::string property_name); // set color by array 
-  //virtual void set_custom_colors(rgb * colors);
+	//virtual void set_custom_colors(rgb * colors);
 	//void set_lock_rotation(bool lock_mode);
 
 	virtual void set_test_case();

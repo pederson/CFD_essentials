@@ -53,6 +53,7 @@ public:
 
   Hull * Union(Hull * other_Hull);
   Hull * Intersect(Hull * other_Hull);
+  Hull * Stamper(std::vector<Point>); 
 
 
 

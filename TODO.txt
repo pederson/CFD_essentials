@@ -17,7 +17,6 @@ TODO:
 - Create getters and setters for everything (encapsulation)
 - support for cylindrical and polar coordinates
 - Class for saving simulation output
-- Create separate Static Mesh and Mutable Mesh classes
 
 - add a ::print_detailed() function to classes for detailed debugging
 	- idea: store it all in vectors
@@ -41,6 +40,9 @@ TODO:
 
 - create an actual converter class (or decide if it is really worth it)
 
+- Panning scale needs refinement
+- Gimbal lock is still happening during manual rotation
+
 - Doxygen comments for everything
 - Equation setter
 - Chemistry setter and data (lxcat?)
@@ -56,3 +58,4 @@ X - Visualizer
 X - Property setter
 X - Geometry builder
 X - Convert everything that uses char* to use std::string instead
+X - Create separate Static Mesh and Mutable Mesh classes

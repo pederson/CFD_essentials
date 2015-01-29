@@ -10,7 +10,6 @@ int main(int argc, char * argv[]){
 
 	// define the geometry model that will be used
 	parametric_model_2d my_param2;
-	Static_Mesh * paramesh;
 	my_param2.set_model_name("GaussianDistElectrons");
 	my_param2.add_physical_property("e_density");
 	my_param2.add_material("Air", {1.0});
@@ -20,6 +19,7 @@ int main(int argc, char * argv[]){
 	my_param2.add_object(&ga1);
 
 	// convert the model into a mesh
+	Static_Mesh * paramesh;
 	paramesh = build_simple_mesh_2d(&my_param2, 0.01, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
 	
 	// view the mesh
@@ -36,7 +36,7 @@ int main(int argc, char * argv[]){
 
 	// set boundary conditions
 
-	// start a simulation
+	// create a simulation
 
 	// run the simulation
 
