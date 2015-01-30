@@ -8,6 +8,9 @@
 
 // In addition, I should be able to define some standard equations (like
 // poisson's equation) to set that equation easily
+
+// Also, "derived" equations that calculate a quantity given other variables
+// from other equations should be possible
 enum PreDefinedEquation{EQUATION_POISSON, EQUATION_CONVECTIVE_DIFFUSION}
 class Equation{
 public:

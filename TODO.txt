@@ -1,6 +1,7 @@
 TODO:
 
 - follow these conventions: https://www.doc.ic.ac.uk/lab/cplus/c++.rules/chap7.html
+- and these: http://www.drdobbs.com/c-made-easier-the-rule-of-three/184401400
 	- inline member functions
 	- copy constructor
 	- const member functions
@@ -10,6 +11,8 @@ TODO:
 	- private member data should be prefixed with "_" and the public
 	  data access should be a const & function with the same name but
 	  without the "_" (e.g. _xdata and xdata()) 
+	- follow the "Rule of Three"
+	- use unique_ptr if taking ownership of the pointer
 
 - Change functions to accept const pointers and then copy the data
 - Change functions to output const references instead of pointers

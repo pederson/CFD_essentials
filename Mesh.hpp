@@ -63,6 +63,7 @@ public:
   void print_summary() const;
   void print_detailed() const;
   static double dist_sq(Mesh_Node * node1, Mesh_Node * node2);
+  static double dist(Mesh_Node * node1, Mesh_Node * node2) {return sqrt(dist_sq(node1, node2));};
   static double area_tri(Mesh_Node * node1, Mesh_Node * node2, Mesh_Node * node3);
 
   // member data access
