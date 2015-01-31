@@ -5,7 +5,7 @@
 #include "../Converter.hpp" 
 //#include "EquationTerm.hpp"
 //#include "Equation.hpp"
-//#include "Simulation.hpp"
+#include "Simulation.hpp"
 
 int main(int argc, char * argv[]){
 
@@ -32,6 +32,12 @@ int main(int argc, char * argv[]){
 	delete paravis;
 	delete paramesh;
 
+	// this is a testing section
+		// solve the poisson equation using a finite difference method
+	Simulation mysim = Simulation(FINITE_DIFFERENCE, paramesh);
+	mysim.
+
+	/* this is what I would do if I had all the classes ready
 	// create an equation
 	// -del^2(potential) = e*(e_density)/epsilon
 	//Equation poiss = Equation(EQUATION_POISSON);
@@ -44,6 +50,7 @@ int main(int argc, char * argv[]){
 	// run the simulation
 
 	// visualize the results
+	*/
 
 	return 0;
 }
