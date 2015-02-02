@@ -1,0 +1,44 @@
+This is an attempt to compile all my standard practices and tips into one document to 
+be followed for all c++ code. 
+
+- follow these conventions: https://www.doc.ic.ac.uk/lab/cplus/c++.rules/chap7.html
+- and these: http://www.drdobbs.com/c-made-easier-the-rule-of-three/184401400
+	- inline member functions
+	- copy constructor
+	- const member functions
+	- virtual destructor for base classes
+	- assignment operator
+	- always const reference to member data from public member functions
+	- private member data should be prefixed with "_" and the public
+	  data access should be a const & function with the same name but
+	  without the "_" (e.g. _xdata and xdata()) 
+	- follow the "Rule of Three"
+	- use unique_ptr if taking ownership of the pointer
+
+- add a ::print_detailed() function to classes for detailed debugging
+	- idea: store it all in vectors
+	- query the size to determine if 
+	- access the user-defined data (const reference) by a ::.data(std::string field) call
+- make constructors that work with raw data const pointers
+
+- Change functions to accept const pointers and then copy the data
+- Change functions to output const references instead of pointers
+
+From "Essential C++":
+		- prefer const, enum, and inline to #define
+		- use const whenever possible
+		- initialize objects before they're used
+			* use member initialization lists in constructors
+		- know what functions c++ silently writes and calls
+		- declare polymorphic base class destructors virtual
+		- prevent exceptions from leaving destructors
+		- never call virtual functions during construction/destruction
+		- have assignment operators return *this
+		- handle assignment to self in operator=
+		- copy all parts of a class (including base classes)
+		- use tr1::shared_ptr for resource management
+
+		- prefer a pass-by-ref-to-const over a pass-by-value, except for built-in types
+		- don't return a reference (or pointer), when you must return an object
+		- always declare data members private
+		- prefer non-member non-friend functions to member functions. can use a namespace for this

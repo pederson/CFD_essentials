@@ -21,7 +21,7 @@ visualixer::visualixer(){
 
 	visualixer_active = false;
 	window_name = "Visualixer";
-	lock_rotation = false;
+	rotation_lock = false;
 	colorby = NULL;
 	vertices = NULL;
 	elements = NULL;

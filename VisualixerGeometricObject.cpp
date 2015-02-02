@@ -13,7 +13,7 @@ mesh_model_visualixer::mesh_model_visualixer(){
 
 	visualixer_active = false;
 	window_name = "Mesh Model Visualixer";
-	lock_rotation = false;
+	rotation_lock = false;
 	//color_ramp = NULL;
 	colorby = NULL;
 	vertices = NULL;

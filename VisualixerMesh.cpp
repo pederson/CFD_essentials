@@ -2,7 +2,7 @@
 
 using namespace std;
 
-//#define _TEST_
+#define _TEST_
 
 vector<visualixer*> _vMeshInstances;
 
@@ -13,18 +13,15 @@ mesh_visualixer::mesh_visualixer(){
 
 	visualixer_active = false;
 	window_name = "Mesh Visualixer";
-	lock_rotation = false;
-	//color_ramp = NULL;
+	rotation_lock = false;
 	colorby = NULL;
 	vertices = NULL;
 	elements = NULL;
-	//normals = NULL;
 
 	num_vertices = 0;
 	num_per_vertex = 0;
 	num_elements = 0;
 	num_line_elements = 0;
-	//num_normals = 0;
 
 	model_centroid[0] = 0.0;
   model_centroid[1] = 0.0;
@@ -118,82 +115,6 @@ void mesh_visualixer::add_mesh(Static_Mesh * mesh){
 	return;
 }
 
-/*
-void mesh_visualixer::add_mesh(Mutable_Mesh * mesh){
-	Node * node;
-	std::map<unsigned int, unsigned int> key_to_index_map;
-
-	num_vertices = mesh->get_num_nodes();
-	num_per_vertex = 6;
-	num_vertex_points = 3;
-	vertices = new GLfloat[num_vertices*num_per_vertex];
-	for (unsigned int i=0; i<num_vertices; i++){
-		node = mesh->get_node_ptr(mesh->get_node_key(i));
-
-		vertices[i*num_per_vertex] = node->x;
-		vertices[i*num_per_vertex + 1] = node->y;
-		vertices[i*num_per_vertex + 2] = node->z;
-		if (node->boundary){
-			vertices[i*num_per_vertex + 3] = 1.0f;
-			vertices[i*num_per_vertex + 4] = 0.0f;
-			vertices[i*num_per_vertex + 5] = 0.0f;
-		}
-		else {
-			vertices[i*num_per_vertex + 3] = 1.0f;
-			vertices[i*num_per_vertex + 4] = 1.0f;
-			vertices[i*num_per_vertex + 5] = 1.0f;
-		}
-
-		key_to_index_map[node->key] = i;
-	}
-
-	// figure out how many line elements are needed
-	num_line_elements = 0;
-	for (unsigned int i=0; i<num_vertices; i++){
-		node = mesh->get_node_ptr(mesh->get_node_key(i));
-		num_line_elements+=node->neighbor_keys.size();
-	}
-
-
-	num_elements = num_vertices;
-	num_per_element = 1;
-	num_per_line_element = 2;
-	elements = new GLuint[num_elements*num_per_element + num_line_elements*num_per_line_element];
-	line_element_offset = num_elements*num_per_element;
-	// set the point elements
-	for (unsigned int i=0; i<num_vertices; i++){
-		elements[i] = i;
-	}
-
-	// DYLAN_TODO: fix this... the key value isn't necessarily the same as the index
-	unsigned int elements_added = 0;
-	for (unsigned int i=0; i<num_vertices; i++){
-		node = mesh->get_node_ptr(mesh->get_node_key(i));
-
-		for (unsigned int j=0; j<node->neighbor_keys.size(); j++){
-			//cout << "node: " << node->key << " neighbor: " << node->neighbor_keys[j] << endl;
-
-			elements[line_element_offset + elements_added*num_per_line_element] = key_to_index_map.at(node->key);
-			elements[line_element_offset + elements_added*num_per_line_element + 1] = key_to_index_map.at(node->neighbor_keys[j]);
-
-			elements_added++;
-		}
-	}
-
-	xmax = mesh->get_xmax();
-	ymax = mesh->get_ymax();
-	zmax = mesh->get_zmax();
-	xmin = mesh->get_xmin();
-	ymin = mesh->get_ymin();
-	zmin = mesh->get_zmin();
-
-	model_centroid[0] = (xmax + xmin)/2.0;
-	model_centroid[1] = (ymax + ymin)/2.0;
-	model_centroid[2] = (zmax + zmin)/2.0;
-
-	return;
-}
-*/
 
 void mesh_visualixer::set_test_case(){
 	num_vertices = 100;
@@ -339,8 +260,12 @@ int main(int argc, char * argv[]){
 	// test the mesh viewer
 	mesh_visualixer * mymvis = new mesh_visualixer();
 	Static_Mesh * mesh = Static_Mesh::create_regular_grid_n(0.1, 50, 50);//, (unsigned int)30);
-	//mymvis->set_test_case();
 	mymvis->add_mesh(mesh);
+	mymvis->set_color_ramp(CRamp::DIVERGENT_9);
+	//if (&mesh->x() == NULL) cout << "damn coloby is null" << endl;
+	mymvis->set_colorby(&mesh->z());
+	//mymvis->set_test_case();
+	
 	mymvis->run();
 	delete mymvis;
 

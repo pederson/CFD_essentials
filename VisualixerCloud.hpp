@@ -18,7 +18,7 @@ public:
 	cloud_visualixer();
 	~cloud_visualixer();
 
-	void add_cloud(PointCloud * cloud);
+	void add_cloud(const PointCloud & cloud);
 	void set_test_case();
 
 protected:

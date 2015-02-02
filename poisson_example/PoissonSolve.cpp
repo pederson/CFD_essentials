@@ -5,7 +5,7 @@
 #include "../Converter.hpp" 
 //#include "EquationTerm.hpp"
 //#include "Equation.hpp"
-#include "Simulation.hpp"
+//#include "Simulation.hpp"
 
 int main(int argc, char * argv[]){
 
@@ -34,8 +34,8 @@ int main(int argc, char * argv[]){
 
 	// this is a testing section
 		// solve the poisson equation using a finite difference method
-	Simulation mysim = Simulation(FINITE_DIFFERENCE, paramesh);
-	mysim.
+	//Simulation mysim = Simulation(FINITE_DIFFERENCE, paramesh);
+	//mysim.
 
 	/* this is what I would do if I had all the classes ready
 	// create an equation

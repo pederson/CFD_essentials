@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <algorithm>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -32,7 +33,110 @@
 //  - print a summary of data
 //  - recalculate the x,y,z extents
 //  - conversion to/from ECEF/latlon/UTM
-//  - create/destroy data vectors
+
+
+// forward declaration
+struct rgb48;
+
+
+class PointCloud{
+public:
+
+  PointCloud();                       // ctor
+  PointCloud(unsigned int numpts);    // ctor
+  PointCloud(const PointCloud & cloud)  // copy ctor
+  : _x(cloud._x),
+    _y(cloud._y),
+    _z(cloud._z),
+    _gpstime(cloud._gpstime),
+    _intensity(cloud._intensity),
+    _classification(cloud._classification),
+    _RGB(cloud._RGB),
+    _extradata_names(cloud._extradata_names),
+    _extradata(cloud._extradata)
+    {_xmin = cloud._xmin; _xmax = cloud._xmax;
+     _ymin = cloud._ymin; _ymax = cloud._ymax;
+     _zmin = cloud._zmin; _zmax = cloud._zmax;
+     _gpst_min = cloud._gpst_min; _gpst_max = cloud._gpst_max;}
+  ~PointCloud();                      // dtor
+
+  // operators
+  PointCloud & operator=(const PointCloud & cloud);
+  PointCloud & operator+=(const PointCloud & cloud);
+
+  // terminal output
+  void print_summary() const;
+  void print_detailed() const;
+
+  // metadata inspectors
+  unsigned int pointcount() const {return _x.size();};
+  double xmax() const {return _xmax;};
+  double xmin() const {return _xmin;};
+  double ymax() const {return _ymax;};
+  double ymin() const {return _ymin;};
+  double zmax() const {return _zmax;};
+  double zmin() const {return _zmin;};
+  bool gpstime_present() const {if (_gpstime.size()>0) return true; else return false;};
+  bool intensity_present() const {if (_intensity.size()>0) return true; else return false;};
+  bool classification_present() const {if (_classification.size()>0) return true; else return false;};
+  bool RGB_present() const {if (_RGB.size()>0) return true; else return false;};
+  bool extradata_present(std::string fieldname) const {for (auto i=0; i<_extradata.size(); i++) {if (_extradata_names.at(i).compare(fieldname)==0) return true;} return false;};
+
+
+  // main data accessors
+  const double & x() const {return _x.front();};
+  const double & y() const {return _y.front();};
+  const double & z() const {return _z.front();};
+
+  // optional member data accessors
+  const double & gpstime() const {return _gpstime.front();};
+  const unsigned short & intensity() const {return _intensity.front();};
+  const unsigned char & classification() const {return _classification.front();};
+  const rgb48 & RGB() const {return _RGB.front();};
+
+  // user-defined member data accessors
+  const double & data(std::string field) const {return _extradata.at(field).front();};
+
+  // mutators
+  PointCloud subset(const bool & keep);
+  PointCloud subset(const unsigned int & keep_inds, const unsigned int keep_count);
+
+  static PointCloud read_LAS(std::string filename, unsigned int byte_offset=0);
+  void write_LAS(std::string filename);
+
+
+protected:
+
+private:
+  // metadata
+  double _xmin, _xmax, _ymin, _ymax, _zmin, _zmax, _gpst_min, _gpst_max;
+  unsigned int _pointcount;
+
+  // required data
+  std::vector<double> _x, _y, _z;
+
+  // optional data
+  std::vector<double> _gpstime;
+  std::vector<unsigned short> _intensity;
+  std::vector<unsigned char> _classification;
+  std::vector<rgb48> _RGB;
+
+  // user-defined data
+  std::vector<std::string> _extradata_names;
+  std::map<std::string, std::vector<double>> _extradata;
+
+  // initializing optional data fields
+  void add_intensity();
+  void add_classification();
+  void add_gpstime();
+  void add_RGB();  
+  void add_extradata(std::string fieldname);
+
+  void calc_extents();  
+
+  void read_LAS_internal(std::string filename, unsigned int byte_offset=0);
+
+};
 
 
 #pragma pack(push,1)
@@ -41,85 +145,7 @@ struct rgb48{
   unsigned short G;
   unsigned short B;
 };
-#pragma pack(pop)
 
-class PointCloud{
-public:
-
-  PointCloud(unsigned int numpts);
-  ~PointCloud();
-
-  // base member data accessors
-  unsigned int size() const {return pointcount;};
-  double x_max() const {return xmax;};
-  double x_min() const {return xmin;};
-  double y_max() const {return ymax;};
-  double y_min() const {return ymin;};
-  double z_max() const {return zmax;};
-  double z_min() const {return zmin;};
-  const double * x_ptr() const {return x;};
-  const double * y_ptr() const {return y;};
-  const double * z_ptr() const {return z;};
-  //double x(unsigned int i) {return x[i];};
-  //double y(unsigned int i) {return y[i];};
-  //double z(unsigned int i) {return z[i];};
-  
-
-  // optional member data accessors
-  const double * gpstime_ptr() const {return gpstime;};
-  const unsigned short * intensity_ptr() const {return intensity;};
-  const unsigned char * classification_ptr() const {return classification;};
-  const rgb48 * RGB_ptr() const {return RGB;};
-
-  // user-defined member data accessors
-  const double * data(std::string field) const {return extra_data.at(field);};
-
-  //// old stuff
-  void print_summary() const;
-  void print_detailed() const;
-
-  // mutators
-  void add_intensity();
-  void add_classification();
-  void add_gpstime();
-  void add_RGB();  
-  void add_extra_data(std::string fieldname);
-
-  PointCloud * subset(bool *keep);
-  PointCloud * subset(unsigned int * keep_inds, unsigned int keep_count);
-  PointCloud * copy();
-
-  static PointCloud * read_LAS(std::string filename, unsigned int byte_offset=0);
-  void write_LAS(std::string filename);
-
-
-protected:
-
-private:
-  // metadata
-  double xmin, xmax, ymin, ymax, zmin, zmax, gpst_min, gpst_max;
-  unsigned int pointcount;
-
-  // required data
-  double *x, *y, *z;
-
-  // optional data
-  double *gpstime;
-  unsigned short *intensity;
-  unsigned char *classification;
-  rgb48 * RGB;
-
-  // user-defined data
-  std::vector<std::string> extra_data_names;
-  std::map<std::string, double *> extra_data;
-
-  void calc_extents();  
-
-  void read_LAS_internal(std::string filename, unsigned int byte_offset=0);
-
-};
-
-#pragma pack(push,1)
 struct las_pt_0{
   int X;
   int Y;

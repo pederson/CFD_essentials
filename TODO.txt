@@ -1,31 +1,9 @@
 TODO:
 
-- follow these conventions: https://www.doc.ic.ac.uk/lab/cplus/c++.rules/chap7.html
-- and these: http://www.drdobbs.com/c-made-easier-the-rule-of-three/184401400
-	- inline member functions
-	- copy constructor
-	- const member functions
-	- virtual destructor for base classes
-	- assignment operator
-	- always const reference to member data from public member functions
-	- private member data should be prefixed with "_" and the public
-	  data access should be a const & function with the same name but
-	  without the "_" (e.g. _xdata and xdata()) 
-	- follow the "Rule of Three"
-	- use unique_ptr if taking ownership of the pointer
-
-- Change functions to accept const pointers and then copy the data
-- Change functions to output const references instead of pointers
 - Shading and Light source for mesh model viewer
 - Create getters and setters for everything (encapsulation)
 - support for cylindrical and polar coordinates
 - Class for saving simulation output
-
-- add a ::print_detailed() function to classes for detailed debugging
-	- idea: store it all in vectors
-	- query the size to determine if 
-	- access the user-defined data (const reference) by a ::.data(std::string field) call
-- make constructors that work with raw data const pointers
 
 - Interface for libMesh, Eigen, Boost, CGAL, and any other third party libraries that are useful
 
@@ -41,10 +19,15 @@ TODO:
 
 - create an actual converter class (or decide if it is really worth it)
 
+- Derive the RegularMesh from Static_Mesh instead of having a bunch of functions related to regular meshes
+
+- use max_element and min_element as a means to get the min/max
+
 	***Visualixer todo:
 - add a labelled colorbar to the visualixer
 - Panning scale needs refinement
 - Gimbal lock is still happening during manual rotation
+- adding a colorby before adding an object (mesh, pointcloud) doesn't work b/c it gets overwritten
 
 - Doxygen comments for everything
 - Equation setter

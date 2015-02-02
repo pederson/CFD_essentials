@@ -108,8 +108,8 @@ protected:
 	double x_upon_click, y_upon_click; // and and y positions of mouse upon click
 
 	bool visualixer_active; // is the window currently drawn?
-	bool lock_rotation; // lock mouse rotations?
-	bool lock_pan; // lock mouse panning
+	bool rotation_lock; // lock mouse rotations?
+	bool pan_lock; // lock mouse panning
 
 
 	// base callbacks to interface with GLFW

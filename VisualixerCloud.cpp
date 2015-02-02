@@ -14,7 +14,7 @@ cloud_visualixer::cloud_visualixer(){
 
 	visualixer_active = false;
 	window_name = "Cloud Visualixer";
-	lock_rotation = false;
+	rotation_lock = false;
 	colorby = NULL;
 	vertices = NULL;
 	elements = NULL;
@@ -89,14 +89,14 @@ void cloud_visualixer::set_test_case(){
 	return;
 }
 
-void cloud_visualixer::add_cloud(PointCloud * cloud){
+void cloud_visualixer::add_cloud(const PointCloud & cloud){
 	const double *x, *y, *z;
-	num_vertices = cloud->size();
+	num_vertices = cloud.pointcount();
 	num_per_vertex = 6;
 	num_vertex_points = 3;
-	x = cloud->x_ptr();
-	y = cloud->y_ptr();
-	z = cloud->z_ptr();
+	x = &cloud.x();
+	y = &cloud.y();
+	z = &cloud.z();
 	vertices = new GLfloat[num_vertices*num_per_vertex];
 	for (unsigned int i=0; i<num_vertices; i++){
 		vertices[i*num_per_vertex] = x[i];
@@ -112,9 +112,9 @@ void cloud_visualixer::add_cloud(PointCloud * cloud){
 		elements[i] = i;
 	}
 
-	const rgb48 * RGB = cloud->RGB_ptr();
-  if (RGB != NULL){
-  	
+	
+  if (cloud.RGB_present()){
+  	const rgb48 * RGB = &cloud.RGB();
     for (unsigned int i=0; i<num_vertices; i){
       vertices[i*num_per_vertex + 3] = RGB[i].R/65,535;
       vertices[i*num_per_vertex + 4] = RGB[i].G/65,535;
@@ -131,15 +131,15 @@ void cloud_visualixer::add_cloud(PointCloud * cloud){
     }
   }
 
-	model_centroid[0] = (cloud->x_max() + cloud->x_min())/2.0;
-	model_centroid[1] = (cloud->y_max() + cloud->y_min())/2.0;
-	model_centroid[2] = (cloud->z_max() + cloud->z_min())/2.0;
-	xmax = cloud->x_max();
-	ymax = cloud->y_max();
-	zmax = cloud->z_max();
-	xmin = cloud->x_min();
-	ymin = cloud->y_min();
-	zmin = cloud->z_min();
+	model_centroid[0] = (cloud.xmax() + cloud.xmin())/2.0;
+	model_centroid[1] = (cloud.ymax() + cloud.ymin())/2.0;
+	model_centroid[2] = (cloud.zmax() + cloud.zmin())/2.0;
+	xmax = cloud.xmax();
+	ymax = cloud.ymax();
+	zmax = cloud.zmax();
+	xmin = cloud.xmin();
+	ymin = cloud.ymin();
+	zmin = cloud.zmin();
 
 	// default color by Z
 	colorby = new float[num_vertices];
@@ -187,11 +187,12 @@ int main(int argc, char * argv[]){
 	// test the point cloud viewer
 	cloud_visualixer * mycvis = new cloud_visualixer();
 	//mycvis->set_test_case();
-	PointCloud * cloud = PointCloud::read_LAS("../testfiles/ComplexSRSInfo.las");
-	//PointCloud * cloud = PointCloud::read_LAS("../testfiles/xyzrgb_manuscript.las");
-	//PointCloud * cloud = PointCloud::read_LAS("../testfiles/LAS12_Sample_withRGB_Quick_Terrain_Modeler.las");
+	PointCloud cloud = PointCloud::read_LAS("../testfiles/ComplexSRSInfo.las");
+	//PointCloud cloud = PointCloud::read_LAS("../testfiles/xyzrgb_manuscript.las");
+	//PointCloud cloud = PointCloud::read_LAS("../testfiles/LAS12_Sample_withRGB_Quick_Terrain_Modeler.las");
 	mycvis->add_cloud(cloud);
     mycvis->set_color_ramp(CRamp::DIVERGENT_1);
+    mycvis->set_colorby(&cloud.z());
 	mycvis->run();
 	delete mycvis;
 
