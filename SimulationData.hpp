@@ -7,6 +7,7 @@
 #include <string>
 #include <map>
 
+/*
 // data for a single time snapshot
 class DataField{
 public:
@@ -19,6 +20,7 @@ private:
 	std::vector<double> _data;
 
 };
+*/
 
 // all data fields over a single time snapshot
 class DataSnapshot{
@@ -28,7 +30,7 @@ public:
 
 private:
 	//std::vector<std::string> _fieldnames;
-	std::map<std::string, std::vector<DataField>> _datafields;
+	std::map<std::string, std::vector<double>> _datafields;
 
 
 };
@@ -42,16 +44,17 @@ public:
 
 	DataSnapshot & at_time(double t) const {for (auto i=0; i<_time.size(); i++){ if (_time.at(i) == t){return _datasnapshots.at(i);}}};
 	DataSnapshot & snapshot(unsigned int t_index) const {return _datasnapshots.at(t_index);};
-
+	bool field_present(std::string fieldname);
+	
 	set_time_span(double tstart, double dt, double tstop);
-	bind_mesh(Static_Mesh * mesh);
+	bind_mesh(const Static_Mesh & mesh);
 	add_field(std::string fieldname);
-	add_data(std::string fieldname, const double * values);
+	add_data(std::string fieldname, const double & values);
 
 private:
 	// metadata
 	double _tstart, _dt, _tstop;
-	Static_Mesh * _mesh;
+	const Static_Mesh * _mesh;
 	std::vector<std::string> _fieldnames;
 	//std::map<std::string, std::vector<DataSnapshot> _datasnapshots;
 	std::vector<DataSnapshot> _datasnapshots;

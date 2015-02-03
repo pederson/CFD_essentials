@@ -3,6 +3,7 @@ be followed for all c++ code.
 
 - follow these conventions: https://www.doc.ic.ac.uk/lab/cplus/c++.rules/chap7.html
 - and these: http://www.drdobbs.com/c-made-easier-the-rule-of-three/184401400
+- and these: http://lemire.me/blog/archives/2012/06/20/do-not-waste-time-with-stl-vectors/
 	- inline member functions
 	- copy constructor
 	- const member functions
