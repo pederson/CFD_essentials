@@ -63,7 +63,7 @@ public:
 		colorby_max = colorby[0]; colorby_min = color_by[0];
 		for (auto i=1; i<num_vertices; i++){
 			if (colorby[i] > colorby_max) colorby_max = colorby[i];
-			if (colorby[i] < colorby_min) colorby_min = color_by[i];
+			if (colorby[i] < colorby_min) colorby_min = colorby[i];
 		}
 		
 		// subtract out the min value

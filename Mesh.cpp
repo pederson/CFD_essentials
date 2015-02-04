@@ -183,6 +183,8 @@ void Static_Mesh::print_summary() const{
   cout << "  x extents: [" << _xmin << ", " << _xmax << "]" << endl;
   cout << "  y extents: [" << _ymin << ", " << _ymax << "]" << endl;
   cout << "  z extents: [" << _zmin << ", " << _zmax << "]" << endl;
+  cout << "  Extra Fields (" << _phys_property_names.size() << "): " << endl;
+  for (auto i=0; i<_phys_property_names.size(); i++) cout << "      " << _phys_property_names.at(i) << endl;
   cout << "************************************* " << endl;
   cout << " " << endl;
 

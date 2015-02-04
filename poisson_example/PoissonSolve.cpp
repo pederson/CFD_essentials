@@ -6,7 +6,7 @@
 //#include "EquationTerm.hpp"
 //#include "Equation.hpp"
 //#include "Simulation.hpp"
-#include <petsc.h>
+#include <petscksp.h>
 
 using namespace std;
 
@@ -19,7 +19,7 @@ int main(int argc, char * argv[]){
 	my_param2.add_material("Air", {1.0});
 	my_param2.add_material("Dielectric", {5.0});
 	my_param2.add_material("Dielectric2", {9.0});
-	gaussian_2d ga1 = gaussian_2d(0.3, 0.3, 100.0, 1.0e+18, {0.0, 0.0}); // electron density in #/m^3
+	gaussian_2d ga1 = gaussian_2d(0.3, 0.3, 100.0, 1.0e+16, {0.0, 0.0}); // electron density in #/m^3
 	my_param2.add_object(&ga1);
 
 	// convert the model into a mesh
@@ -33,13 +33,13 @@ int main(int argc, char * argv[]){
 	paravis->set_colorby(&paramesh->data("e_density"));
 	paravis->run();
 	delete paravis;
-	delete paramesh;
+	//delete paramesh; // WHY DOES THIS COMPILE IF THIS IS UNCOMMENTED???
 
 	// this is a testing section
 		// solve the poisson equation using a finite difference method
 	//Simulation mysim = Simulation(FINITE_DIFFERENCE, paramesh);
 	
-	/*
+	
 	// loop over the internal nodes adding the laplace operator to the matrix
 	double ** mat = new double *[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
 	for (auto i=0; i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); i++) mat[i] = new double[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
@@ -55,11 +55,11 @@ int main(int argc, char * argv[]){
 			rind = paramesh->reg_inds_to_glob_ind(i+1,j);
 			uind = paramesh->reg_inds_to_glob_ind(i,j+1);
 			dind = paramesh->reg_inds_to_glob_ind(i,j-1);
-			mat[cind][cind] = -4;
-			mat[cind][lind] = 1;
-			mat[cind][rind] = 1;
-			mat[cind][uind] = 1;
-			mat[cind][dind] = 1;
+			mat[cind][cind] = -4.0;
+			mat[cind][lind] = 1.0;
+			mat[cind][rind] = 1.0;
+			mat[cind][uind] = 1.0;
+			mat[cind][dind] = 1.0;
 		}
 	}
 
@@ -68,20 +68,78 @@ int main(int argc, char * argv[]){
 
 	// construct the right side using the density field
 	double q_electron = -1.6e-19, eps0 = 8.854e-12;
+	paramesh->print_summary();
 	const double * reldata = &paramesh->data("e_density");
 	double * rhs = new double[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
-	for (auto i=1; i<paramesh->reg_num_nodes_x()-1; i++){ // columns
-		for (auto j=1; j<paramesh->reg_num_nodes_y()-1; j++){ // rows
+	for (auto i=0; i<paramesh->reg_num_nodes_x(); i++){ // columns
+		for (auto j=0; j<paramesh->reg_num_nodes_y(); j++){ // rows
 			cind = paramesh->reg_inds_to_glob_ind(i,j);
+			//cout << "I: " << i << " J: " << j << endl;
 			rhs[cind] = -reldata[cind]*q_electron/eps0;
 		}
 	}
-	*/
+	
+	
+	
 
-	// now solve the system (PETSc)
+	// now solve the system (PETSc KSP)
+	Vec x,b;   /* approx solution, rhs */
+    Mat A;     /* linear system matrix */
+    KSP ksp;   /* linear solver context */
+    PC pc;     /* preconditioner context */
+    int size;
+
+	cout << "starting petsc stuff" << endl;
+    PetscInitialize(&argc,&argv,PETSC_NULL,PETSC_NULL);
+    cout << "initialized petsc" << endl;
+    MPI_Comm_size(PETSC_COMM_WORLD,&size);
+    cout << "initialized mpi comm" << endl;
+
+    VecCreate(PETSC_COMM_WORLD,&x);
+    VecSetSizes(x,PETSC_DECIDE,paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x());
+    VecSetFromOptions(x);
+    VecDuplicate(x,&b);
+    for(auto i=0;i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x();i++) VecSetValues(b,1,&i,&rhs[i],INSERT_VALUES);
+    /* need to assemble after setting values! do necessary
+       message passing etc to propagate matrix to all ranks */
+    VecAssemblyBegin(b);
+    VecAssemblyEnd(b);
+    cout << "assembled rhs" << endl;
+
+    MatCreate(PETSC_COMM_WORLD,&A);
+    MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(),paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x());
+    MatSetFromOptions(A);
+    MatSetUp(A);
+    for (auto i=0; i<paramesh->reg_num_nodes_x(); i++){ // columns
+		for (auto j=0; j<paramesh->reg_num_nodes_y(); j++){ // rows
+			cind = paramesh->reg_inds_to_glob_ind(i,j);
+			MatSetValue(A,i,j,mat[i][j],INSERT_VALUES);
+			//cout << "I: " << i << " J: " << j << endl;
+			rhs[cind] = -reldata[cind]*q_electron/eps0;
+		}
+	}
+    /* need to assemble matrix for the same reasons as above */
+    MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);
+    cout << "assembled matrix" << endl;
+
+	KSPCreate(PETSC_COMM_WORLD,&ksp);
+    KSPSetOperators(ksp,A,A);
+    KSPGetPC(ksp,&pc);
+    PCSetType(pc,PCJACOBI);
+    KSPSetTolerances(ksp,1e-6,PETSC_DEFAULT,PETSC_DEFAULT,PETSC_DEFAULT);
+    KSPSetFromOptions(ksp);
+    KSPSolve(ksp,b,x);
+    cout << "solved equation" << endl;
+
+    // cleanup
+    KSPDestroy(&ksp);
+    VecDestroy(&x);
+    VecDestroy(&b);
+    PetscFinalize();
 
 	// visualize the solution by putting it in the mesh
-
+    
 
 
 
@@ -99,6 +157,10 @@ int main(int argc, char * argv[]){
 
 	// visualize the results
 	*/
+
+	delete[] rhs;
+	for (auto i=0; i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); i++) delete[] mat[i];
+	delete[] mat;
 
 	return 0;
 }
