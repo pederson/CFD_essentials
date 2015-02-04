@@ -416,7 +416,7 @@ void visualixer::onColors(){
 	rgb ptcolor;
 
 	for (unsigned int i=0; i<num_vertices; i++){
-		ptcolor = color_ramp.get_ramp_color((colorby[i]-colorby_min)/(colorby_max - colorby_min));
+		ptcolor = color_ramp.get_ramp_color(float((colorby[i])/(colorby_max - colorby_min)));
 		vertices[i*num_per_vertex + 3] = ptcolor.R;
 		vertices[i*num_per_vertex + 4] = ptcolor.G;
 		vertices[i*num_per_vertex + 5] = ptcolor.B;

@@ -19,7 +19,7 @@ int main(int argc, char * argv[]){
 	my_param2.add_material("Air", {1.0});
 	my_param2.add_material("Dielectric", {5.0});
 	my_param2.add_material("Dielectric2", {9.0});
-	gaussian_2d ga1 = gaussian_2d(0.3, 0.3, 100.0, 1.0e18, {0.0, 0.0}); // electron density in #/m^3
+	gaussian_2d ga1 = gaussian_2d(0.3, 0.3, 100.0, 1.0e+18, {0.0, 0.0}); // electron density in #/m^3
 	my_param2.add_object(&ga1);
 
 	// convert the model into a mesh

@@ -55,15 +55,21 @@ public:
 	//template <class T> void set_colorby(const T * color_by);
 	template <class T>
 	void set_colorby(T const * color_by){
-		if (colorby == NULL) colorby = new float[num_vertices];
-		for (unsigned int i=0; i<num_vertices; i++) colorby[i] = float(color_by[i]);
+		if (colorby == NULL) colorby = new double[num_vertices];
+		for (unsigned int i=0; i<num_vertices; i++) colorby[i] = double(color_by[i]);
 
 
-		colorby_max = colorby[0]; colorby_min = colorby[0];
+		// find the min of the incoming values
+		colorby_max = colorby[0]; colorby_min = color_by[0];
 		for (auto i=1; i<num_vertices; i++){
 			if (colorby[i] > colorby_max) colorby_max = colorby[i];
-			if (colorby[i] < colorby_min) colorby_min = colorby[i];
+			if (colorby[i] < colorby_min) colorby_min = color_by[i];
 		}
+		
+		// subtract out the min value
+		for (auto i=0; i<num_vertices; i++) colorby[i] = color_by[i]-colorby_min;
+
+		
 
 		return;
 	}
@@ -83,7 +89,8 @@ protected:
 	GLfloat * vertices;
 	GLuint * elements;
   	ColorRamp color_ramp;
-  	float * colorby, colorby_max, colorby_min; // one per vertex
+  	double * colorby; // one per vertex
+  	double colorby_max, colorby_min;
 	float model_centroid[3]; // from [model_min, model_max]
 	float xmin, xmax, ymin, ymax, zmin, zmax;
 	unsigned int num_vertices, num_per_vertex, num_vertex_points;
