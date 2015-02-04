@@ -6,9 +6,9 @@
 //#include "EquationTerm.hpp"
 //#include "Equation.hpp"
 //#include "Simulation.hpp"
-#include "petsc.h"
-#undef __FUNCT__
-#define __FUNCT__ "main"
+#include <petsc.h>
+
+using namespace std;
 
 int main(int argc, char * argv[]){
 
@@ -39,17 +39,17 @@ int main(int argc, char * argv[]){
 		// solve the poisson equation using a finite difference method
 	//Simulation mysim = Simulation(FINITE_DIFFERENCE, paramesh);
 	
-
+	/*
 	// loop over the internal nodes adding the laplace operator to the matrix
-	double ** mat = new double *[paramesh->num_nodes_y()*paramesh->num_nodes_x()];
-	for (auto i=0; i<paramesh->num_nodes_y()*paramesh->num_nodes_x(); i++) mat[i] = new double[paramesh->num_nodes_y()*paramesh->num_nodes_x()];
-	for (auto i=0; i<paramesh->num_nodes_x(); i++){ // columns
-		for (auto j=0; j<paramesh->num_nodes_y(); j++) mat[i][j] = 0;
+	double ** mat = new double *[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
+	for (auto i=0; i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); i++) mat[i] = new double[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
+	for (auto i=0; i<paramesh->reg_num_nodes_x(); i++){ // columns
+		for (auto j=0; j<paramesh->reg_num_nodes_y(); j++) mat[i][j] = 0;
 	}
 
 	unsigned int cind, lind, rind, uind, dind;
-	for (auto i=1; i<paramesh->num_nodes_x()-1; i++){ // columns
-		for (auto j=1; j<paramesh->num_nodes_y()-1; j++){ // rows
+	for (auto i=1; i<paramesh->reg_num_nodes_x()-1; i++){ // columns
+		for (auto j=1; j<paramesh->reg_num_nodes_y()-1; j++){ // rows
 			cind = paramesh->reg_inds_to_glob_ind(i,j);
 			lind = paramesh->reg_inds_to_glob_ind(i-1,j);
 			rind = paramesh->reg_inds_to_glob_ind(i+1,j);
@@ -69,13 +69,14 @@ int main(int argc, char * argv[]){
 	// construct the right side using the density field
 	double q_electron = -1.6e-19, eps0 = 8.854e-12;
 	const double * reldata = &paramesh->data("e_density");
-	double * rhs = new double[paramesh->num_nodes_y()*paramesh->num_nodes_x()];
-	for (auto i=1; i<paramesh->num_nodes_x()-1; i++){ // columns
-		for (auto j=1; j<paramesh->num_nodes_y()-1; j++){ // rows
+	double * rhs = new double[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
+	for (auto i=1; i<paramesh->reg_num_nodes_x()-1; i++){ // columns
+		for (auto j=1; j<paramesh->reg_num_nodes_y()-1; j++){ // rows
 			cind = paramesh->reg_inds_to_glob_ind(i,j);
 			rhs[cind] = -reldata[cind]*q_electron/eps0;
 		}
 	}
+	*/
 
 	// now solve the system (PETSc)
 

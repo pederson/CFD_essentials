@@ -16,6 +16,9 @@
 #include <unistd.h>
 #include <math.h>
 
+// might be better to implement this as a namespace with many ifdefs to check for different types
+
+
 // class to define conversion of objects between other objects
 // e.g. Hull to PointCloud, or GeometricModel to Mesh, or StaticMesh to MutableMesh
 class Converter{

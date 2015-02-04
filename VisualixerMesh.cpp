@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#define _TEST_
+//#define _TEST_
 
 vector<visualixer*> _vMeshInstances;
 
