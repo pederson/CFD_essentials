@@ -6,6 +6,9 @@
 //#include "EquationTerm.hpp"
 //#include "Equation.hpp"
 //#include "Simulation.hpp"
+#include "petsc.h"
+#undef __FUNCT__
+#define __FUNCT__ "main"
 
 int main(int argc, char * argv[]){
 
