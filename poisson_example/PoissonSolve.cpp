@@ -78,6 +78,8 @@ int main(int argc, char * argv[]){
 			rhs[cind] = -reldata[cind]*q_electron/eps0;
 		}
 	}
+
+	cout << "RHS[0]: " << rhs[0] << endl;
 	
 	
 	
@@ -132,14 +134,35 @@ int main(int argc, char * argv[]){
     KSPSolve(ksp,b,x);
     cout << "solved equation" << endl;
 
-    // cleanup
-    KSPDestroy(&ksp);
-    VecDestroy(&x);
-    VecDestroy(&b);
-    PetscFinalize();
+    //MatView(A,PETSC_VIEWER_STDOUT_WORLD);
+    //VecView(b,PETSC_VIEWER_STDOUT_WORLD);
+    //VecView(x,PETSC_VIEWER_STDOUT_WORLD);
+    KSPView(ksp,PETSC_VIEWER_STDOUT_WORLD);
+
+    PetscInt sz;
+    VecGetSize(x, &sz);
+    cout << "NUM in vector solution: " << sz << "    NUM in rhs: " << paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x() << endl;
+
+    // collect the value from the solver
+    double * soln = new double[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
+    PetscInt * inds = new PetscInt[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
+    for (auto i=0; i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); i++) inds[i] = i;
+    cout << "gonna do some ish" << endl;
+    VecGetValues(x, paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(), inds, soln);
+    cout << "did some ish" << endl;
+
+    for (auto i=sz-10; i<sz; i++) cout << "Solution[" << i << "]: " << soln[i] << endl;
+    cout << "finished that" << endl;
 
 	// visualize the solution by putting it in the mesh
-    
+	paramesh->add_phys_property("potential", soln);
+	cout << "added property" << endl;
+	paramesh->print_summary();
+	paravis->set_colorby(&paramesh->data("potential"));
+	cout << "set the colorby" << endl;
+	paravis->run();
+	cout << "finished running" << endl;
+
 
 
 
@@ -157,6 +180,12 @@ int main(int argc, char * argv[]){
 
 	// visualize the results
 	*/
+
+	// cleanup
+    KSPDestroy(&ksp);
+    VecDestroy(&x);
+    VecDestroy(&b);
+    PetscFinalize();
 
 	delete[] rhs;
 	for (auto i=0; i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); i++) delete[] mat[i];
