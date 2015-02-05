@@ -2,7 +2,11 @@
    (in serial) */
 /* based on http://www.mcs.anl.gov/petsc/petsc-current/src/ksp/ksp/examples/tutorials/ex1.c.html */
 #include <petscksp.h>
+#include <string>
+#include <iostream>
 #define SIZE 3
+
+using namespace std;
 int main(int argc,char **argv) {
     Vec x,b;   /* approx solution, rhs */
     Mat A;     /* linear system matrix */
@@ -57,6 +61,8 @@ int main(int argc,char **argv) {
     VecView(b,PETSC_VIEWER_STDOUT_WORLD);
     VecView(x,PETSC_VIEWER_STDOUT_WORLD);
     KSPView(ksp,PETSC_VIEWER_STDOUT_WORLD);
+
+
     /* get rid of everything */
     KSPDestroy(&ksp);
     VecDestroy(&x);

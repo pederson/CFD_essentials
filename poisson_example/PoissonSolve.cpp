@@ -19,19 +19,19 @@ int main(int argc, char * argv[]){
 	my_param2.add_material("Air", {1.0});
 	my_param2.add_material("Dielectric", {5.0});
 	my_param2.add_material("Dielectric2", {9.0});
-	gaussian_2d ga1 = gaussian_2d(0.3, 0.3, 100.0, 1.0e+16, {0.0, 0.0}); // electron density in #/m^3
+	gaussian_2d ga1 = gaussian_2d(0.3, 0.3, 100.0, 1.0e+1, {0.0, 0.0}); // electron density in #/m^3
 	my_param2.add_object(&ga1);
 
 	// convert the model into a mesh
 	Static_Mesh * paramesh;
-	paramesh = build_simple_mesh_2d(&my_param2, 0.01, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
+	paramesh = build_simple_mesh_2d(&my_param2, 0.1, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
 	
 	// view the mesh
 	mesh_visualixer * paravis = new mesh_visualixer();
 	paravis->add_mesh(paramesh);
 	paravis->set_color_ramp(CRamp::DIVERGENT_9);
 	paravis->set_colorby(&paramesh->data("e_density"));
-	paravis->run();
+	//paravis->run();
 	delete paravis;
 	//delete paramesh; // WHY DOES THIS COMPILE IF THIS IS UNCOMMENTED???
 
@@ -92,6 +92,7 @@ int main(int argc, char * argv[]){
     int size;
 
 	cout << "starting petsc stuff" << endl;
+	MPI_Init(&argc,&argv); // this is required before PetscInitialize
     PetscInitialize(&argc,&argv,PETSC_NULL,PETSC_NULL);
     cout << "initialized petsc" << endl;
     MPI_Comm_size(PETSC_COMM_WORLD,&size);
@@ -112,12 +113,10 @@ int main(int argc, char * argv[]){
     MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(),paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x());
     MatSetFromOptions(A);
     MatSetUp(A);
-    for (auto i=0; i<paramesh->reg_num_nodes_x(); i++){ // columns
-		for (auto j=0; j<paramesh->reg_num_nodes_y(); j++){ // rows
+    for (auto i=0; i<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); i++){ // columns
+		for (auto j=0; j<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); j++){ // rows
 			cind = paramesh->reg_inds_to_glob_ind(i,j);
-			MatSetValue(A,i,j,mat[i][j],INSERT_VALUES);
-			//cout << "I: " << i << " J: " << j << endl;
-			rhs[cind] = -reldata[cind]*q_electron/eps0;
+			MatSetValues(A,1,&i,1,&j,&mat[i][j],INSERT_VALUES);
 		}
 	}
     /* need to assemble matrix for the same reasons as above */
@@ -135,9 +134,13 @@ int main(int argc, char * argv[]){
     cout << "solved equation" << endl;
 
     //MatView(A,PETSC_VIEWER_STDOUT_WORLD);
+    //MatView(A,PETSC_VIEWER_DRAW_WORLD); // this will draw the non-zero entries of the matrix
+    //cout << "enter something: " << endl;
+    //string input = "";
+    //getline(cin, input);
     //VecView(b,PETSC_VIEWER_STDOUT_WORLD);
     //VecView(x,PETSC_VIEWER_STDOUT_WORLD);
-    KSPView(ksp,PETSC_VIEWER_STDOUT_WORLD);
+    //KSPView(ksp,PETSC_VIEWER_STDOUT_WORLD);
 
     PetscInt sz;
     VecGetSize(x, &sz);
@@ -160,7 +163,7 @@ int main(int argc, char * argv[]){
 	paramesh->print_summary();
 	paravis->set_colorby(&paramesh->data("potential"));
 	cout << "set the colorby" << endl;
-	paravis->run();
+	//paravis->run();
 	cout << "finished running" << endl;
 
 
@@ -185,11 +188,13 @@ int main(int argc, char * argv[]){
     KSPDestroy(&ksp);
     VecDestroy(&x);
     VecDestroy(&b);
+    MatDestroy(&A);
     PetscFinalize();
 
 	delete[] rhs;
 	for (auto i=0; i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); i++) delete[] mat[i];
 	delete[] mat;
+
 
 	return 0;
 }
