@@ -7,6 +7,8 @@ TODO:
 
 - Interface for libMesh, Eigen, Boost, CGAL, and any other third party libraries that are useful
 
+- linear algebra classes (Vector, Matrix, LinearSolver, NonlinearSolver). use typedefs to specialize the linear algebra classes internal data to a given linear algebra library (e.g. typedef Vec Petsc::Vec    etc...)
+
 - make separate object files that can be used elsewhere, like Point. Or use CGAL.
 
 - Something is wrong with the Hull->contains_point() code...

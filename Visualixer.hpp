@@ -166,10 +166,4 @@ private:
 };
 
 
-//************** Simuluation Visualixer *******************
-class sim_visualixer{
-
-};
-
-
 #endif

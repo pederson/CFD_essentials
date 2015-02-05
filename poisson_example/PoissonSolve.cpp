@@ -19,21 +19,21 @@ int main(int argc, char * argv[]){
 	my_param2.add_material("Air", {1.0});
 	my_param2.add_material("Dielectric", {5.0});
 	my_param2.add_material("Dielectric2", {9.0});
-	gaussian_2d ga1 = gaussian_2d(0.3, 0.3, 100.0, 1.0e+1, {0.0, 0.0}); // electron density in #/m^3
+	gaussian_2d ga1 = gaussian_2d(0.3, 0.3, 1000.0, 1.0e+16, {0.0, 0.0}); // electron density in #/m^3
 	my_param2.add_object(&ga1);
 
 	// convert the model into a mesh
 	Static_Mesh * paramesh;
-	paramesh = build_simple_mesh_2d(&my_param2, 0.1, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
+	paramesh = build_simple_mesh_2d(&my_param2, 0.05, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
 	
 	// view the mesh
 	mesh_visualixer * paravis = new mesh_visualixer();
 	paravis->add_mesh(paramesh);
 	paravis->set_color_ramp(CRamp::DIVERGENT_9);
 	paravis->set_colorby(&paramesh->data("e_density"));
-	//paravis->run();
-	delete paravis;
+	paravis->run();
 	//delete paramesh; // WHY DOES THIS COMPILE IF THIS IS UNCOMMENTED???
+
 
 	// this is a testing section
 		// solve the poisson equation using a finite difference method
@@ -43,8 +43,8 @@ int main(int argc, char * argv[]){
 	// loop over the internal nodes adding the laplace operator to the matrix
 	double ** mat = new double *[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
 	for (auto i=0; i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); i++) mat[i] = new double[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
-	for (auto i=0; i<paramesh->reg_num_nodes_x(); i++){ // columns
-		for (auto j=0; j<paramesh->reg_num_nodes_y(); j++) mat[i][j] = 0;
+	for (auto i=0; i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); i++){ // columns
+		for (auto j=0; j<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); j++) mat[i][j] = 0;
 	}
 
 	unsigned int cind, lind, rind, uind, dind;
@@ -113,12 +113,17 @@ int main(int argc, char * argv[]){
     MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(),paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x());
     MatSetFromOptions(A);
     MatSetUp(A);
-    for (auto i=0; i<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); i++){ // columns
+
+    / FIX ME HERE>>> THIS IS INTENTIONAL SO THAT IT DOESNT COMPILE
+    
+    PetscInt rowinds[paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y()];
+    for (auto i=0; i<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); i++) rowinds[i] = i;
+    //for (auto i=0; i<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); i++){ // columns
 		for (auto j=0; j<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); j++){ // rows
-			cind = paramesh->reg_inds_to_glob_ind(i,j);
-			MatSetValues(A,1,&i,1,&j,&mat[i][j],INSERT_VALUES);
+			MatSetValues(A,paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(),rowinds,1,&j,&mat[0][j],INSERT_VALUES);
+			if (j%10 == 0) cout << "on row: " << j << " / " << paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y() << " \r" << flush;
 		}
-	}
+	//}
     /* need to assemble matrix for the same reasons as above */
     MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);
@@ -163,7 +168,7 @@ int main(int argc, char * argv[]){
 	paramesh->print_summary();
 	paravis->set_colorby(&paramesh->data("potential"));
 	cout << "set the colorby" << endl;
-	//paravis->run();
+	paravis->run();
 	cout << "finished running" << endl;
 
 
@@ -194,6 +199,7 @@ int main(int argc, char * argv[]){
 	delete[] rhs;
 	for (auto i=0; i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); i++) delete[] mat[i];
 	delete[] mat;
+	delete paravis;
 
 
 	return 0;
