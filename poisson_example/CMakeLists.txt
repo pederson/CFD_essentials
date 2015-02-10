@@ -6,7 +6,8 @@ PROJECT(poisson_example)
 
 SET(CMAKE_CXX_COMPILER "${PETSC_DIR}/${PETSC_ARCH}/bin/mpicxx")
 #SET(CMAKE_CXX_COMPILER "/usr/bin/mpic++")
-SET(CMAKE_CXX_FLAGS "-std=c++11 -w -Wall -Werror")
+#SET(CMAKE_CXX_FLAGS "-std=c++11 -w -Wall -Werror -fopenmp")
+SET(CMAKE_CXX_FLAGS "-std=c++11 -w -Wall -Werror -fopenmp")
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 

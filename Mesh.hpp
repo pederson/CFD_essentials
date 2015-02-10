@@ -87,6 +87,7 @@ public:
 
   // reading and writing files
   static Static_Mesh read_MSH(std::string filename, unsigned int byte_offset=0);
+  static Static_Mesh read_XML(std::string filename, unsigned int byte_offset=0);
   static Static_Mesh read_NEU(std::string filename, unsigned int byte_offset=0);
   static Static_Mesh read_CAS(std::string filename, unsigned int byte_offset=0);
   void write_MSH(std::string filename) const;

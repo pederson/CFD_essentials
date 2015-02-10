@@ -7,6 +7,7 @@
 //#include "Equation.hpp"
 //#include "Simulation.hpp"
 #include <petscksp.h>
+#include <omp.h>
 
 using namespace std;
 
@@ -24,7 +25,7 @@ int main(int argc, char * argv[]){
 
 	// convert the model into a mesh
 	Static_Mesh * paramesh;
-	paramesh = build_simple_mesh_2d(&my_param2, 0.05, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
+	paramesh = build_simple_mesh_2d(&my_param2, 0.01, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
 	
 	// view the mesh
 	mesh_visualixer * paravis = new mesh_visualixer();
@@ -96,7 +97,7 @@ int main(int argc, char * argv[]){
     PetscInitialize(&argc,&argv,PETSC_NULL,PETSC_NULL);
     cout << "initialized petsc" << endl;
     MPI_Comm_size(PETSC_COMM_WORLD,&size);
-    cout << "initialized mpi comm" << endl;
+    cout << "initialized mpi comm with " << size << " processes" << endl;
 
     VecCreate(PETSC_COMM_WORLD,&x);
     VecSetSizes(x,PETSC_DECIDE,paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x());
@@ -114,16 +115,24 @@ int main(int argc, char * argv[]){
     MatSetFromOptions(A);
     MatSetUp(A);
 
-    / FIX ME HERE>>> THIS IS INTENTIONAL SO THAT IT DOESNT COMPILE
     
-    PetscInt rowinds[paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y()];
-    for (auto i=0; i<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); i++) rowinds[i] = i;
-    //for (auto i=0; i<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); i++){ // columns
+
+    PetscInt idxm[paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y()], idxn[paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y()];;
+    for (auto i=0; i<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); i++){
+    	idxm[i] = i;
+    	idxn[i] = i;
+    }
+    MatSetValues(A, paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(), idxm, paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(), idxn, mat[0], INSERT_VALUES);
+//#pragma omp parallel for collapse(2)
+    /*
+    for (auto i=0; i<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); i++){ // columns
 		for (auto j=0; j<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); j++){ // rows
-			MatSetValues(A,paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(),rowinds,1,&j,&mat[0][j],INSERT_VALUES);
-			if (j%10 == 0) cout << "on row: " << j << " / " << paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y() << " \r" << flush;
+			MatSetValue(A,i,j,mat[i][j],INSERT_VALUES);
+			//MatSetValues(A,paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(),rowinds,1,&j,&mat[0][j],INSERT_VALUES);
+			if (i%10 == 0) cout << "on row: " << i << " / " << paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y() << " \r" << flush;
 		}
-	//}
+	}
+	*/
     /* need to assemble matrix for the same reasons as above */
     MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);
