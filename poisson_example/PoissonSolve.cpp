@@ -18,14 +18,18 @@ int main(int argc, char * argv[]){
 	my_param2.set_model_name("GaussianDistElectrons");
 	my_param2.add_physical_property("e_density");
 	my_param2.add_material("Air", {1.0});
-	my_param2.add_material("Dielectric", {5.0});
+	my_param2.add_material("Dielectric", {5.0e+15});
 	my_param2.add_material("Dielectric2", {9.0});
-	gaussian_2d ga1 = gaussian_2d(0.3, 0.3, 1000.0, 1.0e+16, {0.0, 0.0}); // electron density in #/m^3
-	my_param2.add_object(&ga1);
+	//gaussian_2d ga1 = gaussian_2d(0.3, 0.3, 1000.0, 1.0e+16, {0.0, 0.0}); // electron density in #/m^3
+	circle c1 = circle(0.3, {0.0, 0.4}, my_param2.get_material("Dielectric"));
+	circle c2 = circle(0.3, {0.0, -0.4}, my_param2.get_material("Dielectric"));
+	//my_param2.add_object(&ga1);
+	my_param2.add_object(&c1);
+	my_param2.add_object(&c2);
 
 	// convert the model into a mesh
 	Static_Mesh * paramesh;
-	paramesh = build_simple_mesh_2d(&my_param2, 0.01, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
+	paramesh = build_simple_mesh_2d(&my_param2, 0.03, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
 	
 	// view the mesh
 	mesh_visualixer * paravis = new mesh_visualixer();
@@ -64,8 +68,7 @@ int main(int argc, char * argv[]){
 		}
 	}
 
-	// write in the boundary conditions
-	// zeros for now...just testing the code
+
 
 	// construct the right side using the density field
 	double q_electron = -1.6e-19, eps0 = 8.854e-12;
@@ -78,6 +81,26 @@ int main(int argc, char * argv[]){
 			//cout << "I: " << i << " J: " << j << endl;
 			rhs[cind] = -reldata[cind]*q_electron/eps0;
 		}
+	}
+
+	// write in the boundary conditions
+	// -10 V on the right side of the domain
+	for (auto j=0; j<paramesh->reg_num_nodes_y(); j++){ // rows
+		cind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-1,j);
+		//cout << "I: " << i << " J: " << j << endl;
+		rhs[cind] = -10.0;
+
+	}
+	for (auto j=1; j<paramesh->reg_num_nodes_y()-1; j++){ // rows
+		cind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-1,j);
+
+			lind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-2,j);
+			uind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-1,j+1);
+			dind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-1,j-1);
+			mat[cind][cind] = 1.0;
+			mat[cind][lind] = 0.0;
+			mat[cind][uind] = 0.0;
+			mat[cind][dind] = 0.0;
 	}
 
 	cout << "RHS[0]: " << rhs[0] << endl;
@@ -152,7 +175,7 @@ int main(int argc, char * argv[]){
     //cout << "enter something: " << endl;
     //string input = "";
     //getline(cin, input);
-    //VecView(b,PETSC_VIEWER_STDOUT_WORLD);
+    VecView(b,PETSC_VIEWER_STDOUT_WORLD);
     //VecView(x,PETSC_VIEWER_STDOUT_WORLD);
     //KSPView(ksp,PETSC_VIEWER_STDOUT_WORLD);
 
