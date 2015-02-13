@@ -21,15 +21,16 @@ int main(int argc, char * argv[]){
 	my_param2.add_material("Dielectric", {5.0e+13});
 	my_param2.add_material("Dielectric2", {9.0});
 	//gaussian_2d ga1 = gaussian_2d(0.3, 0.3, 1000.0, 1.0e+16, {0.0, 0.0}); // electron density in #/m^3
-	circle c1 = circle(0.3, {0.0, 0.4}, my_param2.get_material("Dielectric"));
-	circle c2 = circle(0.3, {0.0, -0.4}, my_param2.get_material("Dielectric"));
+	circle c1 = circle(0.03, {0.0, 0.04}, my_param2.get_material("Dielectric"));
+	circle c2 = circle(0.03, {0.0, -0.04}, my_param2.get_material("Dielectric"));
 	//my_param2.add_object(&ga1);
 	my_param2.add_object(&c1);
 	my_param2.add_object(&c2);
 
 	// convert the model into a mesh
 	Static_Mesh * paramesh;
-	paramesh = build_simple_mesh_2d(&my_param2, 0.03, -1.0, 1.0, -1.0, 1.0, my_param2.get_material("Air"));
+	double dx = 0.002;
+	paramesh = build_simple_mesh_2d(&my_param2, dx, -0.1, 0.1, -0.15, 0.15, my_param2.get_material("Air"));
 	
 	// view the mesh
 	mesh_visualixer * paravis = new mesh_visualixer();
@@ -76,19 +77,10 @@ int main(int argc, char * argv[]){
 		for (auto j=0; j<paramesh->reg_num_nodes_y(); j++){ // rows
 			cind = paramesh->reg_inds_to_glob_ind(i,j);
 			//cout << "I: " << i << " J: " << j << " density: " << reldata[cind] << endl;
-			rhs[cind] = -reldata[cind]*q_electron/eps0;
+			rhs[cind] = -reldata[cind]*q_electron/eps0*dx*dx;
 		}
 	}
 
-	// write in the boundary conditions
-	// -1000 V on the right side of the domain
-	for (auto j=0; j<paramesh->reg_num_nodes_y(); j++){ // rows
-		cind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-1,j);
-		//cout << "I: " << i << " J: " << j << endl;
-		rhs[cind] = -1000.0;
-
-	}
-	
 	
 	
 
@@ -110,12 +102,7 @@ int main(int argc, char * argv[]){
     VecSetSizes(x,PETSC_DECIDE,paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x());
     VecSetFromOptions(x);
     VecDuplicate(x,&b);
-    for(auto i=0;i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x();i++) VecSetValues(b,1,&i,&rhs[i],INSERT_VALUES);
-    /* need to assemble after setting values! do necessary
-       message passing etc to propagate matrix to all ranks */
-    VecAssemblyBegin(b);
-    VecAssemblyEnd(b);
-    cout << "assembled rhs" << endl;
+    
 
     MatCreate(PETSC_COMM_WORLD,&A);
     MatSetSizes(A,PETSC_DECIDE,PETSC_DECIDE,paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(),paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x());
@@ -130,28 +117,30 @@ int main(int argc, char * argv[]){
 	oper[0] = -1.0; oper[1] = -1.0; oper[2] = 4.0; oper[3] = -1.0; oper[4] = -1.0;
 	PetscInt cols[5], row;
 	// for each row
-	for (auto j=1; j<paramesh->reg_num_nodes_y()-1; j++){ // rows
-		for (auto i=1; i<paramesh->reg_num_nodes_x()-1; i++){ // columns
-			cind = paramesh->reg_inds_to_glob_ind(i,j);
-			lind = paramesh->reg_inds_to_glob_ind(i-1,j);
-			rind = paramesh->reg_inds_to_glob_ind(i+1,j);
-			uind = paramesh->reg_inds_to_glob_ind(i,j+1);
-			dind = paramesh->reg_inds_to_glob_ind(i,j-1);
+	for (auto j=1; j<paramesh->reg_num_nodes_x()-1; j++){ // cols
+		for (auto i=1; i<paramesh->reg_num_nodes_y()-1; i++){ // rows
+			cind = paramesh->reg_inds_to_glob_ind(j, i);
+			lind = paramesh->reg_inds_to_glob_ind(j, i-1);
+			rind = paramesh->reg_inds_to_glob_ind(j, i+1);
+			uind = paramesh->reg_inds_to_glob_ind(j+1, i);
+			dind = paramesh->reg_inds_to_glob_ind(j-1, i);
 			cols[0] = lind;
 			cols[1] = dind;
 			cols[2] = cind;
 			cols[3] = uind;
 			cols[4] = rind;
 
-			if (j%10 == 0) cout << "on row: " << j << " / " << paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y() << " \r" << flush;
+			if (j%10 == 0) cout << "on row: " << j << " / " << paramesh->reg_num_nodes_x() << " \r" << flush;
 			//cout << "yer" << endl;
-			row = j*paramesh->reg_num_nodes_y() + i; // row index in the overall matrix?
-			//row = 0;
+			//row = j*paramesh->reg_num_nodes_x() + i; // row index in the overall matrix
+			row = cind;
 			MatSetValues(A, 1, &row, 5, cols, oper, INSERT_VALUES);
 		}
 	}
+	cout << endl;
 
-	
+
+	/*
 	// insert boundary conditions
 	PetscInt cl;
 	PetscScalar bnds[4];
@@ -167,27 +156,29 @@ int main(int argc, char * argv[]){
 		cls[2] = cind;
 		cls[3] = uind;
 
-		rw = j*paramesh->reg_num_nodes_y() + paramesh->reg_num_nodes_x();
-		//rw = 0;
+		//rw = j*paramesh->reg_num_nodes_y() + paramesh->reg_num_nodes_x();
+		rw = cind;
 		MatSetValues(A, 1, &rw, 4, cls, bnds, INSERT_VALUES);
 
 	}
-	//*/
-	
-	
-    
-	
-//#pragma omp parallel for collapse(2)
-    /*
-    for (auto i=0; i<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); i++){ // columns
-		for (auto j=0; j<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); j++){ // rows
-			MatSetValue(A,i,j,mat[i][j],INSERT_VALUES);
-			//MatSetValues(A,paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(),rowinds,1,&j,&mat[0][j],INSERT_VALUES);
-			if (i%10 == 0) cout << "on row: " << i << " / " << paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y() << " \r" << flush;
-		}
-	}
+	// write in the boundary conditions
+	// -100 V on the right side of the domain
+	for (auto j=0; j<paramesh->reg_num_nodes_y(); j++){ // rows
+		cind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-1,j);
+		//cout << "I: " << i << " J: " << j << endl;
+		rhs[cind] = -100.0;
 
-	*/
+	}
+	//*/
+
+	for(auto i=0;i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x();i++) VecSetValues(b,1,&i,&rhs[i],INSERT_VALUES);
+    /* need to assemble after setting values! do necessary
+       message passing etc to propagate matrix to all ranks */
+    VecAssemblyBegin(b);
+    VecAssemblyEnd(b);
+    cout << "assembled rhs" << endl;
+	
+	
 	
     /* need to assemble matrix for the same reasons as above */
     MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);
@@ -238,7 +229,6 @@ int main(int argc, char * argv[]){
 
 
 
-
 	/* this is what I would do if I had all the classes ready
 	// create an equation
 	// del^2(potential) = -e*(e_density)/epsilon
@@ -253,6 +243,8 @@ int main(int argc, char * argv[]){
 
 	// visualize the results
 	*/
+
+
 
 	// cleanup
     KSPDestroy(&ksp);
