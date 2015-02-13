@@ -17,8 +17,8 @@ int main(int argc, char * argv[]){
 	parametric_model_2d my_param2;
 	my_param2.set_model_name("GaussianDistElectrons");
 	my_param2.add_physical_property("e_density");
-	my_param2.add_material("Air", {1.0});
-	my_param2.add_material("Dielectric", {5.0e+15});
+	my_param2.add_material("Air", {1.0e+10});
+	my_param2.add_material("Dielectric", {5.0e+13});
 	my_param2.add_material("Dielectric2", {9.0});
 	//gaussian_2d ga1 = gaussian_2d(0.3, 0.3, 1000.0, 1.0e+16, {0.0, 0.0}); // electron density in #/m^3
 	circle c1 = circle(0.3, {0.0, 0.4}, my_param2.get_material("Dielectric"));
@@ -46,11 +46,8 @@ int main(int argc, char * argv[]){
 	
 	
 	// loop over the internal nodes adding the laplace operator to the matrix
-	double ** mat = new double *[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
-	for (auto i=0; i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); i++) mat[i] = new double[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
-	for (auto i=0; i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); i++){ // columns
-		for (auto j=0; j<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); j++) mat[i][j] = 0;
-	}
+	PetscScalar * mat = new PetscScalar [paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
+	for (auto i=0; i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); i++) mat[i] = 0;
 
 	unsigned int cind, lind, rind, uind, dind;
 	for (auto i=1; i<paramesh->reg_num_nodes_x()-1; i++){ // columns
@@ -60,11 +57,11 @@ int main(int argc, char * argv[]){
 			rind = paramesh->reg_inds_to_glob_ind(i+1,j);
 			uind = paramesh->reg_inds_to_glob_ind(i,j+1);
 			dind = paramesh->reg_inds_to_glob_ind(i,j-1);
-			mat[cind][cind] = -4.0;
-			mat[cind][lind] = 1.0;
-			mat[cind][rind] = 1.0;
-			mat[cind][uind] = 1.0;
-			mat[cind][dind] = 1.0;
+			mat[cind*paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x() + cind] = -4.0;
+			mat[cind*paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x() + lind] = 1.0;
+			mat[cind*paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x() + rind] = 1.0;
+			mat[cind*paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x() + uind] = 1.0;
+			mat[cind*paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x() + dind] = 1.0;
 		}
 	}
 
@@ -78,32 +75,19 @@ int main(int argc, char * argv[]){
 	for (auto i=0; i<paramesh->reg_num_nodes_x(); i++){ // columns
 		for (auto j=0; j<paramesh->reg_num_nodes_y(); j++){ // rows
 			cind = paramesh->reg_inds_to_glob_ind(i,j);
-			//cout << "I: " << i << " J: " << j << endl;
+			//cout << "I: " << i << " J: " << j << " density: " << reldata[cind] << endl;
 			rhs[cind] = -reldata[cind]*q_electron/eps0;
 		}
 	}
 
 	// write in the boundary conditions
-	// -10 V on the right side of the domain
+	// -1000 V on the right side of the domain
 	for (auto j=0; j<paramesh->reg_num_nodes_y(); j++){ // rows
 		cind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-1,j);
 		//cout << "I: " << i << " J: " << j << endl;
-		rhs[cind] = -10.0;
+		rhs[cind] = -1000.0;
 
 	}
-	for (auto j=1; j<paramesh->reg_num_nodes_y()-1; j++){ // rows
-		cind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-1,j);
-
-			lind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-2,j);
-			uind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-1,j+1);
-			dind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-1,j-1);
-			mat[cind][cind] = 1.0;
-			mat[cind][lind] = 0.0;
-			mat[cind][uind] = 0.0;
-			mat[cind][dind] = 0.0;
-	}
-
-	cout << "RHS[0]: " << rhs[0] << endl;
 	
 	
 	
@@ -139,13 +123,60 @@ int main(int argc, char * argv[]){
     MatSetUp(A);
 
     
+    cout << "about to init matrix" << endl;
 
-    PetscInt idxm[paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y()], idxn[paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y()];;
-    for (auto i=0; i<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); i++){
-    	idxm[i] = i;
-    	idxn[i] = i;
-    }
-    MatSetValues(A, paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(), idxm, paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(), idxn, mat[0], INSERT_VALUES);
+	// set the matrix values for the laplace operator
+	PetscScalar oper[5];
+	oper[0] = -1.0; oper[1] = -1.0; oper[2] = 4.0; oper[3] = -1.0; oper[4] = -1.0;
+	PetscInt cols[5], row;
+	// for each row
+	for (auto j=1; j<paramesh->reg_num_nodes_y()-1; j++){ // rows
+		for (auto i=1; i<paramesh->reg_num_nodes_x()-1; i++){ // columns
+			cind = paramesh->reg_inds_to_glob_ind(i,j);
+			lind = paramesh->reg_inds_to_glob_ind(i-1,j);
+			rind = paramesh->reg_inds_to_glob_ind(i+1,j);
+			uind = paramesh->reg_inds_to_glob_ind(i,j+1);
+			dind = paramesh->reg_inds_to_glob_ind(i,j-1);
+			cols[0] = lind;
+			cols[1] = dind;
+			cols[2] = cind;
+			cols[3] = uind;
+			cols[4] = rind;
+
+			if (j%10 == 0) cout << "on row: " << j << " / " << paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y() << " \r" << flush;
+			//cout << "yer" << endl;
+			row = j*paramesh->reg_num_nodes_y() + i; // row index in the overall matrix?
+			//row = 0;
+			MatSetValues(A, 1, &row, 5, cols, oper, INSERT_VALUES);
+		}
+	}
+
+	
+	// insert boundary conditions
+	PetscInt cl;
+	PetscScalar bnds[4];
+	bnds[0] = 0.0; bnds[1] = 0.0; bnds[2] = 1.0; bnds[3] = 0.0;
+	PetscInt cls[4], rw;
+	for (auto j=1; j<paramesh->reg_num_nodes_y()-1; j++){ // rows
+		cind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-1, j);
+		lind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-2, j);
+		uind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-1, j+1);
+		dind = paramesh->reg_inds_to_glob_ind(paramesh->reg_num_nodes_x()-1, j-1);
+		cls[0] = lind;
+		cls[1] = dind;
+		cls[2] = cind;
+		cls[3] = uind;
+
+		rw = j*paramesh->reg_num_nodes_y() + paramesh->reg_num_nodes_x();
+		//rw = 0;
+		MatSetValues(A, 1, &rw, 4, cls, bnds, INSERT_VALUES);
+
+	}
+	//*/
+	
+	
+    
+	
 //#pragma omp parallel for collapse(2)
     /*
     for (auto i=0; i<paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y(); i++){ // columns
@@ -155,7 +186,9 @@ int main(int argc, char * argv[]){
 			if (i%10 == 0) cout << "on row: " << i << " / " << paramesh->reg_num_nodes_x()*paramesh->reg_num_nodes_y() << " \r" << flush;
 		}
 	}
+
 	*/
+	
     /* need to assemble matrix for the same reasons as above */
     MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);
@@ -171,11 +204,11 @@ int main(int argc, char * argv[]){
     cout << "solved equation" << endl;
 
     //MatView(A,PETSC_VIEWER_STDOUT_WORLD);
-    //MatView(A,PETSC_VIEWER_DRAW_WORLD); // this will draw the non-zero entries of the matrix
-    //cout << "enter something: " << endl;
-    //string input = "";
+    MatView(A,PETSC_VIEWER_DRAW_WORLD); // this will draw the non-zero entries of the matrix
+    cout << "enter something: " << endl;
+    string input = "";
     //getline(cin, input);
-    VecView(b,PETSC_VIEWER_STDOUT_WORLD);
+    //VecView(b,PETSC_VIEWER_STDOUT_WORLD);
     //VecView(x,PETSC_VIEWER_STDOUT_WORLD);
     //KSPView(ksp,PETSC_VIEWER_STDOUT_WORLD);
 
@@ -229,7 +262,6 @@ int main(int argc, char * argv[]){
     PetscFinalize();
 
 	delete[] rhs;
-	for (auto i=0; i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); i++) delete[] mat[i];
 	delete[] mat;
 	delete paravis;
 
