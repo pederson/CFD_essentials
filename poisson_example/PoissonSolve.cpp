@@ -6,7 +6,8 @@
 //#include "EquationTerm.hpp"
 //#include "Equation.hpp"
 //#include "Simulation.hpp"
-#include <petscksp.h>
+#include "../LinAlgWrapper.hpp"
+//#include <petscksp.h>
 #include <omp.h>
 
 using namespace std;
@@ -84,11 +85,12 @@ int main(int argc, char * argv[]){
 	
 	
 
+	/*
 	// now solve the system (PETSc KSP)
-	Vec x,b;   /* approx solution, rhs */
-    Mat A;     /* linear system matrix */
-    KSP ksp;   /* linear solver context */
-    PC pc;     /* preconditioner context */
+	Vec x,b;   // approx solution, rhs 
+    Mat A;     // linear system matrix 
+    KSP ksp;   // linear solver context 
+    PC pc;     // preconditioner context 
     int size;
 
 	cout << "starting petsc stuff" << endl;
@@ -171,16 +173,17 @@ int main(int argc, char * argv[]){
 	}
 	//*/
 
+	/*
 	for(auto i=0;i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x();i++) VecSetValues(b,1,&i,&rhs[i],INSERT_VALUES);
-    /* need to assemble after setting values! do necessary
-       message passing etc to propagate matrix to all ranks */
+    // need to assemble after setting values! do necessary
+    //   message passing etc to propagate matrix to all ranks 
     VecAssemblyBegin(b);
     VecAssemblyEnd(b);
     cout << "assembled rhs" << endl;
 	
 	
 	
-    /* need to assemble matrix for the same reasons as above */
+    // need to assemble matrix for the same reasons as above 
     MatAssemblyBegin(A,MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(A,MAT_FINAL_ASSEMBLY);
     cout << "assembled matrix" << endl;
@@ -226,6 +229,89 @@ int main(int argc, char * argv[]){
 	cout << "set the colorby" << endl;
 	paravis->run();
 	cout << "finished running" << endl;
+
+	// cleanup
+    KSPDestroy(&ksp);
+    VecDestroy(&x);
+    VecDestroy(&b);
+    MatDestroy(&A);
+    PetscFinalize();
+	*/
+
+	string input = "";
+	cout << "enter something: " << endl;
+    getline(cin, input);
+
+	// now solve the system (linear algebra wrapper)
+	LinVector rhsv(paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x());   // approx solution, rhs 
+    
+    int size;
+
+    cout << "enter something: " << endl;
+    getline(cin, input);
+
+    LinMatrix A(paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(), paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x());     // linear system matrix 
+    LinSolver ksp;   // linear solver context 
+
+    cout << "about to init matrix" << endl;
+
+	// set the matrix values for the laplace operator
+	double oper[5];
+	oper[0] = -1.0; oper[1] = -1.0; oper[2] = 4.0; oper[3] = -1.0; oper[4] = -1.0;
+	int cols[5], row;
+	// for each row
+	for (auto j=1; j<paramesh->reg_num_nodes_x()-1; j++){ // cols
+		for (auto i=1; i<paramesh->reg_num_nodes_y()-1; i++){ // rows
+			cind = paramesh->reg_inds_to_glob_ind(j, i);
+			lind = paramesh->reg_inds_to_glob_ind(j, i-1);
+			rind = paramesh->reg_inds_to_glob_ind(j, i+1);
+			uind = paramesh->reg_inds_to_glob_ind(j+1, i);
+			dind = paramesh->reg_inds_to_glob_ind(j-1, i);
+			cols[0] = lind;
+			cols[1] = dind;
+			cols[2] = cind;
+			cols[3] = uind;
+			cols[4] = rind;
+
+			if (j%10 == 0) cout << "on row: " << j << " / " << paramesh->reg_num_nodes_x() << " \r" << flush;
+			//cout << "yer" << endl;
+			//row = j*paramesh->reg_num_nodes_x() + i; // row index in the overall matrix
+			row = cind;
+			A.insert_values(1, &row, 5, cols, oper);
+		}
+	}
+	cout << endl;
+
+	cout << "enter something: " << endl;
+    getline(cin, input);
+
+	for(auto i=0;i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x();i++){
+		rhsv.insert_values(1,&rhs[i], &i);
+	}
+    cout << "assembled rhs" << endl;
+	
+	LinVector x = ksp.solve(A, rhsv);
+    cout << "solved equation" << endl;
+
+    A.draw();
+
+    
+    unsigned int sz = x.length();
+    cout << "NUM in vector solution: " << sz << "    NUM in rhs: " << paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x() << endl;
+
+    // collect the value from the solver
+
+	// visualize the solution by putting it in the mesh
+	paramesh->add_phys_property("potential", x.data());
+	cout << "added property" << endl;
+	paramesh->print_summary();
+	paravis->set_colorby(&paramesh->data("potential"));
+	cout << "set the colorby" << endl;
+	paravis->run();
+	cout << "finished running" << endl;
+
+	clearLinAlg();
+
 
 
 
@@ -365,13 +451,6 @@ int main(int argc, char * argv[]){
 	*/
 
 
-
-	// cleanup
-    KSPDestroy(&ksp);
-    VecDestroy(&x);
-    VecDestroy(&b);
-    MatDestroy(&A);
-    PetscFinalize();
 
 	delete[] rhs;
 	delete[] mat;
