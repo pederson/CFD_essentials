@@ -69,7 +69,7 @@ int main(int argc, char * argv[]){
 
 
 	// construct the right side using the density field
-	double q_electron = -1.6e-19, eps0 = 8.854e-12; m_electron = 9.11e-31;
+	double q_electron = -1.6e-19, eps0 = 8.854e-12, m_electron = 9.11e-31;
 	paramesh->print_summary();
 	const double * reldata = &paramesh->data("e_density");
 	double * rhs = new double[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
@@ -229,7 +229,7 @@ int main(int argc, char * argv[]){
 
 
 
-
+	/*
 	//************* UNSTEADY PROBLEM ****************
 	// using dv_e/dt = -eE/m_e - nu_c*v_e
 	// and   nu_c = 5.3e+9 * P_atm (in torr)
@@ -278,6 +278,7 @@ int main(int argc, char * argv[]){
 	double num_iters = 5;
 	// use forward euler to advance velocity in time
 	// NEED TO FIX THIS TO DEAL WITH BOUNDARIES WHEN CENTRAL DIFFERENCE OPERATOR IS USED
+	
 	for (auto n=0; n<num_iters; n++){
 
 		for (auto j=1; j<paramesh->reg_num_nodes_x()-1; j++){ // cols
@@ -323,8 +324,8 @@ int main(int argc, char * argv[]){
 		}
 		// solve poisson's equation
 		for(auto i=0;i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x();i++) VecSetValues(b,1,&i,&rhs[i],INSERT_VALUES);
-	    /* need to assemble after setting values! do necessary
-	       message passing etc to propagate matrix to all ranks */
+	    // need to assemble after setting values! do necessary
+	    //   message passing etc to propagate matrix to all ranks 
 	    VecAssemblyBegin(b);
 	    VecAssemblyEnd(b);
 	    KSPSolve(ksp,b,x);
@@ -344,6 +345,7 @@ int main(int argc, char * argv[]){
 		}
 	}
 	}
+	*/
 
 
 
