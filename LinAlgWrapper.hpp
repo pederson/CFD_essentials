@@ -43,7 +43,8 @@ public:
 	  _data(vec._data),
 	  _assembled(vec._assembled),
 	  _length(vec._length) {}
-	const double & operator[](unsigned int idx) { return _data.at(idx);};
+	double & operator[](unsigned int idx) {return _data[idx];};
+	const double & operator[](unsigned int idx) const { return _data.at(idx);};
 	LinVector & operator=(const LinVector & other) { return *this;};
 
 	// inspectors
@@ -68,6 +69,7 @@ public:
 			std::cout << "WARNING: indices are not specified for LinVector... values will not be set!" << std::endl;
 		}
 		disassemble();
+		refresh_data();
 	}
 	void add_values(unsigned int nvals, const double * vals, const int * inds = nullptr);
 	
