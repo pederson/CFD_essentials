@@ -23,20 +23,28 @@ public:
 	// constructor, destructor, etc...	
 	LinVector(unsigned int length) {
 		//PetscErrorCode ierr;
-		LinVector(); 
-		//VecSetSizes(this->_vec, PETSC_DECIDE, length);
+		//std::cout << "called constructor" << std::endl;
+		createvec(); // why is this calling the destructor???
+		//std::cout << "called internal constructor" << std::endl;
+		//VecCreate(PETSC_COMM_WORLD, &_vec); 
+		//std::cout << "called create" << std::endl;
 		set_size(length); 
-		//VecSetType(_vec, VECSEQ);
-		VecSetFromOptions(_vec);
-		//std::cout << "error code: " << ierr << std::endl;
-		
+		//std::cout << "called set size" << std::endl;
+		VecSetType(_vec, VECSEQ);
+		//std::cout << "called set type" << std::endl;
+		//VecSetFromOptions(_vec);
 		initialize(0.0); 
-		
+		//std::cout << "finished constructor" << std::endl;
 	}
-	~LinVector() { VecDestroy(&_vec);};
-	//LinVector(const LinVector & vec);
-	//const double & operator[]{};
-	//LinVector operator={};
+	LinVector() {std::cout << "called empty constructor" << std::endl;};
+	~LinVector() { std::cout << "called destructor" << std::endl; VecDestroy(&_vec);};
+	LinVector(const LinVector & vec)
+	: _vec(vec._vec),
+	  _data(vec._data),
+	  _assembled(vec._assembled),
+	  _length(vec._length) {std::cout << "called copy constructor" << std::endl;}
+	const double & operator[](unsigned int idx) {std::cout << "called operator[]" << std::endl; return _data.at(idx);};
+	LinVector & operator=(const LinVector & other) {std::cout << "called operator=" << std::endl; return *this;};
 
 	// inspectors
 	unsigned int length() const { return _length;};
@@ -53,7 +61,7 @@ public:
 			for (auto i=0; i<nvals; i++) ix[i] = i;
 			VecSetValues(_vec, nvals, ix, vals, INSERT_VALUES);
 		}
-		else if (nvals == length()){
+		else if (nvals == length() || inds!=nullptr && nvals != length()){
 			VecSetValues(_vec, nvals, inds, vals, INSERT_VALUES);
 		}
 		else {
@@ -66,7 +74,7 @@ public:
 
 
 	LinVector duplicate(){
-		LinVector outvec;
+		LinVector outvec(_length);
 		VecDuplicate(_vec, &outvec._vec);
 		outvec._data = _data;
 		return outvec;
@@ -81,10 +89,10 @@ public:
 	void print_summary() {VecView(_vec,PETSC_VIEWER_STDOUT_WORLD);};
 
 	friend class LinSolver;
+	
+private:
 
-protected:
-
-	LinVector(){
+	void createvec(){
 		int mpi_init;
 		MPI_Initialized(&mpi_init);
 		if (!mpi_init) {
@@ -110,9 +118,6 @@ protected:
 		
 	}
 
-
-private:
-
 	bool _assembled;
 	unsigned int _length;
 
@@ -122,6 +127,7 @@ private:
 	void assemble() {VecAssemblyBegin(_vec); VecAssemblyEnd(_vec); _assembled = true;};
 	void disassemble() {_assembled = false;};
 	void refresh_data() {
+		std::cout << "refreshing data" << std::endl;
 		double soln[_length];
 	    PetscInt inds[_length];
 	    for (auto i=0; i<_length; i++) inds[i] = i;
@@ -135,10 +141,11 @@ class LinMatrix{
 public:
 	// constructor, destructor, etc...
 	LinMatrix(unsigned int rows, unsigned int cols) {
-		LinMatrix(); 
+		createmat(); 
 		set_sizes(rows, cols); 
 		//MatSetFromOptions(_mat);
-		MatSetType(_mat, MATMAIJ);
+		MatSetType(_mat, MATSEQAIJ);
+		MatSetUp(_mat);
 	}
 	~LinMatrix(){ MatDestroy(&_mat);};
 	LinMatrix(const LinMatrix & mat);
@@ -180,7 +187,7 @@ public:
 	friend class LinSolver;
 
 protected:
-	LinMatrix(){
+	void createmat(){
 		int mpi_init;
 		MPI_Initialized(&mpi_init);
 		if (!mpi_init) MPI_Init(NULL, NULL);
@@ -222,12 +229,14 @@ public:
 	LinVector solve(LinMatrix & mat, LinVector & rhs){
 		if (!mat.assembled()) mat.assemble();
 		if (!rhs.assembled()) rhs.assemble();
+		PetscErrorCode ierr;
 		LinVector outvec(rhs.length());
 		KSPSetOperators(_ksp, mat._mat, mat._mat);
 		KSPGetPC(_ksp, &_pc);
 		PCSetType(_pc, _pctype);
 		KSPSetTolerances(_ksp, 1e-6, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT);
-		KSPSolve(_ksp, rhs._vec, outvec._vec);
+		ierr = KSPSolve(_ksp, rhs._vec, outvec._vec);
+		//std::cout << "kspsolve error code: " << ierr << std::endl;
 		outvec.refresh_data();
 		return outvec;
 	}
@@ -241,13 +250,13 @@ private:
 };
 
 
-
+/*
 class NonlinSolver{
 public:
 
 private:
 
 };
-
+*/
 
 #endif

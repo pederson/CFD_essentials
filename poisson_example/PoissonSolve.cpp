@@ -238,20 +238,14 @@ int main(int argc, char * argv[]){
     PetscFinalize();
 	*/
 
-	string input = "";
-	cout << "enter something: " << endl;
-    getline(cin, input);
 
 	// now solve the system (linear algebra wrapper)
 	LinVector rhsv(paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x());   // approx solution, rhs 
-    
-    int size;
-
-    cout << "enter something: " << endl;
-    getline(cin, input);
-
     LinMatrix A(paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(), paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x());     // linear system matrix 
     LinSolver ksp;   // linear solver context 
+    int size;
+
+    
 
     cout << "about to init matrix" << endl;
 
@@ -282,8 +276,6 @@ int main(int argc, char * argv[]){
 	}
 	cout << endl;
 
-	cout << "enter something: " << endl;
-    getline(cin, input);
 
 	for(auto i=0;i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x();i++){
 		rhsv.insert_values(1,&rhs[i], &i);
@@ -293,7 +285,7 @@ int main(int argc, char * argv[]){
 	LinVector x = ksp.solve(A, rhsv);
     cout << "solved equation" << endl;
 
-    A.draw();
+    //A.draw(); // a looks fine... I checked already
 
     
     unsigned int sz = x.length();
