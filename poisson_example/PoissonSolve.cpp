@@ -284,6 +284,13 @@ int main(int argc, char * argv[]){
 	
 	LinVector x = ksp.solve(A, rhsv);
     cout << "solved equation" << endl;
+    const double * dat;
+    dat = &x.data();
+    for (auto i=0; i<1000; i++){
+    	cout << "rhs[" << i << "]: " << rhsv[i] << "    " ;
+    	cout << "solution[" << i << "]: " << x[i] << "    ";
+    	cout << "solution[" << i << "]: " << dat[i] << endl;
+    } 
 
     //A.draw(); // a looks fine... I checked already
 
@@ -294,10 +301,11 @@ int main(int argc, char * argv[]){
     // collect the value from the solver
 
 	// visualize the solution by putting it in the mesh
-	paramesh->add_phys_property("potential", x.data());
+	//paramesh->add_phys_property("potential", &x.data());
 	cout << "added property" << endl;
-	paramesh->print_summary();
-	paravis->set_colorby(&paramesh->data("potential"));
+	//paramesh->print_summary();
+	//paravis->set_colorby(&paramesh->data("potential"));
+	paravis->set_colorby(&x.data());
 	cout << "set the colorby" << endl;
 	paravis->run();
 	cout << "finished running" << endl;

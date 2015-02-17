@@ -36,15 +36,15 @@ public:
 		initialize(0.0); 
 		//std::cout << "finished constructor" << std::endl;
 	}
-	LinVector() {std::cout << "called empty constructor" << std::endl;};
-	~LinVector() { std::cout << "called destructor" << std::endl; VecDestroy(&_vec);};
+	LinVector() {};
+	~LinVector() { VecDestroy(&_vec);};
 	LinVector(const LinVector & vec)
 	: _vec(vec._vec),
 	  _data(vec._data),
 	  _assembled(vec._assembled),
-	  _length(vec._length) {std::cout << "called copy constructor" << std::endl;}
-	const double & operator[](unsigned int idx) {std::cout << "called operator[]" << std::endl; return _data.at(idx);};
-	LinVector & operator=(const LinVector & other) {std::cout << "called operator=" << std::endl; return *this;};
+	  _length(vec._length) {}
+	const double & operator[](unsigned int idx) { return _data.at(idx);};
+	LinVector & operator=(const LinVector & other) { return *this;};
 
 	// inspectors
 	unsigned int length() const { return _length;};
@@ -127,7 +127,7 @@ private:
 	void assemble() {VecAssemblyBegin(_vec); VecAssemblyEnd(_vec); _assembled = true;};
 	void disassemble() {_assembled = false;};
 	void refresh_data() {
-		std::cout << "refreshing data" << std::endl;
+		//std::cout << "refreshing data" << std::endl;
 		double soln[_length];
 	    PetscInt inds[_length];
 	    for (auto i=0; i<_length; i++) inds[i] = i;
