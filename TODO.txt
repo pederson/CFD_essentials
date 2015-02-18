@@ -1,13 +1,11 @@
 TODO:
 
-- Shading and Light source for mesh model viewer
+
 - Create getters and setters for everything (encapsulation)
 - support for cylindrical and polar coordinates
-- Class for saving simulation output
 
 - Interface for libMesh, Eigen, Boost, CGAL, and any other third party libraries that are useful
 
-- linear algebra classes (Vector, Matrix, LinearSolver, NonlinearSolver). use typedefs to specialize the linear algebra classes internal data to a given linear algebra library (e.g. typedef Vec Petsc::Vec    etc...)
 
 - make separate object files that can be used elsewhere, like Point. Or use CGAL.
 
@@ -30,6 +28,8 @@ TODO:
 - Panning scale needs refinement
 - Gimbal lock is still happening during manual rotation
 - adding a colorby before adding an object (mesh, pointcloud) doesn't work b/c it gets overwritten
+- Shading and Light source for mesh model viewer
+
 
 - Doxygen comments for everything
 - Equation setter
@@ -48,3 +48,5 @@ X - Geometry builder
 X - Convert everything that uses char* to use std::string instead
 X - Create separate Static Mesh and Mutable Mesh classes
 X - separate out the visualixer classes into separate files
+X - SimulationData class
+X - Linear Algebra wrapper

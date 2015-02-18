@@ -107,6 +107,7 @@ int main(int argc, char * argv[]){
 	
 	LinVector x = ksp.solve(A, rhsv);
     cout << "solved equation" << endl;
+    /*
     const double * dat;
     dat = &x.data();
     for (auto i=0; i<100; i++){
@@ -114,6 +115,7 @@ int main(int argc, char * argv[]){
     	cout << "solution[" << i << "]: " << x[i] << "    ";
     	cout << "solution[" << i << "]: " << dat[i] << endl;
     } 
+    */
 
     //A.draw(); // a looks fine... I checked already
 
@@ -211,7 +213,7 @@ int main(int argc, char * argv[]){
 	for (auto n=1; n<num_iters; n++){
 		tcur = dt;
 
-		cout << "calculating new velocity" << endl;
+		cout << "on time step " << n << "/" << num_iters-1 << "\r" << flush;
 		for (auto j=1; j<paramesh->reg_num_nodes_x()-1; j++){ // cols
 			for (auto i=1; i<paramesh->reg_num_nodes_y()-1; i++){
 				cind = paramesh->reg_inds_to_glob_ind(j, i);
@@ -245,7 +247,7 @@ int main(int argc, char * argv[]){
 		paravis->run();
 		*/
 
-		cout << "calculating new density" << endl;
+		//cout << "calculating new density" << endl;
 		for (auto j=1; j<paramesh->reg_num_nodes_x()-1; j++){ // cols
 			for (auto i=1; i<paramesh->reg_num_nodes_y()-1; i++){
 				cind = paramesh->reg_inds_to_glob_ind(j, i);
@@ -278,7 +280,7 @@ int main(int argc, char * argv[]){
 		paravis->run();
 		*/
 
-		cout << "calculating new rhs and solving for potential" << endl;
+		//cout << "calculating new rhs and solving for potential" << endl;
 		for (auto j=1; j<paramesh->reg_num_nodes_x()-1; j++){ // cols
 			for (auto i=1; i<paramesh->reg_num_nodes_y()-1; i++){
 				cind = paramesh->reg_inds_to_glob_ind(j, i);
@@ -293,7 +295,7 @@ int main(int argc, char * argv[]){
 
 
 		// update E field
-		cout << "calculating new Electric field" << endl;
+		//cout << "calculating new Electric field" << endl;
 		for (auto j=1; j<paramesh->reg_num_nodes_x()-1; j++){ // cols
 			for (auto i=1; i<paramesh->reg_num_nodes_y()-1; i++){
 				cind = paramesh->reg_inds_to_glob_ind(j, i);
