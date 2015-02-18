@@ -6,27 +6,20 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <iostream>
 
-/*
-// data for a single time snapshot
-class DataField{
-public:
-	DataField();
-	~DataField();
+//class Static_Mesh; // forward declaration
 
-	double data(i);
-
-private:
-	std::vector<double> _data;
-
-};
-*/
 
 // all data fields over a single time snapshot
 class DataSnapshot{
 public:
 	DataSnapshot();
 	~DataSnapshot();
+
+	const double & field(std::string fieldname) const {return _datafields.at(fieldname).front();};
+
+	friend class SimulationData;
 
 private:
 	//std::vector<std::string> _fieldnames;
@@ -42,17 +35,31 @@ public:
 	SimulationData();
 	~SimulationData();
 
-	DataSnapshot & at_time(double t) const {for (auto i=0; i<_time.size(); i++){ if (_time.at(i) == t){return _datasnapshots.at(i);}}};
-	DataSnapshot & snapshot(unsigned int t_index) const {return _datasnapshots.at(t_index);};
-	bool field_present(std::string fieldname);
+	// inspectors
+	void print_summary() const;
+	bool field_present(std::string fieldname) const;
+	unsigned int num_time_steps() const {return _time.size();};
+	const DataSnapshot & at_time(double t, std::string fieldname) const {for (auto i=0; i<_time.size(); i++){ if (_time.at(i) == t){return _datasnapshots.at(i);}}};
+	const double & get_data_at_index(unsigned int t_index, std::string fieldname) const {return _datasnapshots.at(t_index).field(fieldname);};
+	const DataSnapshot & snapshot(unsigned int t_index) const {return _datasnapshots.at(t_index);};
 	
-	set_time_span(double tstart, double dt, double tstop);
-	bind_mesh(const Static_Mesh & mesh);
-	add_field(std::string fieldname);
-	add_data(std::string fieldname, const double & values);
+	
+	// mutators
+	void set_time_span(double tstart, double dt, double tstop);
+	void bind_mesh(const Static_Mesh & mesh);
+	void add_field(std::string fieldname);
+	void add_data_at_time(double time, std::string fieldname, const double & values);
+	void add_data_at_index(unsigned int t_index, std::string fieldname, const double & values);
 
 private:
+	DataSnapshot & at_time(double t) {for (auto i=0; i<_time.size(); i++){ if (_time.at(i) == t){return _datasnapshots.at(i);}}};
+	//DataSnapshot & snapshot(unsigned int t_index) {return _datasnapshots.at(t_index);};
+	void allocate_snapshots_mesh();
+	void allocate_snapshots_time();
+	void allocate_snapshots_field(std::string fieldname);
+
 	// metadata
+	bool _time_set, _mesh_set;
 	double _tstart, _dt, _tstop;
 	const Static_Mesh * _mesh;
 	std::vector<std::string> _fieldnames;

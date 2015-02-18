@@ -7,6 +7,7 @@
 //#include "Equation.hpp"
 //#include "Simulation.hpp"
 #include "../LinAlgWrapper.hpp"
+#include "../SimulationData.hpp"
 //#include <petscksp.h>
 #include <omp.h>
 
@@ -134,7 +135,9 @@ int main(int argc, char * argv[]){
 	
 	
 
-	
+
+	double dt = 1e-12; // one nanosecond time step
+	double num_iters = 5;	
 	//************* UNSTEADY PROBLEM ****************
 	// using dv_e/dt = -eE/m_e - nu_c*v_e
 	// and   nu_c = 5.3e+9 * P_atm (in torr)
@@ -145,6 +148,18 @@ int main(int argc, char * argv[]){
 	//
 	// then solve the continuity equation
 	// dn_e/dt + del . (n_e*v_e) = 0
+
+	// set up the simulation data holder
+	SimulationData simdata;
+	simdata.bind_mesh(*paramesh);
+	simdata.add_field("E_x");
+	simdata.add_field("E_y");
+	simdata.add_field("vel_x");
+	simdata.add_field("vel_y");
+	simdata.add_field("n_e");
+	simdata.add_field("potential");
+	simdata.set_time_span(0.0, dt, num_iters*dt);
+	simdata.print_summary();
 
 	// calculate E using centered difference except for on the boundaries
 	double * E_x = new double[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
@@ -179,12 +194,22 @@ int main(int argc, char * argv[]){
 	double * n_e_old = new double[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
 	for (auto i=0; i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(); i++) n_e_old[i] = reldata[i];
 
-	double dt = 1e-11; // one nanosecond time step
-	double num_iters = 5;
+	
+	// fill in the simdata for this first time step
+	simdata.add_data_at_index(0, "E_x", E_x[0]);
+	simdata.add_data_at_index(0, "E_y", E_y[0]);
+	simdata.add_data_at_index(0, "vel_x", vel_x[0]);
+	simdata.add_data_at_index(0, "vel_y", vel_y[0]);
+	simdata.add_data_at_index(0, "n_e", reldata[0]);
+	simdata.add_data_at_index(0, "potential", x.data());
+	
+
+
 	// use forward euler to advance velocity in time
 	// NEED TO FIX THIS TO DEAL WITH BOUNDARIES WHEN CENTRAL DIFFERENCE OPERATOR IS USED
-	
-	for (auto n=0; n<num_iters; n++){
+	double tcur;
+	for (auto n=1; n<num_iters; n++){
+		tcur = dt;
 
 		cout << "calculating new velocity" << endl;
 		for (auto j=1; j<paramesh->reg_num_nodes_x()-1; j++){ // cols
@@ -211,12 +236,14 @@ int main(int argc, char * argv[]){
 			}
 		}
 
+		/*
 		cout << "plotting vel_x" << endl;
 		paravis->set_colorby(vel_x);
 		paravis->run();
 		cout << "plotting vel_y" << endl;
 		paravis->set_colorby(vel_y);
 		paravis->run();
+		*/
 
 		cout << "calculating new density" << endl;
 		for (auto j=1; j<paramesh->reg_num_nodes_x()-1; j++){ // cols
@@ -245,9 +272,11 @@ int main(int argc, char * argv[]){
 			}
 		}
 
+		/*
 		cout << "plotting electron density" << endl;
 		paravis->set_colorby(n_e);
 		paravis->run();
+		*/
 
 		cout << "calculating new rhs and solving for potential" << endl;
 		for (auto j=1; j<paramesh->reg_num_nodes_x()-1; j++){ // cols
@@ -277,16 +306,32 @@ int main(int argc, char * argv[]){
 				E_y[cind] = (x[uind] - x[dind])/(2*dx);
 			}
 		}
+		/*
 		cout << "plotting E_x" << endl;
 		paravis->set_colorby(E_x);
 		paravis->run();
 		cout << "plotting E_y" << endl;
 		paravis->set_colorby(E_y);
 		paravis->run();
+		*/
 
+		// fill in the simdata for this time step
+		simdata.add_data_at_index(n, "E_x", E_x[0]);
+		simdata.add_data_at_index(n, "E_y", E_y[0]);
+		simdata.add_data_at_index(n, "vel_x", vel_x[0]);
+		simdata.add_data_at_index(n, "vel_y", vel_y[0]);
+		simdata.add_data_at_index(n, "n_e", n_e[0]);
+		simdata.add_data_at_index(n, "potential", x.data());
 
+		tcur += dt;
 	}
 	//*/
+
+	// plot the evolution of density
+	for (auto i=0; i<simdata.num_time_steps(); i++){
+		paravis->set_colorby(&(simdata.get_data_at_index(i, "n_e")));
+		paravis->run();
+	}
 
 
 

@@ -22,7 +22,7 @@ FIND_PACKAGE( PkgConfig REQUIRED )
 PKG_SEARCH_MODULE( GLFW3 REQUIRED glfw3 )
 
 INCLUDE_DIRECTORIES(${GLFW3_INCLUDE_DIR} )
-ADD_EXECUTABLE( poisson_evolve PoissonEvolve.cpp ../Visualixer.cpp ../VisualixerMesh.cpp ../PointCloud.cpp ../Mesh.cpp ../GeometricObject.cpp ../ColorRamp.cpp ../Converter.cpp ../Hull.cpp)
+ADD_EXECUTABLE( poisson_evolve PoissonEvolve.cpp ../Visualixer.cpp ../VisualixerMesh.cpp ../PointCloud.cpp ../Mesh.cpp ../GeometricObject.cpp ../ColorRamp.cpp ../Converter.cpp ../Hull.cpp ../SimulationData.cpp)
 
 FOREACH(item ${GLFW3_STATIC_LIBRARIES})
     MESSAGE(STATUS "  using lib: " ${item})

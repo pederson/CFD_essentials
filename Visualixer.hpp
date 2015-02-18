@@ -56,13 +56,13 @@ public:
 	template <class T>
 	void set_colorby(T const * color_by){
 		if (color_by == NULL){
-			std::cout << "SHIT THE COLORBY INPUT IS NULL" << std::endl;
+			//std::cout << "SHIT THE COLORBY INPUT IS NULL" << std::endl;
 			return;
 		}
 		if (colorby == NULL) colorby = new double[num_vertices];
 		for (unsigned int i=0; i<num_vertices; i++) colorby[i] = double(color_by[i]);
 
-		std::cout << "converted all to double" << std::endl;
+		//std::cout << "converted all to double" << std::endl;
 
 		// find the min of the incoming values
 		colorby_max = colorby[0]; colorby_min = colorby[0];
@@ -71,12 +71,12 @@ public:
 			if (colorby[i] < colorby_min) colorby_min = colorby[i];
 		}
 
-		std::cout << "found the min and max" << std::endl;
+		//std::cout << "found the min and max" << std::endl;
 		
 		// subtract out the min value
 		for (auto i=0; i<num_vertices; i++) colorby[i] = color_by[i]-colorby_min;
 
-		std::cout << "subtracted out the min value" << std::endl;
+		//std::cout << "subtracted out the min value" << std::endl;
 
 		return;
 	}
