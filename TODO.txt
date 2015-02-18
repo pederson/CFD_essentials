@@ -1,8 +1,11 @@
 TODO:
 
 
-- Create getters and setters for everything (encapsulation)
-- support for cylindrical and polar coordinates
+- Make Simulation class that handles the setup and execution of a simulation
+	- Need to finish the equation class and boundary conditions class to do this
+
+- Increase encapsulation with getters and setters
+- support for cylindrical and polar coordinates (maybe not necessary)
 
 - Interface for libMesh, Eigen, Boost, CGAL, and any other third party libraries that are useful
 

@@ -21,7 +21,6 @@ be followed for all c++ code.
 	- query the size to determine if 
 	- access the user-defined data (const reference) by a ::.data(std::string field) call
 - make constructors that work with raw data const pointers
-
 - Change functions to accept const pointers and then copy the data
 - Change functions to output const references instead of pointers
 
@@ -37,9 +36,10 @@ From "Essential C++":
 		- have assignment operators return *this
 		- handle assignment to self in operator=
 		- copy all parts of a class (including base classes)
-		- use tr1::shared_ptr for resource management
+		- use std::shared_ptr for resource management
 
 		- prefer a pass-by-ref-to-const over a pass-by-value, except for built-in types
 		- don't return a reference (or pointer), when you must return an object
 		- always declare data members private
 		- prefer non-member non-friend functions to member functions. can use a namespace for this
+		- forward declare dependent classes that aren't STL

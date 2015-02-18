@@ -39,7 +39,7 @@ public:
 	void print_summary() const;
 	bool field_present(std::string fieldname) const;
 	unsigned int num_time_steps() const {return _time.size();};
-	const DataSnapshot & at_time(double t, std::string fieldname) const {for (auto i=0; i<_time.size(); i++){ if (_time.at(i) == t){return _datasnapshots.at(i);}}};
+	const double & get_data_at_time(double t, std::string fieldname) const {for (auto i=0; i<_time.size(); i++){ if (_time.at(i) == t){return _datasnapshots.at(i).field(fieldname);}}};
 	const double & get_data_at_index(unsigned int t_index, std::string fieldname) const {return _datasnapshots.at(t_index).field(fieldname);};
 	const DataSnapshot & snapshot(unsigned int t_index) const {return _datasnapshots.at(t_index);};
 	
@@ -52,8 +52,6 @@ public:
 	void add_data_at_index(unsigned int t_index, std::string fieldname, const double & values);
 
 private:
-	DataSnapshot & at_time(double t) {for (auto i=0; i<_time.size(); i++){ if (_time.at(i) == t){return _datasnapshots.at(i);}}};
-	//DataSnapshot & snapshot(unsigned int t_index) {return _datasnapshots.at(t_index);};
 	void allocate_snapshots_mesh();
 	void allocate_snapshots_time();
 	void allocate_snapshots_field(std::string fieldname);
@@ -61,9 +59,10 @@ private:
 	// metadata
 	bool _time_set, _mesh_set;
 	double _tstart, _dt, _tstop;
+
+	// data
 	const Static_Mesh * _mesh;
 	std::vector<std::string> _fieldnames;
-	//std::map<std::string, std::vector<DataSnapshot> _datasnapshots;
 	std::vector<DataSnapshot> _datasnapshots;
 
 	// time info
