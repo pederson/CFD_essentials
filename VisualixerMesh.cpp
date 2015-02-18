@@ -47,6 +47,14 @@ void mesh_visualixer::add_mesh(Static_Mesh * mesh){
 	Mesh_Node nd;
 	Mesh_Element elem;
 
+	xmax = mesh->xmax();
+	ymax = mesh->ymax();
+	zmax = mesh->zmax();
+	xmin = mesh->xmin();
+	ymin = mesh->ymin();
+	zmin = mesh->zmin();
+	//GLfloat scale = (xmax-xmin)/1.0;
+
 	num_vertices = mesh->nodecount();
 	num_per_vertex = 6;
 	num_vertex_points = 3;
@@ -101,12 +109,6 @@ void mesh_visualixer::add_mesh(Static_Mesh * mesh){
 		}
 	}
 
-	xmax = mesh->xmax();
-	ymax = mesh->ymax();
-	zmax = mesh->zmax();
-	xmin = mesh->xmin();
-	ymin = mesh->ymin();
-	zmin = mesh->zmin();
 
 	model_centroid[0] = (xmax + xmin)/2.0;
 	model_centroid[1] = (ymax + ymin)/2.0;

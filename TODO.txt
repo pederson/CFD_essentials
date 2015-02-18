@@ -12,7 +12,8 @@ TODO:
 
 - make separate object files that can be used elsewhere, like Point. Or use CGAL.
 
-- Something is wrong with the Hull->contains_point() code...
+- Something is wrong with the Hull->contains_point() code... is this a double to float conversion issue?
+
 - color by boundary doesn't work properly (b/c bool conversion to float maybe?)
 
 - Check out the Fluent .cas, .msh and .neu files to see how they are stored. Maybe also be able to read these in and print them out. Also check out Ansys .cmdb and .dsdb format.

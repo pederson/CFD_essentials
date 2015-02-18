@@ -14,6 +14,7 @@
 using namespace std;
 
 int main(int argc, char * argv[]){
+	double scale = 1.0e-4;
 
 	// define the geometry model that will be used
 	parametric_model_2d my_param2;
@@ -23,16 +24,16 @@ int main(int argc, char * argv[]){
 	my_param2.add_material("Dielectric", {5.0e+13});
 	my_param2.add_material("Dielectric2", {9.0});
 	//gaussian_2d ga1 = gaussian_2d(0.3, 0.3, 1000.0, 1.0e+16, {0.0, 0.0}); // electron density in #/m^3
-	circle c1 = circle(0.03, {0.0, 0.04}, my_param2.get_material("Dielectric"));
-	circle c2 = circle(0.03, {0.0, -0.04}, my_param2.get_material("Dielectric"));
 	//my_param2.add_object(&ga1);
+	circle c1 = circle(3.0e-1*scale, {0.0, 4.0e-1*scale}, my_param2.get_material("Dielectric"));
+	circle c2 = circle(3.0e-1*scale, {0.0, -4.0e-1*scale}, my_param2.get_material("Dielectric"));
 	my_param2.add_object(&c1);
 	my_param2.add_object(&c2);
 
 	// convert the model into a mesh
 	Static_Mesh * paramesh;
-	double dx = 0.002;
-	paramesh = build_simple_mesh_2d(&my_param2, dx, -0.1, 0.1, -0.15, 0.15, my_param2.get_material("Air"));
+	double dx = 2.0e-2*scale;
+	paramesh = build_simple_mesh_2d(&my_param2, dx, -1.0*scale, 1.0*scale, -1.5*scale, 1.5*scale, my_param2.get_material("Air"));
 	
 	// view the mesh
 	mesh_visualixer * paravis = new mesh_visualixer();
@@ -139,7 +140,7 @@ int main(int argc, char * argv[]){
 
 
 	double dt = 1e-12; // one nanosecond time step
-	double num_iters = 5;	
+	double num_iters = 15;	
 	//************* UNSTEADY PROBLEM ****************
 	// using dv_e/dt = -eE/m_e - nu_c*v_e
 	// and   nu_c = 5.3e+9 * P_atm (in torr)

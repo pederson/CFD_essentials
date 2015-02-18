@@ -204,7 +204,7 @@ void visualixer::onMouseWheel(double xoffset, double yoffset){
 
 	}
 	//cout << "zoom level: " << zoom_level << endl;
-	if (zoom_level > 3.0) zoom_level = 3.0; // limit the zoom in
+	if (zoom_level > 5.0) zoom_level = 5.0; // limit the zoom in
 	if (zoom_level < 0.5) zoom_level = 0.5; // limit the zoom out
 	zoom_scale_new = 1/(zoom_level);
 	eye_vec = focus_vec + (eye_vec-focus_vec)*(zoom_scale_new-zoom_scale + 1.0f);
@@ -536,7 +536,8 @@ void visualixer::onShaders(){
   glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
   // set up projection matrix
-  proj = glm::perspective(0.785f, float(DEFAULT_WIDTH)/float(DEFAULT_HEIGHT), 0.05f, 100000.0f);
+  //proj = glm::perspective(0.785f, float(DEFAULT_WIDTH)/float(DEFAULT_HEIGHT), 0.05f, 100000.0f);
+  proj = glm::perspective(0.785f, float(DEFAULT_WIDTH)/float(DEFAULT_HEIGHT), 0.000005f, 100000.0f);
   uniProj = glGetUniformLocation(shaderProgram, "proj");
   glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
