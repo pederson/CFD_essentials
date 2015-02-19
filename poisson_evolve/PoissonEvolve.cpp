@@ -16,7 +16,7 @@ using namespace std;
 int main(int argc, char * argv[]){
 	double scale = 1.0e-4;
 	double q_electron = -1.6e-19, eps0 = 8.854e-12, m_electron = 9.11e-31;
-	double dx = 3.0e-2*scale;
+	double dx = 5.0e-3*scale;
 
 	// define the geometry model that will be used
 	parametric_model_2d my_param2;
@@ -42,7 +42,7 @@ int main(int argc, char * argv[]){
 	paravis->add_mesh(paramesh);
 	paravis->set_color_ramp(CRamp::DIVERGENT_9);
 	paravis->set_colorby(&paramesh->data("e_density"));
-	paravis->run();
+	//paravis->run();
 	//delete paramesh; // WHY DOES THIS COMPILE IF THIS IS UNCOMMENTED???
 
 
@@ -135,7 +135,7 @@ int main(int argc, char * argv[]){
 	//paravis->set_colorby(&paramesh->data("potential"));
 	paravis->set_colorby(&x.data());
 	cout << "set the colorby" << endl;
-	paravis->run();
+	//paravis->run();
 	cout << "finished running" << endl;
 	
 	

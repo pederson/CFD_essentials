@@ -4,11 +4,14 @@ TODO:
 - Make Simulation class that handles the setup and execution of a simulation
 	- Need to finish the equation class and boundary conditions class to do this
 
+- Write to HDF5 for simulation output
+
+- support boundary properties (with conditions that v=0, etc...)
+
 - Increase encapsulation with getters and setters
 - support for cylindrical and polar coordinates (maybe not necessary)
 
 - Interface for libMesh, Eigen, Boost, CGAL, and any other third party libraries that are useful
-
 
 - make separate object files that can be used elsewhere, like Point. Or use CGAL.
 
