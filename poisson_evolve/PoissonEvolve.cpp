@@ -15,6 +15,8 @@ using namespace std;
 
 int main(int argc, char * argv[]){
 	double scale = 1.0e-4;
+	double q_electron = -1.6e-19, eps0 = 8.854e-12, m_electron = 9.11e-31;
+	double dx = 3.0e-2*scale;
 
 	// define the geometry model that will be used
 	parametric_model_2d my_param2;
@@ -32,9 +34,9 @@ int main(int argc, char * argv[]){
 
 	// convert the model into a mesh
 	Static_Mesh * paramesh;
-	double dx = 2.0e-2*scale;
 	paramesh = build_simple_mesh_2d(&my_param2, dx, -1.0*scale, 1.0*scale, -1.5*scale, 1.5*scale, my_param2.get_material("Air"));
-	
+	paramesh->print_summary();
+
 	// view the mesh
 	mesh_visualixer * paravis = new mesh_visualixer();
 	paravis->add_mesh(paramesh);
@@ -49,8 +51,6 @@ int main(int argc, char * argv[]){
 	//Simulation mysim = Simulation(FINITE_DIFFERENCE, paramesh);
 
 	// construct the right side using the density field
-	double q_electron = -1.6e-19, eps0 = 8.854e-12, m_electron = 9.11e-31;
-	paramesh->print_summary();
 	unsigned int cind;
 	const double * reldata = &paramesh->data("e_density");
 	double * rhs = new double[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
@@ -101,9 +101,11 @@ int main(int argc, char * argv[]){
 	cout << endl;
 
 
-	for(auto i=0;i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x();i++){
-		rhsv.insert_values(1,&rhs[i], &i);
-	}
+	//int inds[paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x()];
+	//for(auto i=0;i<paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x();i++){
+	//	inds[i] = i;
+	//}
+	rhsv.insert_values(paramesh->reg_num_nodes_y()*paramesh->reg_num_nodes_x(), rhs);
     cout << "assembled rhs" << endl;
 	
 	LinVector x = ksp.solve(A, rhsv);

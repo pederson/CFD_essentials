@@ -59,13 +59,14 @@ void SimulationData::set_time_span(double tstart, double dt, double tstop){
 
 	_time_set = true;
 
+	_time.clear();
 	// construct the time vector
 	double tcur = _tstart;
 	while (tcur <= _tstop){
+		//cout << "Tcur: " << tcur << "\t tstop: " << tstop << endl;
 		_time.push_back(tcur);
+		
 		tcur += dt;
-
-		cout << "Tcur: " << tcur << "\t tstop: " << tstop << endl;
 	}
 
 	// expand the data snapshot vector accordingly

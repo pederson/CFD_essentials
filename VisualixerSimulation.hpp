@@ -21,7 +21,7 @@ public:
 	simulation_visualixer();
 	~simulation_visualixer();
 
-	void add_simulation(const SimulationData * simdat);
+	void add_simulation(const SimulationData & simdat);
 
 protected:
 
