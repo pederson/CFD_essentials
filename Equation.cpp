@@ -22,16 +22,43 @@ enum PreDefinedEquation{EQUATION_ELECTROSTATIC_POISSON,
 class Equation{
 public:
 
-	Equation();
-	Equation(PreDefinedEquation eq);
-	~Equation();
+Equation::Equation(){
 
-	// inspectors
-	void print_summary() const;
+}
+Equation::Equation(PreDefinedEquation eq);
+~Equation(){
 
-	// mutators
-	void add_term_lhs(EquationTerm lhst);
-	void add_term_rhs(EquationTerm rhst);
+}
+
+// inspectors
+void Equation::print_summary() const{
+	cout << "**** Equation Summary ****" << endl;
+	cout << "\t\t" << endl;
+
+	// print lhs first
+	if (_lhs.size() == 0) cout << " 0" ;
+	for (auto i=0; i<_lhs.size(); i++) {
+		_lhs[i].print_summary();
+		cout << " + " ;
+	}
+	cout << " = " ;
+	for (auto i=0; i<_rhs.size(); i++) {
+		_rhs[i].print_summary();
+		cout << " + " ;
+	}
+	cout << endl;
+	cout << "**************************" << endl;
+
+}
+
+// mutators
+void Equation::add_term_lhs(EquationTerm lhst){
+	_lhs.push_back(lhst);
+}
+
+void Equation::add_term_rhs(EquationTerm rhst){
+	_rhs.push_back(rhst);
+}
 
 private:
 	std::vector<EquationTerm> _lhs, _rhs;

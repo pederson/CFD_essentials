@@ -24,6 +24,8 @@ be followed for all c++ code.
 - Change functions to accept const pointers and then copy the data
 - Change functions to output const references instead of pointers
 
+- try to use iterators rather than iterating over vector.size() and indices
+
 From "Essential C++":
 		- prefer const, enum, and inline to #define
 		- use const whenever possible

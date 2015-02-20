@@ -11,7 +11,7 @@
 
 using namespace std;
 
-Mesh_Node::Mesh_Node(){
+MeshNode::MeshNode(){
   _x = 0.0;
   _y = 0.0;
   _z = 0.0;
@@ -20,7 +20,7 @@ Mesh_Node::Mesh_Node(){
   _num_connections = 0;
 }
 
-Mesh_Node::Mesh_Node(double x, double y, double z, bool boundary, unsigned int num_connections, unsigned int core_group){
+MeshNode::MeshNode(double x, double y, double z, bool boundary, unsigned int num_connections, unsigned int core_group){
   _x = x;
   _y = y;
   _z = z;
@@ -29,52 +29,52 @@ Mesh_Node::Mesh_Node(double x, double y, double z, bool boundary, unsigned int n
   _core_group = core_group;
 }
 
-Mesh_Node::~Mesh_Node(){
+MeshNode::~MeshNode(){
 
 }
 
-void Mesh_Node::print_summary() const {
-  cout << "  Mesh_Node: (" << _x << ", " << _y << ", " << _z 
+void MeshNode::print_summary() const {
+  cout << "  MeshNode: (" << _x << ", " << _y << ", " << _z 
         << ")    boundary?: " << (_boundary? "yes" : "no") 
         << "   num_connections: " << _num_connections
         << "   core_group: " << _core_group << endl;
 }
 
-void Mesh_Node::print_detailed() const{
-  cout << "  Mesh_Node: (" << _x << ", " << _y << ", " << _z 
+void MeshNode::print_detailed() const{
+  cout << "  MeshNode: (" << _x << ", " << _y << ", " << _z 
         << ")    boundary?: " << (_boundary? "yes" : "no") 
         << "   num_connections: " << _num_connections
         << "   core_group: " << _core_group << endl;
 }
 
-double Mesh_Node::dist_sq(const Mesh_Node & node1, const Mesh_Node & node2){
+double MeshNode::dist_sq(const MeshNode & node1, const MeshNode & node2){
   return (node1.x()-node2.x())*(node1.x()-node2.x()) + 
           (node1.y()-node2.y())*(node1.y()-node2.y()) + 
           (node1.z()-node2.z())*(node1.z()-node2.z());
 }
 
-double Mesh_Node::area_tri(const Mesh_Node & node1, const Mesh_Node & node2, const Mesh_Node & node3){
+double MeshNode::area_tri(const MeshNode & node1, const MeshNode & node2, const MeshNode & node3){
   return fabs((node2.x()*node1.y() - node1.x()*node2.y()) + 
               (node3.x()*node2.y() - node2.x()*node3.y()) + 
               (node1.x()*node3.y() - node3.x()*node1.y()));
 }
 //******************************************************************************************************
 
-Mesh_Element::Mesh_Element(){
+MeshElement::MeshElement(){
   _element_type = EMPTY;
 }
 
-Mesh_Element::Mesh_Element(std::vector<unsigned int> vertex_inds){
+MeshElement::MeshElement(std::vector<unsigned int> vertex_inds){
   _vertex_inds = vertex_inds;
   recalc_type();
 }
 
-Mesh_Element::~Mesh_Element(){
+MeshElement::~MeshElement(){
 
 }
 
-void Mesh_Element::print_summary() const{
-  cout << "  Mesh_Element: num_elements: " << _vertex_inds.size() << " vertices: ";
+void MeshElement::print_summary() const{
+  cout << "  MeshElement: num_elements: " << _vertex_inds.size() << " vertices: ";
   for (unsigned int i=0; i<_vertex_inds.size(); i++){
     cout << _vertex_inds.at(i) << "  ";
   }
@@ -82,7 +82,7 @@ void Mesh_Element::print_summary() const{
   return;
 }
 
-void Mesh_Element::print_detailed() const{
+void MeshElement::print_detailed() const{
   cout << " Mesh Element: " << _vertex_inds.size() << " vertices: ";
   for (unsigned int i=0; i<_vertex_inds.size(); i++){
     cout << _vertex_inds.at(i) << ", ";
@@ -91,7 +91,7 @@ void Mesh_Element::print_detailed() const{
   return;
 }
 
-void Mesh_Element::remove_vertex(unsigned int vert_ind){
+void MeshElement::remove_vertex(unsigned int vert_ind){
   for (unsigned int i=0; i<_vertex_inds.size(); i++){
     if (_vertex_inds.at(i) == vert_ind){
       // remove index
@@ -102,7 +102,7 @@ void Mesh_Element::remove_vertex(unsigned int vert_ind){
   recalc_type();
 }
 
-void Mesh_Element::add_vertex(unsigned int vert_ind, int position){
+void MeshElement::add_vertex(unsigned int vert_ind, int position){
   if (position == -1){
     _vertex_inds.push_back(vert_ind);
   }
@@ -112,7 +112,7 @@ void Mesh_Element::add_vertex(unsigned int vert_ind, int position){
   recalc_type();
 }
  
-void Mesh_Element::recalc_type(){
+void MeshElement::recalc_type(){
   cout << "doing a recalc doesn't have a defined behavior yet!" << endl;
   switch (_vertex_inds.size()){
     case 0:
@@ -145,7 +145,7 @@ void Mesh_Element::recalc_type(){
 }
 
 //******************************************************************************************************
-Static_Mesh::Static_Mesh(){
+Mesh::Mesh(){
   _xmin = 0;
   _xmax = 0;
   _ymin = 0;
@@ -156,11 +156,11 @@ Static_Mesh::Static_Mesh(){
   _num_dims = 0;
 }
 
-Static_Mesh::~Static_Mesh(){
+Mesh::~Mesh(){
 
 }
 
-void Static_Mesh::print_summary() const{
+void Mesh::print_summary() const{
   cout << " " << endl;
   cout << "******** Static Mesh Summary ******** " << endl;
   if (_nodes.size() == 0){
@@ -191,15 +191,15 @@ void Static_Mesh::print_summary() const{
   return;
 }
 
-void Static_Mesh::print_detailed() const{
+void Mesh::print_detailed() const{
 
 }
 
-Mesh_Node & Static_Mesh::regular_node(unsigned int i, unsigned int j, unsigned int k){
+MeshNode & Mesh::regular_node(unsigned int i, unsigned int j, unsigned int k){
   return _nodes.at(reg_inds_to_glob_ind(i,j,k));
 }
 
-const double & Static_Mesh::x(){
+const double & Mesh::x(){
   if (_x.size() != _nodes.size()){
     _x.clear();
     _x.resize(_nodes.size());
@@ -211,7 +211,7 @@ const double & Static_Mesh::x(){
 }
 
 
-const double & Static_Mesh::y(){
+const double & Mesh::y(){
   if (_y.size() != _nodes.size()){
     _y.clear();
     _y.resize(_nodes.size());
@@ -222,7 +222,7 @@ const double & Static_Mesh::y(){
   return _y.front();
 }
 
-const double & Static_Mesh::z(){
+const double & Mesh::z(){
   if (_z.size() != _nodes.size()){
     _z.clear();
     _z.resize(_nodes.size());
@@ -234,7 +234,7 @@ const double & Static_Mesh::z(){
 }
 
 
-const bool & Static_Mesh::boundary(){
+const bool & Mesh::boundary(){
   if (_boundary.size() != _nodes.size()){
     _boundary.clear();
     _boundary.resize(_nodes.size());
@@ -246,7 +246,7 @@ const bool & Static_Mesh::boundary(){
 }
 
 
-const unsigned int & Static_Mesh::core_group(){
+const unsigned int & Mesh::core_group(){
   if (_core_group.size() != _nodes.size()){
     _core_group.clear();
     _core_group.resize(_nodes.size());
@@ -257,7 +257,7 @@ const unsigned int & Static_Mesh::core_group(){
   return _core_group.front();
 }
 
-const unsigned int & Static_Mesh::num_connections(){
+const unsigned int & Mesh::num_connections(){
   if (_num_connections.size() != _nodes.size()){
     _num_connections.clear();
     _num_connections.resize(_nodes.size());
@@ -268,7 +268,7 @@ const unsigned int & Static_Mesh::num_connections(){
   return _num_connections.front();
 }
 
-const double & Static_Mesh::data(std::string fieldname) const{
+const double & Mesh::data(std::string fieldname) const{
 
   if (_phys_properties.at(fieldname).size() != _nodes.size()){
     cout << "physical properties size doesn't match nodes size!" << endl;
@@ -278,7 +278,7 @@ const double & Static_Mesh::data(std::string fieldname) const{
   return _phys_properties.at(fieldname).front();
 }
 
-void Static_Mesh::add_phys_property(std::string property_name, const double * property_vals){
+void Mesh::add_phys_property(std::string property_name, const double * property_vals){
   for (unsigned int i=0; i<_phys_property_names.size(); i++){
     if (_phys_property_names.at(i).compare(property_name) == 0){
       cout << property_name << " is already in the mesh... doing nothing" << endl;
@@ -295,7 +295,7 @@ void Static_Mesh::add_phys_property(std::string property_name, const double * pr
   return;
 }
 
-void Static_Mesh::add_phys_property(std::string property_name, double init_val){
+void Mesh::add_phys_property(std::string property_name, double init_val){
   for (unsigned int i=0; i<_phys_property_names.size(); i++){
     if (_phys_property_names.at(i).compare(property_name) == 0){
       cout << property_name << " is already in the mesh... doing nothing" << endl;
@@ -310,7 +310,7 @@ void Static_Mesh::add_phys_property(std::string property_name, double init_val){
   return;
 }
 
-void Static_Mesh::reset_property(std::string property_name, double reset_val){
+void Mesh::reset_property(std::string property_name, double reset_val){
   for (unsigned int i=0; i<_phys_property_names.size(); i++){
     if (_phys_property_names.at(i).compare(property_name) == 0){
       cout << property_name << " is already in the mesh... doing nothing" << endl;
@@ -322,19 +322,19 @@ void Static_Mesh::reset_property(std::string property_name, double reset_val){
 }
 
 
-Static_Mesh * Static_Mesh::create_regular_grid_n(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
+Mesh * Mesh::create_regular_grid_n(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
                     unsigned int num_nodes_z){
-  Static_Mesh * mesh_out = new Static_Mesh();
+  Mesh * mesh_out = new Mesh();
   mesh_out->create_regular_grid_internal(res, num_nodes_x, num_nodes_y, num_nodes_z, 0.0, 0.0, 0.0);
 
   return mesh_out;
 }
 
 
-Static_Mesh * Static_Mesh::create_regular_grid_b(double res, double xmin, double xmax, double ymin, double ymax,
+Mesh * Mesh::create_regular_grid_b(double res, double xmin, double xmax, double ymin, double ymax,
                     double zmin, double zmax){
   unsigned int num_nodes_x, num_nodes_y, num_nodes_z;
-  Static_Mesh * mesh_out = new Static_Mesh();
+  Mesh * mesh_out = new Mesh();
 
   num_nodes_x = (unsigned int)((xmax-xmin)/res) + 1;
   num_nodes_y = (unsigned int)((ymax-ymin)/res) + 1;
@@ -352,18 +352,18 @@ Static_Mesh * Static_Mesh::create_regular_grid_b(double res, double xmin, double
 
 
 /*
-Static_Mesh Static_Mesh::read_MSH(std::string filename, unsigned int byte_offset=0){
+Mesh Mesh::read_MSH(std::string filename, unsigned int byte_offset=0){
   
 }
 
-Static_Mesh Static_Mesh::read_NEU(string filename, unsigned int byte_offset=0);
-Static_Mesh Static_Mesh::read_CAS(string filename, unsigned int byte_offset=0);
-void Static_Mesh::write_MSH(string filename) const;
-void Static_Mesh::write_NEU(string filename) const;
-void Static_Mesh::write_CAS(string filename) const;
+Mesh Mesh::read_NEU(string filename, unsigned int byte_offset=0);
+Mesh Mesh::read_CAS(string filename, unsigned int byte_offset=0);
+void Mesh::write_MSH(string filename) const;
+void Mesh::write_NEU(string filename) const;
+void Mesh::write_CAS(string filename) const;
 */
 
-void Static_Mesh::create_regular_grid_internal(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
+void Mesh::create_regular_grid_internal(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
                       unsigned int num_nodes_z,
                       double xcen, double ycen, double zcen){
   // declare vars
@@ -525,11 +525,11 @@ void Static_Mesh::create_regular_grid_internal(double res, unsigned int num_node
   return;
 }
 
-unsigned int Static_Mesh::reg_inds_to_glob_ind(unsigned int i, unsigned int j, unsigned int k){
+unsigned int Mesh::reg_inds_to_glob_ind(unsigned int i, unsigned int j, unsigned int k){
   return k*(_num_nodes_x*_num_nodes_y) + j*(_num_nodes_x) + i;
 }
 
-void Static_Mesh::calc_extents(){
+void Mesh::calc_extents(){
   // declare vars
 
   _xmax = _nodes.at(0).x(); _xmin = _nodes.at(0).x(); _ymax = _nodes.at(0).y(); _ymin = _nodes.at(0).y(); _zmax = _nodes.at(0).z(); _zmin = _nodes.at(0).z();
@@ -560,7 +560,7 @@ int main(int argc, char * argv[]){
   // test constructor
   cout << "testing mesh constructor..." << flush;
   Mutable_Mesh * mymesh = new Mutable_Mesh();
-  //Static_Mesh * mymesh = new Static_Mesh();
+  //Mesh * mymesh = new Mesh();
   cout << "succeeded" << endl;
 
   // test num nodes setting
@@ -577,7 +577,7 @@ int main(int argc, char * argv[]){
 
   // test creation of a regular mesh
   cout << "testing regular grid creation..." << flush;
-  Static_Mesh * mesh_reg_1ds = Static_Mesh::create_regular_grid_n(0.1, 100, 50, 10);
+  Mesh * mesh_reg_1ds = Mesh::create_regular_grid_n(0.1, 100, 50, 10);
   cout << "succeeded" << endl;
   mesh_reg_1ds->print_summary();
   mesh_reg_1ds->node(50).print_summary();

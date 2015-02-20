@@ -5,10 +5,10 @@
 using namespace std;
 
 // define the functions that build a mesh from a parametric model
-Static_Mesh * build_simple_mesh_2d(parametric_model_2d * model,  double res, double xmin, double xmax, double ymin, double ymax, vector<double> bg_properties){
+Mesh * build_simple_mesh_2d(parametric_model_2d * model,  double res, double xmin, double xmax, double ymin, double ymax, vector<double> bg_properties){
 
 	// first create a regular grid
-	Static_Mesh * outmesh = Static_Mesh::create_regular_grid_b(res, xmin, xmax, ymin, ymax);
+	Mesh * outmesh = Mesh::create_regular_grid_b(res, xmin, xmax, ymin, ymax);
 
 	// transfer background properties to the mesh
 	vector<string> prop_names = model->get_phys_property_names();
@@ -25,7 +25,7 @@ Static_Mesh * build_simple_mesh_2d(parametric_model_2d * model,  double res, dou
 	return outmesh;
 }
 
-void add_shape_to_mesh(Static_Mesh * mesh, geometric_object_2d * shape, parametric_model_2d * model, double res){
+void add_shape_to_mesh(Mesh * mesh, geometric_object_2d * shape, parametric_model_2d * model, double res){
 	// convert the shape to a hull
 	vector<string> propnames = model->get_phys_property_names();
 	
@@ -54,7 +54,7 @@ void add_shape_to_mesh(Static_Mesh * mesh, geometric_object_2d * shape, parametr
 	}
 	else{
 		Hull * shull = approximate_parametric_shape_2d(shape, res);
-		Mesh_Node n;
+		MeshNode n;
 		vector<double> shapeprops = shape->get_phys_properties();
 		for (auto i=0; i<nnodes; i++){
 			n = mesh->node(i);		// add the shape properties if it returns true

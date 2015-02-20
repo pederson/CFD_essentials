@@ -77,7 +77,7 @@ void SimulationData::set_time_span(double tstart, double dt, double tstop){
 	return;
 }
 
-void SimulationData::bind_mesh(const Static_Mesh & mesh){
+void SimulationData::bind_mesh(const Mesh & mesh){
 	_mesh = &mesh; 
 	_mesh_set = true;
 	allocate_snapshots_mesh();

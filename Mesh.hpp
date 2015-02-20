@@ -17,15 +17,15 @@ enum ElementType{EMPTY, POINT, LINE, TRIANGLE, QUADRANGLE, TETRAHEDRON, HEXAHEDR
 
 
 // forward declarations
-class Mesh_Node;
-class Mesh_Element;
+class MeshNode;
+class MeshElement;
 
 
-class Static_Mesh{
+class Mesh{
 public:
-  Static_Mesh();   // constructor
-  Static_Mesh(const Static_Mesh & mesh);  // copy constructor
-  ~Static_Mesh();    // destructor
+  Mesh();   // constructor
+  Mesh(const Mesh & mesh);  // copy constructor
+  ~Mesh();    // destructor
 
   void print_summary() const;
   void print_detailed() const;
@@ -45,8 +45,8 @@ public:
 
 
   // node and element access
-  Mesh_Node & node(unsigned int i) {return _nodes.at(i);};
-  Mesh_Element & element(unsigned int i) {return _elements.at(i);};
+  MeshNode & node(unsigned int i) {return _nodes.at(i);};
+  MeshElement & element(unsigned int i) {return _elements.at(i);};
   
   // property interaction and access
   const double & x();
@@ -58,7 +58,7 @@ public:
   const double & data(std::string fieldname) const;
 
   // specialty stuff for regular grids
-  Mesh_Node & regular_node(unsigned int i, unsigned int j=0, unsigned int k=0);
+  MeshNode & regular_node(unsigned int i, unsigned int j=0, unsigned int k=0);
   unsigned int reg_num_nodes_x() const {return _num_nodes_x;};
   unsigned int reg_num_nodes_y() const {return _num_nodes_y;};
   unsigned int reg_num_nodes_z() const {return _num_nodes_z;};
@@ -78,18 +78,18 @@ public:
 
 
   // grid generation and refinement
-  static Static_Mesh * create_regular_grid_n(double res, unsigned int num_nodes_x, unsigned int num_nodes_y = 1, 
+  static Mesh * create_regular_grid_n(double res, unsigned int num_nodes_x, unsigned int num_nodes_y = 1, 
                       unsigned int num_nodes_z = 1); // create a regular grid of points and store it in the mesh
-  static Static_Mesh * create_regular_grid_b(double res, double xmin, double xmax, double ymin=0.0, double ymax=0.0,
+  static Mesh * create_regular_grid_b(double res, double xmin, double xmax, double ymin=0.0, double ymax=0.0,
                       double zmin=0.0, double zmax=0.0);
   
   //static Mesh * create_unstructured_tri_simple();
 
   // reading and writing files
-  static Static_Mesh read_MSH(std::string filename, unsigned int byte_offset=0);
-  static Static_Mesh read_XML(std::string filename, unsigned int byte_offset=0);
-  static Static_Mesh read_NEU(std::string filename, unsigned int byte_offset=0);
-  static Static_Mesh read_CAS(std::string filename, unsigned int byte_offset=0);
+  static Mesh read_MSH(std::string filename, unsigned int byte_offset=0);
+  static Mesh read_XML(std::string filename, unsigned int byte_offset=0);
+  static Mesh read_NEU(std::string filename, unsigned int byte_offset=0);
+  static Mesh read_CAS(std::string filename, unsigned int byte_offset=0);
   void write_MSH(std::string filename) const;
   void write_NEU(std::string filename) const;
   void write_CAS(std::string filename) const;
@@ -105,8 +105,8 @@ private:
   double _res;
 
   // nodes and elements
-  std::vector<Mesh_Node> _nodes; // array of nodes
-  std::vector<Mesh_Element> _elements; // array of elements
+  std::vector<MeshNode> _nodes; // array of nodes
+  std::vector<MeshElement> _elements; // array of elements
 
   // user-defined propertie for the mesh
   std::vector<std::string> _phys_property_names; // the name position in this vector corresponds with the position of the property value in the node
@@ -130,7 +130,7 @@ private:
 
 
 // cell class for finite volume methods
-class Mesh_Cell{
+class MeshCell{
 public:
   unsigned int num_vertices;
   std::vector<unsigned int> vertices;
@@ -145,11 +145,11 @@ private:
 
 
 
-class Mesh_Element{
+class MeshElement{
 public:
-  Mesh_Element();
-  Mesh_Element(std::vector<unsigned int> vertex_inds);
-  ~Mesh_Element();
+  MeshElement();
+  MeshElement(std::vector<unsigned int> vertex_inds);
+  ~MeshElement();
 
   // utils
   void print_summary() const;
@@ -181,18 +181,18 @@ private:
 
 
 
-class Mesh_Node{
+class MeshNode{
 public:
-  Mesh_Node();
-  Mesh_Node(double x, double y, double z=0.0, bool boundary=false, unsigned int num_connections=0, unsigned int core_group=false);
-  ~Mesh_Node();
+  MeshNode();
+  MeshNode(double x, double y, double z=0.0, bool boundary=false, unsigned int num_connections=0, unsigned int core_group=false);
+  ~MeshNode();
 
   // utils
   void print_summary() const;
   void print_detailed() const;
-  static double dist_sq(const Mesh_Node & node1, const Mesh_Node & node2);
-  static double dist(const Mesh_Node & node1, const Mesh_Node & node2) {return sqrt(dist_sq(node1, node2));};
-  static double area_tri(const Mesh_Node & node1, const Mesh_Node & node2, const Mesh_Node & node3);
+  static double dist_sq(const MeshNode & node1, const MeshNode & node2);
+  static double dist(const MeshNode & node1, const MeshNode & node2) {return sqrt(dist_sq(node1, node2));};
+  static double area_tri(const MeshNode & node1, const MeshNode & node2, const MeshNode & node3);
 
   // member data access
   double x() const {return _x;};
@@ -219,7 +219,11 @@ private:
 
 };
 
-// unstructured cell transformation here
+// regular mesh
+
+// mutable mesh
+
+// affine cell transformation here
 
 
 #endif

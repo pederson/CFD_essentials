@@ -3,8 +3,10 @@ TODO:
 
 - Make Simulation class that handles the setup and execution of a simulation
 	- Need to finish the equation class and boundary conditions class to do this
-
+	- Make this a base class maybe. Derived classes of FESimulation, FVSimulation, FDSimulation, FDTDSimulation, etc... can be made
 - Write to HDF5 for simulation output
+
+- start using iterators when possible
 
 - support boundary properties (with conditions that v=0, etc...)
 

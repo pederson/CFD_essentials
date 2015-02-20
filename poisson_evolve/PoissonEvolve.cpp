@@ -33,7 +33,7 @@ int main(int argc, char * argv[]){
 	my_param2.add_object(&c2);
 
 	// convert the model into a mesh
-	Static_Mesh * paramesh;
+	Mesh * paramesh;
 	paramesh = build_simple_mesh_2d(&my_param2, dx, -1.0*scale, 1.0*scale, -1.5*scale, 1.5*scale, my_param2.get_material("Air"));
 	paramesh->print_summary();
 

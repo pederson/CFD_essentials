@@ -43,9 +43,9 @@ mesh_visualixer::~mesh_visualixer(){
 	//if (normals != NULL) delete[] normals;
 }
 
-void mesh_visualixer::add_mesh(Static_Mesh * mesh){
-	Mesh_Node nd;
-	Mesh_Element elem;
+void mesh_visualixer::add_mesh(Mesh * mesh){
+	MeshNode nd;
+	MeshElement elem;
 
 	xmax = mesh->xmax();
 	ymax = mesh->ymax();

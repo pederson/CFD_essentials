@@ -46,7 +46,7 @@ public:
 	
 	// mutators
 	void set_time_span(double tstart, double dt, double tstop);
-	void bind_mesh(const Static_Mesh & mesh);
+	void bind_mesh(const Mesh & mesh);
 	void add_field(std::string fieldname);
 	void add_data_at_time(double time, std::string fieldname, const double & values);
 	void add_data_at_index(unsigned int t_index, std::string fieldname, const double & values);
@@ -61,7 +61,7 @@ private:
 	double _tstart, _dt, _tstop;
 
 	// data
-	const Static_Mesh * _mesh;
+	const Mesh * _mesh;
 	std::vector<std::string> _fieldnames;
 	std::vector<DataSnapshot> _datasnapshots;
 
