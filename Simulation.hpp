@@ -5,6 +5,7 @@
 #include "InitialConditions.hpp"
 #include "Equation.hpp"
 #include "Mesh.hpp"
+#include "LinAlgWrapper.hpp"
 
 #include <vector>
 
@@ -25,6 +26,7 @@ public:
 	add_equation(const Equation & eq) {_equations.push_back(eq);};
 	add_boundary_condition(const BoundaryCondition & BC) {_boundary_conditions.push_back(BC);};
 	add_initial_condition(const InitialCondition & IC) {_initial_conditions.push_back(IC);};
+	//set_solution_method
 
 	run();
 

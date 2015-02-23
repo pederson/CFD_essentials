@@ -24,6 +24,13 @@ public:
 	void add_simulation(const SimulationData & simdat);
 
 protected:
+	void onRender();
+
+	bool MainLoop();
+	void onExit();
+
+private:
+	const SimulationData * _simdata;
 
 };
 

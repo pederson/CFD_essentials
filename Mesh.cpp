@@ -194,10 +194,11 @@ void Mesh::print_summary() const{
 void Mesh::print_detailed() const{
 
 }
-
+/*
 MeshNode & Mesh::regular_node(unsigned int i, unsigned int j, unsigned int k){
   return _nodes.at(reg_inds_to_glob_ind(i,j,k));
 }
+*/
 
 const double & Mesh::x(){
   if (_x.size() != _nodes.size()){
@@ -321,7 +322,7 @@ void Mesh::reset_property(std::string property_name, double reset_val){
   return;
 }
 
-
+/*
 Mesh * Mesh::create_regular_grid_n(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
                     unsigned int num_nodes_z){
   Mesh * mesh_out = new Mesh();
@@ -349,7 +350,7 @@ Mesh * Mesh::create_regular_grid_b(double res, double xmin, double xmax, double 
 
   return mesh_out;
 }
-
+*/
 
 /*
 Mesh Mesh::read_MSH(std::string filename, unsigned int byte_offset=0){
@@ -363,6 +364,7 @@ void Mesh::write_NEU(string filename) const;
 void Mesh::write_CAS(string filename) const;
 */
 
+/*
 void Mesh::create_regular_grid_internal(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
                       unsigned int num_nodes_z,
                       double xcen, double ycen, double zcen){
@@ -524,10 +526,13 @@ void Mesh::create_regular_grid_internal(double res, unsigned int num_nodes_x, un
 
   return;
 }
+*/
 
+/*
 unsigned int Mesh::reg_inds_to_glob_ind(unsigned int i, unsigned int j, unsigned int k){
   return k*(_num_nodes_x*_num_nodes_y) + j*(_num_nodes_x) + i;
 }
+*/
 
 void Mesh::calc_extents(){
   // declare vars

@@ -2,19 +2,19 @@
 
 using namespace std;
 
-RegularMesh * RegularMesh::create_regular_grid_n(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
+RegularMesh RegularMesh::create_regular_grid_n(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
                     unsigned int num_nodes_z){
-  RegularMesh * mesh_out = new RegularMesh();
-  mesh_out->create_regular_grid_internal(res, num_nodes_x, num_nodes_y, num_nodes_z, 0.0, 0.0, 0.0);
+  RegularMesh mesh_out;
+  mesh_out.create_regular_grid_internal(res, num_nodes_x, num_nodes_y, num_nodes_z, 0.0, 0.0, 0.0);
 
   return mesh_out;
 }
 
 
-RegularMesh * RegularMesh::create_regular_grid_b(double res, double xmin, double xmax, double ymin, double ymax,
+RegularMesh RegularMesh::create_regular_grid_b(double res, double xmin, double xmax, double ymin, double ymax,
                     double zmin, double zmax){
   unsigned int num_nodes_x, num_nodes_y, num_nodes_z;
-  RegularMesh * mesh_out = new RegularMesh();
+  RegularMesh mesh_out;
 
   num_nodes_x = (unsigned int)((xmax-xmin)/res) + 1;
   num_nodes_y = (unsigned int)((ymax-ymin)/res) + 1;
@@ -25,7 +25,7 @@ RegularMesh * RegularMesh::create_regular_grid_b(double res, double xmin, double
   xcen = (xmin + xmax)/2.0;
   ycen = (ymin + ymax)/2.0;
   zcen = (zmin + zmax)/2.0;
-  mesh_out->create_regular_grid_internal(res, num_nodes_x, num_nodes_y, num_nodes_z, xcen, ycen, zcen);
+  mesh_out.create_regular_grid_internal(res, num_nodes_x, num_nodes_y, num_nodes_z, xcen, ycen, zcen);
 
   return mesh_out;
 }
@@ -198,6 +198,7 @@ unsigned int RegularMesh::reg_inds_to_glob_ind(unsigned int i, unsigned int j, u
   return k*(_num_nodes_x*_num_nodes_y) + j*(_num_nodes_x) + i;
 }
 
+/*
 // regular mesh
 class RegularMesh : public Mesh{
 public:
@@ -233,4 +234,5 @@ private:
   unsigned int _num_nodes_x, _num_nodes_y, _num_nodes_z;
   double _res;
 };
+*/
 

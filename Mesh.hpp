@@ -57,6 +57,7 @@ public:
   const unsigned int & num_connections();
   const double & data(std::string fieldname) const;
 
+  /*
   // specialty stuff for regular grids
   MeshNode & regular_node(unsigned int i, unsigned int j=0, unsigned int k=0);
   unsigned int reg_num_nodes_x() const {return _num_nodes_x;};
@@ -70,6 +71,7 @@ public:
   std::vector<unsigned int> reg_front_inds();
   std::vector<unsigned int> reg_back_inds();
   unsigned int reg_inds_to_glob_ind(unsigned int i, unsigned int j=0, unsigned int k=0);
+  */
 
   void add_phys_property(std::string property_name, const double * property_vals);
   void add_phys_property(std::string proprety_name, double init_val);
@@ -77,12 +79,14 @@ public:
   void set_phys_property(std::string property_name, unsigned int i, double val){_phys_properties.at(property_name).at(i) = val;};
 
 
+  /*
   // grid generation and refinement
   static Mesh * create_regular_grid_n(double res, unsigned int num_nodes_x, unsigned int num_nodes_y = 1, 
                       unsigned int num_nodes_z = 1); // create a regular grid of points and store it in the mesh
   static Mesh * create_regular_grid_b(double res, double xmin, double xmax, double ymin=0.0, double ymax=0.0,
                       double zmin=0.0, double zmax=0.0);
-  
+  */
+
   //static Mesh * create_unstructured_tri_simple();
 
   // reading and writing files
@@ -94,15 +98,18 @@ public:
   void write_NEU(std::string filename) const;
   void write_CAS(std::string filename) const;
 
-private:
+//private:
+protected:
   // metadata
   MeshType _mesh_type;
   unsigned int _num_dims;
   double _xmin, _xmax, _ymin, _ymax, _zmin, _zmax;
 
+  
   // metadata for regular mesh
   unsigned int _num_nodes_x, _num_nodes_y, _num_nodes_z;
   double _res;
+  
 
   // nodes and elements
   std::vector<MeshNode> _nodes; // array of nodes
@@ -117,9 +124,11 @@ private:
   std::vector<double> _x, _y, _z;
   std::vector<unsigned int> _core_group, _num_connections;
 
+  /*
   void create_regular_grid_internal(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
                       unsigned int num_nodes_z,
                       double xcen=0.0, double ycen=0.0, double zcen=0.0);
+  */
 
   void calc_extents();
 
