@@ -124,6 +124,10 @@ void SimulationData::add_data_at_index(unsigned int t_index, std::string fieldna
 	}
 }
 
+void SimulationData::write_HDF5(std::string outname) const{
+
+}
+
 
 // run this when a new field has been added
 void SimulationData::allocate_snapshots_field(string fieldname){

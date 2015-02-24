@@ -8,6 +8,8 @@
 #include <map>
 #include <iostream>
 
+#include <H5Cpp.h>
+
 //class Static_Mesh; // forward declaration
 
 
@@ -50,6 +52,9 @@ public:
 	void add_field(std::string fieldname);
 	void add_data_at_time(double time, std::string fieldname, const double & values);
 	void add_data_at_index(unsigned int t_index, std::string fieldname, const double & values);
+
+	void write_HDF5(std::string outname) const;
+	//static read_HDF5(std::string filename);
 
 private:
 	void allocate_snapshots_mesh();
