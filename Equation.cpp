@@ -1,6 +1,3 @@
-#ifndef _EQUATION_H
-#define _EQUATION_H
-
 // The equation object should be made up of terms on the lhs and
 // terms on the rhs. In turn, each term is made up of components multiplied
 // together or divided. These components could be constants, variables, 
@@ -19,16 +16,54 @@ enum PreDefinedEquation{EQUATION_ELECTROSTATIC_POISSON,
 						EQUATION_FLUID_DIFFUSION,
 						EQUATION_PLASMA_CONTINUITY};
 
-class Equation{
-public:
+#define _TEST_
+
+using namespace std;
 
 Equation::Equation(){
 
 }
-Equation::Equation(PreDefinedEquation eq);
-~Equation(){
+
+Equation::Equation(PreDefinedEquation eq){
+
+	switch (eq){
+		case EQUATION_ELECTROSTATIC_POISSON:
+			EquationTerm term1;
+
+			term1.add_var(EquationVar(EQUATION_VAR_CONSTANT, "eps0", 1.1e-19), EQUATION_TERM_MULTIPLY);
+			term1.add_var(EquationVar(EQUATION_VAR_DIFFERENTIAL_T), EQUATION_TERM_MULTIPLY);
+			term1.add_var(EquationVar(EQUATION_VAR_MAIN_VARIABLE, "n_e"), EQUATION_TERM_MULTIPLY);
+			term1.add_var(EquationVar(EQUATION_VAR_VARIABLE, "red"), EQUATION_TERM_DIVIDE);
+
+			break;
+
+		case EQUATION_FLUID_CONTINUITY:
+
+			break;
+
+		case EQUATION_FLUID_MOMENTUM:
+
+			break;
+
+		case EQUATION_FLUID_ENERGY:
+
+			break;
+
+		case EQUATION_FLUID_DIFFUSION:
+
+			break;
+
+		case EQUATION_PLASMA_CONTINUITY:
+
+			break;
+
+		otherwise:
+			cout << "ERROR: Unrecognized predefined equation" << endl;
+
+	}
 
 }
+
 
 // inspectors
 void Equation::print_summary() const{
@@ -60,9 +95,12 @@ void Equation::add_term_rhs(EquationTerm rhst){
 	_rhs.push_back(rhst);
 }
 
-private:
-	std::vector<EquationTerm> _lhs, _rhs;
 
-};
+#ifdef _TEST_
 
-#endif
+int main(int argc, char * argv[]){
+
+
+
+	return 0;
+}

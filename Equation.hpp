@@ -24,7 +24,6 @@ public:
 
 	Equation();
 	Equation(PreDefinedEquation eq);
-	~Equation();
 
 	// inspectors
 	void print_summary() const;
