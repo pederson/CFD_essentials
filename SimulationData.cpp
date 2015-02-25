@@ -141,6 +141,7 @@ void SimulationData::write_HDF5(std::string outname) const{
 		H5::DataSpace nodespace(1, &nnodes);
 		H5::DataSpace elemspace(1, &nelem);
 
+		// insert nodes
 		double nodebuf[nnodes];
 		for (auto i=0; i<nnodes; i++) nodebuf[i] = _mesh->node(i).x();
 		H5::DataSet nodex_set = nodes_group.createDataSet("NodesX", H5::PredType::NATIVE_DOUBLE, nodespace);
@@ -160,11 +161,55 @@ void SimulationData::write_HDF5(std::string outname) const{
 			nodez_set.write(nodebuf, H5::PredType::NATIVE_DOUBLE);
 			nodez_set.close();
 		}
+
+		// insert elements
+
+		// insert nodedata
+
+		// insert elementdata
 		
 
+	// ******* create a group for the Fields *******
+	H5::Group fields_group(outfile.createGroup("/Fields"));
 
-	// ******* create a group for the snapshots *******
-	H5::Group snapshotgroup(outfile.createGroup("/Snapshots"));
+		hsize_t ntime = num_time_steps();
+		hsize_t fielddim[2];
+		fielddim[0] = nnodes;
+		fielddim[1] = ntime;
+
+		H5::DataSpace fieldspace(2, fielddim);
+		H5::DataSet field_set;
+		
+		double fieldbuf[nnodes][ntime];
+		string cfieldname;
+		for (auto i=0; i<_fieldnames.size(); i++){
+			cfieldname = _fieldnames.at(i);
+
+			field_set = fields_group.createDataSet(_fieldnames.at(i), H5::PredType::NATIVE_DOUBLE, fieldspace);
+			
+			for (auto j=0; j<ntime; j++){
+				for (auto k=0; k<nnodes; k++){
+					fieldbuf[k][j] = _datasnapshots.at(j)._datafields.at(cfieldname).at(k);
+				}
+			}
+
+			field_set.write(fieldbuf, H5::PredType::NATIVE_DOUBLE);
+			field_set.close();
+		}
+
+
+	// ******* create a group for the Time values *******
+	H5::Group time_group(outfile.createGroup("/Time"));
+
+		H5::DataSpace timespace(1, &ntime);
+		H5::DataSet time_set = time_group.createDataSet("Time", H5::PredType::NATIVE_DOUBLE, timespace);
+
+		double timebuf[ntime];
+		for (auto i=0; i<ntime; i++) timebuf[i] = _time.at(i);
+
+		time_set.write(timebuf, H5::PredType::NATIVE_DOUBLE);
+		time_set.close();
+
 
 
 	// close the file

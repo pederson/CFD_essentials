@@ -30,6 +30,7 @@ int main(int argc, char * argv[]){
 	SimulationData simdata;
 	simdata.bind_mesh(paramesh);
 	simdata.add_field("E_x");
+	simdata.add_field("H_y");
 	simdata.set_time_span(0.0, dt, num_iters*dt);
 	simdata.print_summary();
 
@@ -72,6 +73,7 @@ int main(int argc, char * argv[]){
 
 		// fill in the simdata for this time step
 		simdata.add_data_at_index(n, "E_x", E_x[0]);
+		simdata.add_data_at_index(n, "H_y", H_y[0]);
 
 		tcur += dt;
 	}
