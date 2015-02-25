@@ -4,9 +4,10 @@ TODO:
 - Make Simulation class that handles the setup and execution of a simulation
 	- Need to finish the equation class and boundary conditions class to do this
 	- Make this a base class maybe. Derived classes of FESimulation, FVSimulation, FDSimulation, FDTDSimulation, etc... can be made
-- Write to HDF5 for simulation output
 
 - start using iterators when possible
+
+- Fix Mesh class and SimulationData class to have storage fields for both NodeData and ElementData (where data is associated per node or element, respectively)
 
 - fix Mesh accessors to have both const and non-const options... this is important
 
