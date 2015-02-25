@@ -128,6 +128,46 @@ void SimulationData::write_HDF5(std::string outname) const{
 	// create an empty HDF5 file
 	H5::H5File outfile(outname, H5F_ACC_TRUNC);
 
+	// ******* create a group for the mesh *******
+	H5::Group meshgroup(outfile.createGroup("/Mesh"));
+
+		H5::Group nodes_group(meshgroup.createGroup("/Mesh/Nodes"));
+		H5::Group elements_group(meshgroup.createGroup("/Mesh/Elements"));
+		H5::Group nodedata_group(meshgroup.createGroup("/Mesh/NodeData"));
+		H5::Group elementdata_group(meshgroup.createGroup("/Mesh/ElementData"));
+
+		hsize_t nnodes = _mesh->nodecount();
+		hsize_t nelem = _mesh->elementcount();
+		H5::DataSpace nodespace(1, &nnodes);
+		H5::DataSpace elemspace(1, &nelem);
+
+		double nodebuf[nnodes];
+		for (auto i=0; i<nnodes; i++) nodebuf[i] = _mesh->node(i).x();
+		H5::DataSet nodex_set = nodes_group.createDataSet("NodesX", H5::PredType::NATIVE_DOUBLE, nodespace);
+		nodex_set.write(nodebuf, H5::PredType::NATIVE_DOUBLE);
+		nodex_set.close();
+
+		if (_mesh->num_dims() > 1){
+			for (auto i=0; i<nnodes; i++) nodebuf[i] = _mesh->node(i).y();
+			H5::DataSet nodey_set = nodes_group.createDataSet("NodesY", H5::PredType::NATIVE_DOUBLE, nodespace);
+			nodey_set.write(nodebuf, H5::PredType::NATIVE_DOUBLE);
+			nodey_set.close();
+		}
+		
+		if (_mesh->num_dims() > 2){
+			for (auto i=0; i<nnodes; i++) nodebuf[i] = _mesh->node(i).z();
+			H5::DataSet nodez_set = nodes_group.createDataSet("NodesZ", H5::PredType::NATIVE_DOUBLE, nodespace);
+			nodez_set.write(nodebuf, H5::PredType::NATIVE_DOUBLE);
+			nodez_set.close();
+		}
+		
+
+
+	// ******* create a group for the snapshots *******
+	H5::Group snapshotgroup(outfile.createGroup("/Snapshots"));
+
+
+	// close the file
 	outfile.close();
 
 }

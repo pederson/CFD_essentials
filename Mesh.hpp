@@ -47,6 +47,8 @@ public:
   // node and element access
   MeshNode & node(unsigned int i) {return _nodes.at(i);};
   MeshElement & element(unsigned int i) {return _elements.at(i);};
+  const MeshNode & node(unsigned int i) const {return _nodes.at(i);};
+  const MeshElement & element(unsigned int i) const {return _elements.at(i);};
   
   // property interaction and access
   const double & x();
@@ -116,6 +118,7 @@ protected:
   std::vector<MeshElement> _elements; // array of elements
 
   // user-defined propertie for the mesh
+  // DYLAN_TODO: RENAME THIS NodeData and ElementData
   std::vector<std::string> _phys_property_names; // the name position in this vector corresponds with the position of the property value in the node
   std::map<std::string, std::vector<double>> _phys_properties;
 

@@ -8,6 +8,8 @@ TODO:
 
 - start using iterators when possible
 
+- fix Mesh accessors to have both const and non-const options... this is important
+
 - support boundary properties (with conditions that v=0, etc...)
 
 - Increase encapsulation with getters and setters

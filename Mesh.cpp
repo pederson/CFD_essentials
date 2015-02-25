@@ -200,7 +200,7 @@ MeshNode & Mesh::regular_node(unsigned int i, unsigned int j, unsigned int k){
 }
 */
 
-const double & Mesh::x(){
+const double & Mesh::x() {
   if (_x.size() != _nodes.size()){
     _x.clear();
     _x.resize(_nodes.size());
