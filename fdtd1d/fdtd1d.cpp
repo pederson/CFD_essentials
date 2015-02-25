@@ -77,11 +77,15 @@ int main(int argc, char * argv[]){
 	}
 	//*/
 
+	simdata.write_HDF5("outfile_test.h5");
+
 	// plot the evolution of E_x
+	/*
 	for (auto i=0; i<simdata.num_time_steps(); i++){
 		paravis.set_colorby(&(simdata.get_data_at_index(i, "E_x")));
 		paravis.run();
 	}
+	*/
 
 
 	delete[] E_x;

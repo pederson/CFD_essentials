@@ -125,6 +125,10 @@ void SimulationData::add_data_at_index(unsigned int t_index, std::string fieldna
 }
 
 void SimulationData::write_HDF5(std::string outname) const{
+	// create an empty HDF5 file
+	H5::H5File outfile(outname, H5F_ACC_TRUNC);
+
+	outfile.close();
 
 }
 
