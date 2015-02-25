@@ -35,8 +35,9 @@ int main(int argc, char * argv[]){
 	simdata.print_summary();
 
 	// calculate E using centered difference except for on the boundaries
-	double * E_x = new double[paramesh.reg_num_nodes_x()];
-	double * H_y = new double[paramesh.reg_num_nodes_x()];
+	double * E_x = new double[paramesh.reg_num_nodes_x()*paramesh.reg_num_nodes_y()];
+	double * H_y = new double[paramesh.reg_num_nodes_x()*paramesh.reg_num_nodes_y()];
+	double * H_x = new double[paramesh.reg_num_nodes_x()*paramesh.reg_num_nodes_y()];
 
 
 	
@@ -47,27 +48,38 @@ int main(int argc, char * argv[]){
 
 		cout << "on time step " << n << "/" << num_iters-1 << "\r" << flush;
 
-		// update E field
+		// update H field
 		//cout << "calculating new Electric field" << endl;
 		for (auto i=1; i<paramesh.reg_num_nodes_x()-1; i++){ // cols
-				cind = paramesh.reg_inds_to_glob_ind(i);
-				lind = paramesh.reg_inds_to_glob_ind(i-1);
+			for (auto j=1; j<paramesh.reg_num_nodes_y()-1; j++){
+				cind = paramesh.reg_inds_to_glob_ind(i, j);
+				lind = paramesh.reg_inds_to_glob_ind(i, j-1);
+				rind = paramesh.reg_inds_to_glob_ind(i, j+1);
+				uind = paramesh.reg_inds_to_glob_ind(i+1, j);
+				dind = paramesh.reg_inds_to_glob_ind(i-1, j);
 
-				E_x[cind] += 0.5*(H_y[lind] - H_y[cind]);
+
+				//H_x[cind] = Chxh[cind]
+			}
 		}
 
-		// impose a gaussian source
+		// impose a gaussian source (hard-coded)
 		pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);
 		E_x[paramesh.reg_num_nodes_x()*paramesh.reg_num_nodes_y()/2] = pulse;
 
-		// update H field
+		// update E field
 		for (auto i=0; i<paramesh.reg_num_nodes_x()-1; i++){ // cols
-				cind = paramesh.reg_inds_to_glob_ind(i);
-				rind = paramesh.reg_inds_to_glob_ind(i+1);
+			for (auto j=1; j<paramesh.reg_num_nodes_y()-1; j++){
+				cind = paramesh.reg_inds_to_glob_ind(i, j);
+				lind = paramesh.reg_inds_to_glob_ind(i, j-1);
+				rind = paramesh.reg_inds_to_glob_ind(i, j+1);
+				uind = paramesh.reg_inds_to_glob_ind(i+1, j);
+				dind = paramesh.reg_inds_to_glob_ind(i-1, j);
 
-				H_y[cind] = H_y[cind] + 0.5*(E_x[cind] - E_x[rind]);
+				//H_y[cind] = H_y[cind] + 0.5*(E_x[cind] - E_x[rind]);
 
-				E_x[cind] += 0.5*(H_y[lind] - H_y[cind]);
+				//E_x[cind] += 0.5*(H_y[lind] - H_y[cind]);
+			}
 		}
 		
 
