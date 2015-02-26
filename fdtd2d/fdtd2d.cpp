@@ -13,7 +13,7 @@ int main(int argc, char * argv[]){
 
 	// convert the model into a mesh
 	RegularMesh paramesh;
-	paramesh = RegularMesh::create_regular_grid_b(dx, 0.0, 1.0, 0.0, 1.0);
+	paramesh = RegularMesh::create_regular_grid_b(dx, 0.0, 1.0);//, 0.0, 1.0);
 	paramesh.print_summary();
 
 	// view the mesh
@@ -42,7 +42,7 @@ int main(int argc, char * argv[]){
 
 	
 	double tcur, pulse, t0=40.0, spread = 12.0;
-	unsigned int cind, lind, rind;
+	unsigned int cind, lind, rind, uind, dind ;
 	for (auto n=1; n<num_iters; n++){
 		tcur = dt;
 
@@ -58,7 +58,7 @@ int main(int argc, char * argv[]){
 				uind = paramesh.reg_inds_to_glob_ind(i+1, j);
 				dind = paramesh.reg_inds_to_glob_ind(i-1, j);
 
-
+				E_x[cind] += 0.5*(H_y[lind] - H_y[cind]);
 				//H_x[cind] = Chxh[cind]
 			}
 		}
@@ -76,7 +76,7 @@ int main(int argc, char * argv[]){
 				uind = paramesh.reg_inds_to_glob_ind(i+1, j);
 				dind = paramesh.reg_inds_to_glob_ind(i-1, j);
 
-				//H_y[cind] = H_y[cind] + 0.5*(E_x[cind] - E_x[rind]);
+				H_y[cind] = H_y[cind] + 0.5*(E_x[cind] - E_x[rind]);
 
 				//E_x[cind] += 0.5*(H_y[lind] - H_y[cind]);
 			}
@@ -91,14 +91,15 @@ int main(int argc, char * argv[]){
 	}
 	//*/
 
-	//simdata.write_HDF5("simulation_data.h5");
+	simdata.write_HDF5("simulation_data.h5");
 
 	// plot the evolution of E_x
-	
+	/*
 	for (auto i=0; i<simdata.num_time_steps(); i++){
 		paravis.set_colorby(&(simdata.get_data_at_index(i, "E_x")));
 		paravis.run();
 	}
+	*/
 	
 
 
