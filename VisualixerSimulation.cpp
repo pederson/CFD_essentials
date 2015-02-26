@@ -1,18 +1,15 @@
-#include "VisualixerMesh.hpp"
+#include "VisualixerSimulation.hpp"
 
 using namespace std;
 
-//#define _TEST_
+vector<visualixer*> _vSimulationInstances;
 
-vector<visualixer*> _vMeshInstances;
+simulation_visualixer::simulation_visualixer(){
 
-//*************************************** Mesh Visualixer Class *******************************************
-mesh_visualixer::mesh_visualixer(){
-
-	_vMeshInstances.push_back(this);
+	_vSimulationInstances.push_back(this);
 
 	visualixer_active = false;
-	window_name = "Mesh Visualixer";
+	window_name = "Simulation Visualixer";
 	rotation_lock = false;
 	colorby = NULL;
 	vertices = NULL;
@@ -22,45 +19,80 @@ mesh_visualixer::mesh_visualixer(){
 	num_per_vertex = 0;
 	num_elements = 0;
 	num_line_elements = 0;
+	_freq_Hz = 30;
+	_colorby_field = "";
+	_cur_time_step = 0;
+	set_color_ramp(CRamp::DIVERGENT_9);
 
 	model_centroid[0] = 0.0;
 	model_centroid[1] = 0.0;
 	model_centroid[2] = 0.0;
+
 }
 
-mesh_visualixer::~mesh_visualixer(){
-	for (unsigned int i=0; i<_vMeshInstances.size(); i++){
-		if (_vMeshInstances.at(i) == this){
-			_vMeshInstances.erase(_vMeshInstances.begin() + i);
+simulation_visualixer::~simulation_visualixer(){
+	for (unsigned int i=0; i<_vSimulationInstances.size(); i++){
+		if (_vSimulationInstances.at(i) == this){
+			_vSimulationInstances.erase(_vSimulationInstances.begin() + i);
 			return;
 		}
 	}
 
 	//delete[] window_name;
-	//if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
-	//if (normals != NULL) delete[] normals;
+
 }
 
-void mesh_visualixer::add_mesh(Mesh * mesh){
+void simulation_visualixer::bind_simulation(const SimulationData & simdata){
+	_simdata = &simdata;
+}
+
+void simulation_visualixer::set_frequency_Hz(unsigned int freq){
+	_freq_Hz = freq;
+}
+
+void simulation_visualixer::set_colorby_field(std::string fieldname){
+	_colorby_field = fieldname;
+}
+
+void simulation_visualixer::increment_time_step(){
+	_cur_time_step = (_cur_time_step+1)%_simdata->num_time_steps();
+	set_colorby(&(_simdata->get_data_at_index(_cur_time_step, _colorby_field)));
+	onColors();
+	onRender();
+	onShaders();
+}
+
+void simulation_visualixer::run(){
+	onInit();
+	onPrepareData();
+	onColors();
+	onRender();
+	onShaders();
+	MainLoop();
+	onExit();
+	return;
+}
+
+void simulation_visualixer::onPrepareData(){
+	const Mesh * themesh = _simdata->mesh();
 	MeshNode nd;
 	MeshElement elem;
 
-	xmax = mesh->xmax();
-	ymax = mesh->ymax();
-	zmax = mesh->zmax();
-	xmin = mesh->xmin();
-	ymin = mesh->ymin();
-	zmin = mesh->zmin();
-	//GLfloat scale = (xmax-xmin)/1.0;
+	xmax = themesh->xmax();
+	ymax = themesh->ymax();
+	zmax = themesh->zmax();
+	xmin = themesh->xmin();
+	ymin = themesh->ymin();
+	zmin = themesh->zmin();
 
-	num_vertices = mesh->nodecount();
+	num_vertices = themesh->nodecount();
 	num_per_vertex = 6;
 	num_vertex_points = 3;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
 	for (unsigned int i=0; i<num_vertices; i++){
-		nd = mesh->node(i);
+		nd = themesh->node(i);
 
 		vertices[i*num_per_vertex] = nd.x();
 		vertices[i*num_per_vertex + 1] = nd.y();
@@ -81,8 +113,8 @@ void mesh_visualixer::add_mesh(Mesh * mesh){
 	// DYLAN_TODO: this should really be more rigorous and count for each element
 	//				in the mesh
 	num_line_elements = 0;
-	for (unsigned int i=0; i<mesh->elementcount(); i++){
-		elem = mesh->element(i);
+	for (unsigned int i=0; i<themesh->elementcount(); i++){
+		elem = themesh->element(i);
 		num_line_elements += elem.num_vertices();
 	}
 
@@ -98,8 +130,8 @@ void mesh_visualixer::add_mesh(Mesh * mesh){
 
 	
 	unsigned int jp1, elements_added=0;
-	for (unsigned int i=0; i<mesh->elementcount(); i++){
-		elem = mesh->element(i);
+	for (unsigned int i=0; i<themesh->elementcount(); i++){
+		elem = themesh->element(i);
 		for (unsigned int j=0; j<elem.num_vertices(); j++){
 			jp1 = (j+1)%elem.num_vertices();
 			elements[line_element_offset + elements_added*num_per_line_element] = elem.vertex_ind(j);
@@ -109,78 +141,16 @@ void mesh_visualixer::add_mesh(Mesh * mesh){
 		}
 	}
 
-
 	model_centroid[0] = (xmax + xmin)/2.0;
 	model_centroid[1] = (ymax + ymin)/2.0;
 	model_centroid[2] = (zmax + zmin)/2.0;
 
-	return;
+	if (_colorby_field.compare("") != 0) set_colorby(&(_simdata->get_data_at_index(_cur_time_step, _colorby_field)));
+
 }
 
 
-void mesh_visualixer::set_test_case(){
-	num_vertices = 100;
-	num_per_vertex = 6;
-	num_vertex_points = 3;
-	vertices = new GLfloat[num_vertices*num_per_vertex];
-	for (unsigned int i=0; i<10; i++){
-		for (unsigned int j=0; j<10; j++){
-			vertices[(i*10+j)*num_per_vertex] = GLfloat(i);
-			vertices[(i*10+j)*num_per_vertex + 1] = GLfloat(j);
-			vertices[(i*10+j)*num_per_vertex + 2] = 10.0;
-			if (j%2==0){
-				vertices[(i*10+j)*num_per_vertex + 3] = 1.0f;
-				vertices[(i*10+j)*num_per_vertex + 4] = 0.0f;
-				vertices[(i*10+j)*num_per_vertex + 5] = 0.0f;
-			}
-			else if (j%3==0){
-				vertices[(i*10+j)*num_per_vertex + 3] = 0.0f;
-				vertices[(i*10+j)*num_per_vertex + 4] = 1.0f;
-				vertices[(i*10+j)*num_per_vertex + 5] = 0.0f;
-			}
-			else {
-				vertices[(i*10+j)*num_per_vertex + 3] = 1.0f;
-				vertices[(i*10+j)*num_per_vertex + 4] = 1.0f;
-				vertices[(i*10+j)*num_per_vertex + 5] = 1.0f;
-			}
-		}
-	}
-
-	num_elements = num_vertices;
-	num_per_element = 1;
-	num_line_elements = 18;
-	num_per_line_element = 2;
-	elements = new GLuint[num_elements*num_per_element + num_line_elements*num_per_line_element];
-	line_element_offset = num_elements*num_per_element;
-	// set the point elements
-	for (unsigned int i=0; i<num_vertices; i++){
-		elements[i] = i;
-	}
-	// add in the line elements
-	for (unsigned int i=0; i<9; i++){
-		elements[line_element_offset + i*num_per_line_element] = i;
-		elements[line_element_offset + i*num_per_line_element+1] = (i+1);
-	}
-	for (unsigned int i=0; i<9; i++){
-		elements[line_element_offset + (i+9)*num_per_line_element] = i*10;
-		elements[line_element_offset + (i+9)*num_per_line_element + 1] = (i+1)*10;
-	}
-
-
-	model_centroid[0] = 4.5;
-	model_centroid[1] = 4.5;
-	model_centroid[2] = 10.0;
-	xmax = num_vertices-1;
-	ymax = num_vertices-1;
-	zmax = 10.0;
-	xmin = 0;
-	ymin = 0;
-	zmin = 0;
-
-	return;
-}
-
-void mesh_visualixer::onRender(){
+void simulation_visualixer::onRender(){
 	// Create Vertex Array Object
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
@@ -208,9 +178,19 @@ void mesh_visualixer::onRender(){
   return;
 }
 
-bool mesh_visualixer::MainLoop(){
+bool simulation_visualixer::MainLoop(){
 
+
+	double lastTime = glfwGetTime(), curTime;
   while(!glfwWindowShouldClose(window_ptr)){
+
+  	curTime = glfwGetTime();
+  	if (curTime-lastTime >= 1.0/double(_freq_Hz)){ 
+  		//cout << "I should be incrementing: " << curTime << "\r" << flush;
+  		increment_time_step();
+  		lastTime = curTime;
+  	}
+  	
 
     if (glfwGetKey(window_ptr, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window_ptr, GL_TRUE);
 
@@ -236,7 +216,7 @@ bool mesh_visualixer::MainLoop(){
 	return 0;
 }
 
-void mesh_visualixer::onExit(){
+void simulation_visualixer::onExit(){
 	glDeleteProgram(shaderProgram);
   glDeleteShader(fragmentShader);
   glDeleteShader(vertexShader);
@@ -252,27 +232,3 @@ void mesh_visualixer::onExit(){
 	return;
 }
 
-
-#ifdef _TEST_
-// use cmake to compile
-
-int main(int argc, char * argv[]){
-	// declare vars
-
-	// test the mesh viewer
-	mesh_visualixer * mymvis = new mesh_visualixer();
-	Static_Mesh * mesh = Static_Mesh::create_regular_grid_n(0.1, 50, 50);//, (unsigned int)30);
-	mymvis->add_mesh(mesh);
-	mymvis->set_color_ramp(CRamp::DIVERGENT_9);
-	//if (&mesh->x() == NULL) cout << "damn coloby is null" << endl;
-	mymvis->set_colorby(&mesh->z());
-	//mymvis->set_test_case();
-	
-	mymvis->run();
-	delete mymvis;
-
-	return 0;
-
-}
-
-#endif

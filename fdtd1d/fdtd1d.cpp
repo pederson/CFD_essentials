@@ -1,6 +1,7 @@
 #include "../VisualixerMesh.hpp"
 #include "../RegularMesh.hpp" 
 #include "../SimulationData.hpp"
+#include "../VisualixerSimulation.hpp"
 
 using namespace std;
 
@@ -24,7 +25,7 @@ int main(int argc, char * argv[]){
 
 
 	// simple 1D simulation	
-	double num_iters = 80;	
+	double num_iters = 200;	
 
 	// set up the simulation data holder
 	SimulationData simdata;
@@ -60,6 +61,10 @@ int main(int argc, char * argv[]){
 		pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);
 		E_x[paramesh.reg_num_nodes_x()/2] = pulse;
 
+		// impose boundary conditions
+		E_x[paramesh.reg_num_nodes_x()-1] = E_x[paramesh.reg_num_nodes_x()-2];
+		E_x[0] = E_x[1];
+
 		// update H field
 		for (auto i=0; i<paramesh.reg_num_nodes_x()-1; i++){ // cols
 				cind = paramesh.reg_inds_to_glob_ind(i);
@@ -67,7 +72,7 @@ int main(int argc, char * argv[]){
 
 				H_y[cind] = H_y[cind] + 0.5*(E_x[cind] - E_x[rind]);
 
-				E_x[cind] += 0.5*(H_y[lind] - H_y[cind]);
+				//E_x[cind] += 0.5*(H_y[lind] - H_y[cind]);
 		}
 		
 
@@ -82,12 +87,19 @@ int main(int argc, char * argv[]){
 	simdata.write_HDF5("outfile_test.h5");
 
 	// plot the evolution of E_x
+	simulation_visualixer simvis;
+	simvis.bind_simulation(simdata);
+	simvis.set_colorby_field("E_x");
+	simvis.run();
+	//cout << "finished running..." << endl;
 	/*
 	for (auto i=0; i<simdata.num_time_steps(); i++){
+		cout << "on time step " << i << "/" << simdata.num_time_steps() << "\r" << flush;
 		paravis.set_colorby(&(simdata.get_data_at_index(i, "E_x")));
 		paravis.run();
 	}
 	*/
+	
 
 
 	delete[] E_x;

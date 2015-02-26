@@ -21,17 +21,31 @@ public:
 	simulation_visualixer();
 	~simulation_visualixer();
 
-	void add_simulation(const SimulationData & simdat);
+	void bind_simulation(const SimulationData & simdat);
+	void set_frequency_Hz(unsigned int freq); // set the # of cycles per second
+	void set_colorby_field(std::string fieldname);
+
+	void run();
 
 protected:
-	void onRender();
 
+private:
+
+	void increment_time_step();
+
+	void onPrepareData();
+	void onRender();
 	bool MainLoop();
 	void onExit();
 
-private:
+	GLuint * line_elements;
+	GLuint lebo;
+
 	const SimulationData * _simdata;
 
+	std::string _colorby_field;
+	unsigned int _freq_Hz, _cur_time_step; // frequency at which the simulation plays
+	unsigned int num_line_elements, num_per_line_element, line_element_offset;
 };
 
 #endif
