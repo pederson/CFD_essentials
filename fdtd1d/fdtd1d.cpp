@@ -9,7 +9,10 @@ int main(int argc, char * argv[]){
 	// constants
 	double eps0 = 8.854e-12;
 	double c0 = 3.0e+8;
-	double dx = 0.01;
+	double dx = 0.005;
+	double num_iters = 600;	
+	double srcfreq = 2e+9;
+
 	double dt = 0.5*dx/c0;
 
 	// convert the model into a mesh
@@ -25,7 +28,7 @@ int main(int argc, char * argv[]){
 
 
 	// simple 1D simulation	
-	double num_iters = 300;	
+	
 
 	// set up the simulation data holder
 	SimulationData simdata;
@@ -36,39 +39,38 @@ int main(int argc, char * argv[]){
 	simdata.print_summary();
 
 	// calculate E using centered difference except for on the boundaries
-	double * E_x = new double[paramesh.reg_num_nodes_x()];
-	double * H_y = new double[paramesh.reg_num_nodes_x()];
-	H_y[0] = 0.0;
-	E_x[0] = 0.0;
-	H_y[paramesh.reg_num_nodes_x()-1] = 0.0;
-	E_x[paramesh.reg_num_nodes_x()-1] = 0.0;
+	double * E_x = new double[paramesh.nodecount()];
+	double * H_y = new double[paramesh.nodecount()];
+	for (auto i=0; i<paramesh.nodecount(); i++){
+		E_x[i] = 0.0;
+		H_y[i] = 0.0;
+	}
+
+	// set a relative epsilon as a ramp from 1 to 10;
+	double * eps_r = new double[paramesh.nodecount()];
+	for (auto i=0; i<paramesh.nodecount(); i++){
+		eps_r[i] = double(i*9.0)/paramesh.nodecount() + 1.0;
+	}
 
 
 	
-	double tcur, pulse, t0=40.0, spread = 12.0;
+	double tcur, pulse, t0=40.0, spread = 20;
+	double imp0 = 377.0;
 	unsigned int cind, lind, rind;
-	for (auto n=1; n<num_iters; n++){
+	for (auto n=0; n<num_iters; n++){
 		tcur = dt;
 
 		cout << "on time step " << n << "/" << num_iters-1 << "\r" << flush;
 
-		// impose boundary conditions
-		//H_y[paramesh.reg_num_nodes_x()-1] = H_y[paramesh.reg_num_nodes_x()-2];
-		H_y[0] = H_y[1];
-
-		// update H field
-		for (auto i=0; i<paramesh.reg_num_nodes_x()-1; i++){ // cols
-				cind = paramesh.reg_inds_to_glob_ind(i);
-				rind = paramesh.reg_inds_to_glob_ind(i+1);
-
-				H_y[cind] = H_y[cind] + 0.5*(E_x[cind] - E_x[rind]);
-
-				//E_x[cind] += 0.5*(H_y[lind] - H_y[cind]);
-		}
+		// impose a gaussian source
+		pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);	// gaussian pulse source
+		//pulse = sin(2*VX_PI*srcfreq*n*dt); // oscillatory source
+		E_x[paramesh.reg_num_nodes_x()/2] += pulse;
 
 		// impose boundary conditions
 		E_x[0] = E_x[1];
-		//E_x[paramesh.reg_num_nodes_x()-1] = E_x[paramesh.reg_num_nodes_x()-2];
+		E_x[paramesh.reg_num_nodes_x()-1] = E_x[paramesh.reg_num_nodes_x()-2];
+		//E_x[paramesh.reg_num_nodes_x()-1] += exp(-0.5*(t0-n + 1)*(t0-n + 1)/spread/spread);
 
 		// update E field
 		//cout << "calculating new Electric field" << endl;
@@ -76,14 +78,27 @@ int main(int argc, char * argv[]){
 				cind = paramesh.reg_inds_to_glob_ind(i);
 				lind = paramesh.reg_inds_to_glob_ind(i-1);
 
-				E_x[cind] += 0.5*(H_y[lind] - H_y[cind]);
+				E_x[cind] += 0.5*(H_y[lind] - H_y[cind])*imp0/eps_r[cind];
+				//E_x[cind] += 0.5*(H_y[lind] - H_y[cind]);
 		}
 
-		// impose a gaussian source
-		pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);
-		E_x[paramesh.reg_num_nodes_x()/2] += pulse;
 
-		
+		// impose boundary conditions
+		H_y[paramesh.reg_num_nodes_x()-1] = H_y[paramesh.reg_num_nodes_x()-2];	// Absorbing BC
+		H_y[0] = H_y[1];	// Absorbing BC
+		//H_y[paramesh.reg_num_nodes_x()-2] -= exp(-0.5*(t0-n)*(t0-n)/spread*spread)/imp0;	// TFSF boundary
+
+		// update H field
+		for (auto i=1; i<paramesh.reg_num_nodes_x()-1; i++){ // cols
+				cind = paramesh.reg_inds_to_glob_ind(i);
+				rind = paramesh.reg_inds_to_glob_ind(i+1);
+
+				H_y[cind] = H_y[cind] + 0.5*(E_x[cind] - E_x[rind])/imp0;
+				//H_y[cind] = H_y[cind] + 0.5*(E_x[cind] - E_x[rind]);
+
+		}
+
+
 
 		// fill in the simdata for this time step
 		simdata.add_data_at_index(n, "E_x", E_x[0]);

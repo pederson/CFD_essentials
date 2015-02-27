@@ -42,6 +42,8 @@ TODO:
 - Gimbal lock is still happening during manual rotation
 - adding a colorby before adding an object (mesh, pointcloud) doesn't work b/c it gets overwritten
 - Shading and Light source for mesh model viewer
+- Make the onPrepareData() call a base class function
+- Don't allow the viewing window to recenter itself for each timestep
 
 
 - Doxygen comments for everything

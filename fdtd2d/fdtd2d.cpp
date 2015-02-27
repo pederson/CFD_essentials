@@ -1,6 +1,7 @@
 #include "../VisualixerMesh.hpp"
 #include "../RegularMesh.hpp" 
 #include "../SimulationData.hpp"
+#include "../VisualixerSimulation.hpp"
 
 using namespace std;
 
@@ -8,7 +9,7 @@ int main(int argc, char * argv[]){
 	// constants
 	double eps0 = 8.854e-12;
 	double c0 = 3.0e+8;
-	double dx = 0.01;
+	double dx = 0.005;
 	double dt = 0.5*dx/c0;
 
 	// convert the model into a mesh
@@ -24,7 +25,7 @@ int main(int argc, char * argv[]){
 
 
 	// simple 1D simulation	
-	double num_iters = 50;	
+	double num_iters = 100;	
 
 	// set up the simulation data holder
 	SimulationData simdata;
@@ -38,7 +39,7 @@ int main(int argc, char * argv[]){
 	double * E_z = new double[paramesh.reg_num_nodes_x()*paramesh.reg_num_nodes_y()];
 	double * H_y = new double[paramesh.reg_num_nodes_x()*paramesh.reg_num_nodes_y()];
 	double * H_x = new double[paramesh.reg_num_nodes_x()*paramesh.reg_num_nodes_y()];
-	for (auto i=0; i<paramesh.reg_num_nodes_x()*paramesh.reg_num_nodes_y(); i++){
+	for (auto i=0; i<paramesh.nodecount(); i++){
 		H_x[i] = 0.0;
 		H_y[i] = 0.0;
 		E_z[i] = 0.0;
@@ -54,13 +55,13 @@ int main(int argc, char * argv[]){
 	
 	double tcur, pulse, t0=10.0, spread = 12.0;
 	unsigned int cind, lind, rind, uind, dind ;
-	for (auto n=1; n<num_iters; n++){
+	for (auto n=0; n<num_iters; n++){
 		tcur = dt;
 
 		cout << "on time step " << n << "/" << num_iters-1 << "\r" << flush;
 
 		// update E field
-		for (auto i=0; i<paramesh.reg_num_nodes_x()-1; i++){ // cols
+		for (auto i=1; i<paramesh.reg_num_nodes_x()-1; i++){ // cols
 			for (auto j=1; j<paramesh.reg_num_nodes_y()-1; j++){
 				cind = paramesh.reg_inds_to_glob_ind(i, j);
 				lind = paramesh.reg_inds_to_glob_ind(i, j-1);
@@ -74,9 +75,11 @@ int main(int argc, char * argv[]){
 			}
 		}
 
+
+
 		// impose a gaussian source (hard-coded)
 		pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);
-		E_z[paramesh.reg_num_nodes_x()*paramesh.reg_num_nodes_y()/2] = pulse;
+		E_z[paramesh.nodecount()/2] = pulse;
 
 		
 		// update H field
@@ -95,8 +98,6 @@ int main(int argc, char * argv[]){
 			}
 		}
 
-		
-
 		// fill in the simdata for this time step
 		simdata.add_data_at_index(n, "E_z", E_z[0]);
 		simdata.add_data_at_index(n, "H_y", H_y[0]);
@@ -107,12 +108,12 @@ int main(int argc, char * argv[]){
 
 	//simdata.write_HDF5("simulation_data.h5");
 
-	// plot the evolution of E_x
-	
-	for (auto i=0; i<simdata.num_time_steps(); i++){
-		paravis.set_colorby(&(simdata.get_data_at_index(i, "E_z")));
-		paravis.run();
-	}
+	// visualize the simulation
+	simulation_visualixer simvis;
+	simvis.bind_simulation(simdata);
+	simvis.set_colorby_field("E_z");
+	simvis.set_frequency_Hz(100);
+	simvis.run();
 	
 	
 
