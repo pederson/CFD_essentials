@@ -54,7 +54,7 @@ public:
 
 	//template <class T> void set_colorby(const T * color_by);
 	template <class T>
-	void set_colorby(T const * color_by){
+	void set_colorby(T const * color_by, bool recalcminmax=true){
 		if (color_by == NULL){
 			//std::cout << "SHIT THE COLORBY INPUT IS NULL" << std::endl;
 			return;
@@ -65,10 +65,16 @@ public:
 		//std::cout << "converted all to double" << std::endl;
 
 		// find the min of the incoming values
-		colorby_max = colorby[0]; colorby_min = colorby[0];
-		for (auto i=1; i<num_vertices; i++){
-			if (colorby[i] > colorby_max) colorby_max = colorby[i];
-			if (colorby[i] < colorby_min) colorby_min = colorby[i];
+		if (recalcminmax){
+			//std::cout << "readjusted the colorby" << std::endl;
+			colorby_max = colorby[0];
+			for (auto i=1; i<num_vertices; i++){
+				if (colorby[i] > colorby_max) colorby_max = colorby[i];
+			}
+			colorby_min = colorby[0];
+			for (auto i=1; i<num_vertices; i++){
+				if (colorby[i] < colorby_min) colorby_min = colorby[i];
+			}
 		}
 
 		//std::cout << "found the min and max" << std::endl;

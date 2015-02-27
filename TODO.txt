@@ -1,5 +1,6 @@
 TODO:
 
+- Explore using Boost library (what can it do for me?)
 
 - Make Simulation class that handles the setup and execution of a simulation
 	- Need to finish the equation class and boundary conditions class to do this

@@ -58,7 +58,8 @@ void simulation_visualixer::set_colorby_field(std::string fieldname){
 
 void simulation_visualixer::increment_time_step(){
 	_cur_time_step = (_cur_time_step+1)%_simdata->num_time_steps();
-	set_colorby(&(_simdata->get_data_at_index(_cur_time_step, _colorby_field)));
+	set_colorby(&(_simdata->get_data_at_index(_cur_time_step, _colorby_field)), false);
+	//set_colorby(&(_simdata->get_data_at_index(_cur_time_step, _colorby_field)));
 	onColors();
 	onRender();
 	onShaders();
@@ -145,7 +146,21 @@ void simulation_visualixer::onPrepareData(){
 	model_centroid[1] = (ymax + ymin)/2.0;
 	model_centroid[2] = (zmax + zmin)/2.0;
 
-	if (_colorby_field.compare("") != 0) set_colorby(&(_simdata->get_data_at_index(_cur_time_step, _colorby_field)));
+	if (_colorby_field.compare("") != 0){
+		// set colorby max and min
+		const double * dat = &(_simdata->get_data_at_index(0, _colorby_field));
+		colorby_max = dat[0]; colorby_min = dat[0];
+		for (auto t=0; t<_simdata->num_time_steps(); t++){
+			dat = &(_simdata->get_data_at_index(t, _colorby_field));
+			for (auto i=0; i<num_vertices; i++){
+				if (dat[i] > colorby_max) colorby_max = dat[i];
+				if (dat[i] < colorby_min) colorby_min = dat[i];
+			}
+		}
+		set_colorby(&(_simdata->get_data_at_index(0, _colorby_field)), false);
+		//cout << "set min and max colorby" << endl;
+		//cout << "max: " << colorby_max << "\t min: " << colorby_min << endl;
+	} 
 
 }
 

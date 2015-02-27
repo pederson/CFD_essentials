@@ -25,7 +25,7 @@ int main(int argc, char * argv[]){
 
 
 	// simple 1D simulation	
-	double num_iters = 200;	
+	double num_iters = 300;	
 
 	// set up the simulation data holder
 	SimulationData simdata;
@@ -38,6 +38,10 @@ int main(int argc, char * argv[]){
 	// calculate E using centered difference except for on the boundaries
 	double * E_x = new double[paramesh.reg_num_nodes_x()];
 	double * H_y = new double[paramesh.reg_num_nodes_x()];
+	H_y[0] = 0.0;
+	E_x[0] = 0.0;
+	H_y[paramesh.reg_num_nodes_x()-1] = 0.0;
+	E_x[paramesh.reg_num_nodes_x()-1] = 0.0;
 
 
 	
@@ -47,6 +51,24 @@ int main(int argc, char * argv[]){
 		tcur = dt;
 
 		cout << "on time step " << n << "/" << num_iters-1 << "\r" << flush;
+
+		// impose boundary conditions
+		//H_y[paramesh.reg_num_nodes_x()-1] = H_y[paramesh.reg_num_nodes_x()-2];
+		H_y[0] = H_y[1];
+
+		// update H field
+		for (auto i=0; i<paramesh.reg_num_nodes_x()-1; i++){ // cols
+				cind = paramesh.reg_inds_to_glob_ind(i);
+				rind = paramesh.reg_inds_to_glob_ind(i+1);
+
+				H_y[cind] = H_y[cind] + 0.5*(E_x[cind] - E_x[rind]);
+
+				//E_x[cind] += 0.5*(H_y[lind] - H_y[cind]);
+		}
+
+		// impose boundary conditions
+		E_x[0] = E_x[1];
+		//E_x[paramesh.reg_num_nodes_x()-1] = E_x[paramesh.reg_num_nodes_x()-2];
 
 		// update E field
 		//cout << "calculating new Electric field" << endl;
@@ -59,21 +81,8 @@ int main(int argc, char * argv[]){
 
 		// impose a gaussian source
 		pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);
-		E_x[paramesh.reg_num_nodes_x()/2] = pulse;
+		E_x[paramesh.reg_num_nodes_x()/2] += pulse;
 
-		// impose boundary conditions
-		E_x[paramesh.reg_num_nodes_x()-1] = E_x[paramesh.reg_num_nodes_x()-2];
-		E_x[0] = E_x[1];
-
-		// update H field
-		for (auto i=0; i<paramesh.reg_num_nodes_x()-1; i++){ // cols
-				cind = paramesh.reg_inds_to_glob_ind(i);
-				rind = paramesh.reg_inds_to_glob_ind(i+1);
-
-				H_y[cind] = H_y[cind] + 0.5*(E_x[cind] - E_x[rind]);
-
-				//E_x[cind] += 0.5*(H_y[lind] - H_y[cind]);
-		}
 		
 
 		// fill in the simdata for this time step
@@ -90,6 +99,7 @@ int main(int argc, char * argv[]){
 	simulation_visualixer simvis;
 	simvis.bind_simulation(simdata);
 	simvis.set_colorby_field("E_x");
+	simvis.set_frequency_Hz(100);
 	simvis.run();
 	//cout << "finished running..." << endl;
 	/*
