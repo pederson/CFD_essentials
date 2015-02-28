@@ -25,7 +25,7 @@ int main(int argc, char * argv[]){
 
 
 	// simple 1D simulation	
-	double num_iters = 100;	
+	double num_iters = 500;	
 
 	// set up the simulation data holder
 	SimulationData simdata;
@@ -36,22 +36,23 @@ int main(int argc, char * argv[]){
 	simdata.print_summary();
 
 	// calculate E using centered difference except for on the boundaries
-	double * E_z = new double[paramesh.reg_num_nodes_x()*paramesh.reg_num_nodes_y()];
-	double * H_y = new double[paramesh.reg_num_nodes_x()*paramesh.reg_num_nodes_y()];
-	double * H_x = new double[paramesh.reg_num_nodes_x()*paramesh.reg_num_nodes_y()];
+	double * D_z = new double[paramesh.nodecount()];
+	double * I_z = new double[paramesh.nodecount()];
+	double * E_z = new double[paramesh.nodecount()];
+	double * H_y = new double[paramesh.nodecount()];
+	double * H_x = new double[paramesh.nodecount()];
+	double * gaz = new double[paramesh.nodecount()];
+	double * gbz = new double[paramesh.nodecount()];
 	for (auto i=0; i<paramesh.nodecount(); i++){
+		D_z[i] = 0.0;
+		I_z[i] = 0.0;
 		H_x[i] = 0.0;
 		H_y[i] = 0.0;
 		E_z[i] = 0.0;
+		gaz[i] = 1.0;		// gax = 1/(epsilon+(sigma*dt/eps0));
+		gbz[i] = 0.0;		// gbx = sigma*dt/eps0;
 	}
 
-	// define some constants (for vacuum)
-	double Chxh = 1.0;
-	double Chxe = dt/dx;
-	double Chyh = 1.0;
-	double Chye = dt/dx;
-	double Ceze = 1.0;
-	double Cezh = dt/dx;
 	
 	double tcur, pulse, t0=10.0, spread = 12.0;
 	unsigned int cind, lind, rind, uind, dind ;
@@ -71,7 +72,10 @@ int main(int argc, char * argv[]){
 
 				//H_y[cind] = H_y[cind] + 0.5*(E_x[cind] - E_x[rind]);
 
-				E_z[cind] = Ceze * E_z[cind] + Cezh * ((H_y[cind] - H_y[dind]) - (H_x[cind] - H_x[lind]));
+				D_z[cind] = D_z[cind] 
+						  + 0.5 * (H_y[cind] - H_y[lind] - H_x[cind] + H_x[dind]);
+				E_z[cind] = gaz[cind] *(D_z[cind] - I_z[cind]);
+				I_z[cind] = I_z[cind] + gbz[cind] * E_z[cind];
 			}
 		}
 
@@ -93,8 +97,8 @@ int main(int argc, char * argv[]){
 				dind = paramesh.reg_inds_to_glob_ind(i-1, j);
 
 				//E_x[cind] += 0.5*(H_y[lind] - H_y[cind]);
-				H_x[cind] = Chxh * H_x[cind] - Chxe * (E_z[rind] - E_z[cind]);
-				H_y[cind] = Chyh * H_y[cind] + Chye * (E_z[uind] - E_z[cind]);
+				H_x[cind] = H_x[cind] - 0.5 * (E_z[uind] - E_z[cind]);
+				H_y[cind] = H_y[cind] + 0.5 * (E_z[rind] - E_z[cind]);
 			}
 		}
 
@@ -111,8 +115,8 @@ int main(int argc, char * argv[]){
 	// visualize the simulation
 	simulation_visualixer simvis;
 	simvis.bind_simulation(simdata);
-	simvis.set_colorby_field("E_z");
-	simvis.set_frequency_Hz(100);
+	simvis.set_colorby_field("H_y");
+	simvis.set_frequency_Hz(50);
 	simvis.run();
 	
 	
