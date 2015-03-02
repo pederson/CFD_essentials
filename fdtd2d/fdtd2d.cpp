@@ -115,7 +115,7 @@ int main(int argc, char * argv[]){
 	// visualize the simulation
 	simulation_visualixer simvis;
 	simvis.bind_simulation(simdata);
-	simvis.set_colorby_field("H_y");
+	simvis.set_colorby_field("E_z");
 	simvis.set_frequency_Hz(50);
 	simvis.run();
 	
