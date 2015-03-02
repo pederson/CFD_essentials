@@ -6,6 +6,8 @@
 // In addition, I should be able to define some standard equations (like
 // poisson's equation) to set that equation easily
 
+//#define _TEST_
+
 // Also, "derived" equations that calculate a quantity given other variables
 // from other equations should be possible
 enum PreDefinedEquation{EQUATION_ELECTROSTATIC_POISSON, 
@@ -16,7 +18,6 @@ enum PreDefinedEquation{EQUATION_ELECTROSTATIC_POISSON,
 						EQUATION_FLUID_DIFFUSION,
 						EQUATION_PLASMA_CONTINUITY};
 
-#define _TEST_
 
 using namespace std;
 

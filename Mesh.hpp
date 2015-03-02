@@ -81,15 +81,8 @@ public:
   void set_phys_property(std::string property_name, unsigned int i, double val){_phys_properties.at(property_name).at(i) = val;};
 
 
-  /*
   // grid generation and refinement
-  static Mesh * create_regular_grid_n(double res, unsigned int num_nodes_x, unsigned int num_nodes_y = 1, 
-                      unsigned int num_nodes_z = 1); // create a regular grid of points and store it in the mesh
-  static Mesh * create_regular_grid_b(double res, double xmin, double xmax, double ymin=0.0, double ymax=0.0,
-                      double zmin=0.0, double zmax=0.0);
-  */
-
-  //static Mesh * create_unstructured_tri_simple();
+  //static Mesh create_unstructured_tri_simple();
 
   // reading and writing files
   static Mesh read_MSH(std::string filename, unsigned int byte_offset=0);
@@ -109,8 +102,8 @@ protected:
 
   
   // metadata for regular mesh
-  unsigned int _num_nodes_x, _num_nodes_y, _num_nodes_z;
-  double _res;
+  //unsigned int _num_nodes_x, _num_nodes_y, _num_nodes_z;
+  //double _res;
   
 
   // nodes and elements
@@ -121,17 +114,13 @@ protected:
   // DYLAN_TODO: RENAME THIS NodeData and ElementData
   std::vector<std::string> _phys_property_names; // the name position in this vector corresponds with the position of the property value in the node
   std::map<std::string, std::vector<double>> _phys_properties;
+  //std::map<std::string, std::vector<double>> _nodedata;
+  //std::map<std::string, std::vector<double>> _elementdata;
 
   // other properties conveniently placed in arrays (on demand) in order to return data
   std::vector<bool> _boundary;
   std::vector<double> _x, _y, _z;
   std::vector<unsigned int> _core_group, _num_connections;
-
-  /*
-  void create_regular_grid_internal(double res, unsigned int num_nodes_x, unsigned int num_nodes_y, 
-                      unsigned int num_nodes_z,
-                      double xcen=0.0, double ycen=0.0, double zcen=0.0);
-  */
 
   void calc_extents();
 
@@ -196,7 +185,7 @@ private:
 class MeshNode{
 public:
   MeshNode();
-  MeshNode(double x, double y, double z=0.0, bool boundary=false, unsigned int num_connections=0, unsigned int core_group=false);
+  MeshNode(double x, double y, double z=0.0, bool boundary=false, unsigned int num_connections=0, unsigned int core_group=0);
   ~MeshNode();
 
   // utils
@@ -206,7 +195,7 @@ public:
   static double dist(const MeshNode & node1, const MeshNode & node2) {return sqrt(dist_sq(node1, node2));};
   static double area_tri(const MeshNode & node1, const MeshNode & node2, const MeshNode & node3);
 
-  // member data access
+  // inspectors
   double x() const {return _x;};
   double y() const {return _y;};
   double z() const {return _z;};
@@ -231,11 +220,8 @@ private:
 
 };
 
-// regular mesh
 
 // mutable mesh
-
-// affine cell transformation here
 
 
 #endif

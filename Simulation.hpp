@@ -37,10 +37,10 @@ private:
 	std::vector<BoundaryCondition> _boundary_conditions;	// this defines the boudnary conditions
 	std::vector<InitialCondition> _initial_conditions;
 	std::vector<Equation> _equations; 		// this defines the equations involved
-	double tstart, tstop;		// this defines the start and stop time
+	double _tstart, _tstop;		// this defines the start and stop time
 
 	// define linear algebra solution method
-	LinVector
+	LinVector _vec;
 
 
 };

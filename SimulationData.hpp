@@ -8,7 +8,9 @@
 #include <map>
 #include <iostream>
 
-#include <H5Cpp.h>
+#ifdef _HDF5_H
+	#include <H5Cpp.h>
+#endif
 //#include <H5File.h>
 //class Static_Mesh; // forward declaration
 

@@ -14,21 +14,32 @@ class Point{
   friend class Hull;
 public:
   // constructor
-  Point();
-  Point(double _x, double _y);
-  Point(double _x, double _y, double _z);
+  Point(double _x=0.0, double _y=0.0, double _z=0.0)
+    :x(_x),
+     y(_y),
+     z(_z)
+     {_ndims = 3;}
 
   // destructor
   ~Point();
 
+  // inspectors
+  //double x() const {return x;};
+  //double y() const {return y;};
+  //double z() const {return z;};
+  void print_summary() const;
+
+  // mutators
+
+
   static int dist(Point p1, Point p2);
 
-  void print();
+  
 
 private:
   // data members
   double x, y, z;
-  unsigned char ndims;
+  unsigned char _ndims;
 
 };
 
@@ -37,27 +48,25 @@ public:
   // constructor
   Hull();
   Hull(std::vector<Point> ordered_points);
-  Hull(double * x, double * y, unsigned int numpoints);
+  Hull(const double * x, const double * y, unsigned int numpoints);
 
   // destructor
   ~Hull();
 
-  // member functions
+  // inspectors
   void print_summary() const;
   void print_detailed() const;
-
-  void construct_convex(std::vector<Point> allpts);
-  void construct_convex(double * x, double * y, unsigned int numpoints);
-
   bool contains_point(Point query) const;
+
+  // mutators
+  void construct_convex(std::vector<Point> allpts);
+  void construct_convex(const double * x, const double * y, unsigned int numpoints);
+
+  
 
   Hull * Union(Hull * other_Hull);
   Hull * Intersect(Hull * other_Hull);
   Hull * Stamper(std::vector<Point>); 
-
-
-
-protected:
 
 private:
 

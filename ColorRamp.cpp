@@ -106,27 +106,27 @@ unsigned int qualitative_4[27] = {
 
 
 ColorRamp::ColorRamp(){
-  ramp = NULL;
-  rgb_max = 255;
-  num_values = 9;
-  rgb_interpolation = false;
-  current_ramp = CRamp::DIVERGENT_8;
+  _ramp = NULL;
+  _rgb_max = 255;
+  _num_values = 9;
+  _rgb_interpolation = false;
+  _current_ramp = CRamp::DIVERGENT_8;
   reset_ramp_array();
 }
 
 ColorRamp::~ColorRamp(){
-  if (ramp != NULL) delete[] ramp;
+  if (_ramp != NULL) delete[] _ramp;
 }
 
 void ColorRamp::cycle_ramp(){
-  current_ramp = static_cast<CRamp>( static_cast<char>(current_ramp) + 1);
-  if (current_ramp == CRamp::END_OF_LIST) current_ramp = (CRamp) 0;
+  _current_ramp = static_cast<CRamp>( static_cast<char>(_current_ramp) + 1);
+  if (_current_ramp == CRamp::END_OF_LIST) _current_ramp = (CRamp) 0;
   reset_ramp_array();
   return;
 }
 
 void ColorRamp::set_ramp(CRamp ramp_name){
-  current_ramp = ramp_name;
+  _current_ramp = ramp_name;
   reset_ramp_array();
   return;
 }
@@ -134,24 +134,38 @@ void ColorRamp::set_ramp(CRamp ramp_name){
 rgb ColorRamp::get_ramp_color(float norm_value) const{
   rgb out;
 
-  if (rgb_interpolation){
-    cout << "woops: rgb interpolation not yet functional" << endl;
+  if (_rgb_interpolation){
+    //cout << "woops: rgb interpolation not yet functional" << endl;
+    if (norm_value == 1.0) out = _ramp[(unsigned int)(norm_value*(_num_values-1))];
+    else{
+      unsigned int ind1, ind2;
+      float interpval = norm_value*(_num_values);
+      rgb r1, r2;
+      ind1 = (unsigned int)(norm_value*(_num_values));
+      ind2 = ind1+1;
+      r1 = _ramp[ind1];
+      r2 = _ramp[ind2];
+      out.R = r1.R*(1-interpval) + r2.R*(interpval);
+      out.G = r1.G*(1-interpval) + r2.G*(interpval);
+      out.B = r1.B*(1-interpval) + r2.B*(interpval);
+
+    } 
   }
   else{
-    if (norm_value == 1.0) out = ramp[(unsigned int)(norm_value*(num_values-1))];
-    else out = ramp[(unsigned int)(norm_value*(num_values))];
+    if (norm_value == 1.0) out = _ramp[(unsigned int)(norm_value*(_num_values-1))];
+    else out = _ramp[(unsigned int)(norm_value*(_num_values))];
   }
   return out;
 }
 
 void ColorRamp::reset_ramp_array(){
-  if (ramp != NULL) delete[] ramp;
+  if (_ramp != NULL) delete[] _ramp;
 
   unsigned int * rgbvals;
-  num_values = 9;
-  rgb_max = 255;
+  _num_values = 9;
+  _rgb_max = 255;
 
-  switch (current_ramp){
+  switch (_current_ramp){
     case CRamp::MULTI_HUE_RED_1:
       rgbvals = multi_hue_red_1;
       break;
@@ -256,11 +270,11 @@ void ColorRamp::reset_ramp_array(){
       break;
   }
 
-  ramp = new rgb[num_values];
-  for (unsigned int i=0; i<num_values; i++){
-    ramp[i].R = float(rgbvals[i*3])/float(rgb_max);
-    ramp[i].G = float(rgbvals[i*3+1])/float(rgb_max);
-    ramp[i].B = float(rgbvals[i*3+2])/float(rgb_max);
+  _ramp = new rgb[_num_values];
+  for (unsigned int i=0; i<_num_values; i++){
+    _ramp[i].R = float(rgbvals[i*3])/float(_rgb_max);
+    _ramp[i].G = float(rgbvals[i*3+1])/float(_rgb_max);
+    _ramp[i].B = float(rgbvals[i*3+2])/float(_rgb_max);
   }
 
   return;

@@ -22,18 +22,18 @@ public:
   //RegularMesh(const RegularMesh & rmesh);
   //~RegularMesh();
 
-  // specialty stuff for regular grids
+  // inspectors
   MeshNode & regular_node(unsigned int i, unsigned int j=0, unsigned int k=0);
   unsigned int reg_num_nodes_x() const {return _num_nodes_x;};
   unsigned int reg_num_nodes_y() const {return _num_nodes_y;};
   unsigned int reg_num_nodes_z() const {return _num_nodes_z;};
   //unsigned int & reg_nodes_boundary(BoundaryLocation loc);
-  std::vector<unsigned int> reg_left_inds() const;
-  std::vector<unsigned int> reg_right_inds() const;
-  std::vector<unsigned int> reg_top_inds() const;
-  std::vector<unsigned int> reg_bottom_inds() const;
-  std::vector<unsigned int> reg_front_inds() const;
-  std::vector<unsigned int> reg_back_inds() const;
+  std::vector<unsigned int> left_inds() const;
+  std::vector<unsigned int> right_inds() const;
+  std::vector<unsigned int> top_inds() const;
+  std::vector<unsigned int> bottom_inds() const;
+  std::vector<unsigned int> front_inds() const;
+  std::vector<unsigned int> back_inds() const;
   unsigned int reg_inds_to_glob_ind(unsigned int i, unsigned int j=0, unsigned int k=0) const;
   unsigned int nearest_node(double x_loc, double y_loc=0.0, double z_loc=0.0) const;
 

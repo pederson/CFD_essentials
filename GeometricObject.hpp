@@ -16,11 +16,7 @@
 
 #include <sys/mman.h>
 
-/*
-enum class Material : char{
-	Air, Metal, End_of_List
-};
-*/
+
 
 /* Make this so that I can sequentially add items on top of eachother 
 */
@@ -37,21 +33,23 @@ public:
 	geometric_object_2d();
 	//~geometric_object_2d();
 
+	// inspectors
 	virtual void print_summary() const;
-
-	std::string get_object_name() const {return object_name;};
+	std::string get_object_name() const {return _object_name;};
 	std::vector<double> get_phys_properties() const {return phys_properties;};
-	vertex_2d get_center() const {return center;};
+	vertex_2d get_center() const {return _center;};
 	std::map<std::string, double> get_parameters() const {return parameters;};
 	std::vector<vertex_2d> get_vertices() const {return vertices;};
+
+	// mutators
 	//void translate(float delta_x, float delta_y);
 	//void set_phys_property(std::string property_name, double value);
 
 protected:
 
 	// common data for all derived classes
-	std::string object_name;
-	vertex_2d center;
+	std::string _object_name;
+	vertex_2d _center;
 	std::vector<double> phys_properties;
 
 	// container for derived class specific data

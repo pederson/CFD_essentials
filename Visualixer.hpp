@@ -50,7 +50,9 @@ public:
 	virtual std::string get_window_name() {return window_name;};
 	virtual void set_window_name(std::string w_name);
 
-	virtual void set_color_ramp(CRamp ramp_name);
+	void set_color_ramp(CRamp ramp_name);
+	void set_color_interpolation(bool interp) {color_ramp.set_interpolation(interp);};
+
 
 	//template <class T> void set_colorby(const T * color_by);
 	template <class T>

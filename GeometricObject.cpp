@@ -4,20 +4,20 @@
 using namespace std;
 
 geometric_object_2d::geometric_object_2d(){
-	object_name = "GeometricObject2D";
+	_object_name = "GeometricObject2D";
 }
 
 void geometric_object_2d::print_summary() const{
 	//cout << "printing summary" << flush;
-	cout << "\tShape: " << object_name << "   Center: (" << center.x << ", " << center.y << ")" ;
+	cout << "\tShape: " << _object_name << "   Center: (" << _center.x << ", " << _center.y << ")" ;
 	cout << " base print summary" << endl;
 	for (auto i=0; i<parameters.size(); i++) cout << "   " << parameter_names.at(i) << ": " << parameters.at(parameter_names.at(i));
 	cout << endl;
 }
 
 gaussian_2d::gaussian_2d(double sigma_x, double sigma_y, double amplitude, double min_val, vertex_2d center_){
-	object_name = "Gaussian_2D";
-	center = center_;
+	_object_name = "Gaussian_2D";
+	_center = center_;
 	//phys_properties = properties;
 
 	_sigma_x = sigma_x;
@@ -27,14 +27,14 @@ gaussian_2d::gaussian_2d(double sigma_x, double sigma_y, double amplitude, doubl
 }
 
 void gaussian_2d::print_summary() const{
-	cout << "\tShape: " << object_name << " sigma_x: " << _sigma_x << " sigma_y: " << _sigma_y << " amplitude: " << _amplitude << " center: " << center.x << ", " << center.y << endl;
+	cout << "\tShape: " << _object_name << " sigma_x: " << _sigma_x << " sigma_y: " << _sigma_y << " amplitude: " << _amplitude << " center: " << _center.x << ", " << _center.y << endl;
 
 }
 
 rectangle::rectangle(double width_, double height_, vertex_2d center_, std::vector<double> properties){
 	// common parameters
-	object_name = "Rectangle";
-	center = center_;
+	_object_name = "Rectangle";
+	_center = center_;
 	phys_properties = properties;
 
 	// rectangle specific parameters
@@ -49,15 +49,15 @@ rectangle::rectangle(double width_, double height_, vertex_2d center_, std::vect
 }
 
 void rectangle::print_summary() const{
-	cout << "\tShape: " << object_name << " width: " << width << " height: " << height << " center: " << center.x << ", " << center.y << endl;
+	cout << "\tShape: " << _object_name << " width: " << width << " height: " << height << " center: " << _center.x << ", " << _center.y << endl;
 }
 
 circle::circle(double radius_, vertex_2d center_, std::vector<double> properties){
 	radius = radius_;
 
 	// common parameters
-	object_name = "Circle";
-	center = center_;
+	_object_name = "Circle";
+	_center = center_;
 	phys_properties = properties;
 
 	// circle specific parameters
@@ -66,13 +66,13 @@ circle::circle(double radius_, vertex_2d center_, std::vector<double> properties
 }
 
 void circle::print_summary() const{
-	cout << "\tShape: " << object_name << " radius: " << radius << " center: " << center.x << ", " << center.y << endl;
+	cout << "\tShape: " << _object_name << " radius: " << radius << " center: " << _center.x << ", " << _center.y << endl;
 }
 
 ellipse::ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, std::vector<double> properties){
 	// common parameters
-	object_name = "Ellipse";
-	center = center_;
+	_object_name = "Ellipse";
+	_center = center_;
 	phys_properties = properties;
 
 	// ellipse specific parameters
@@ -88,12 +88,12 @@ ellipse::ellipse(double axis_major, double axis_minor, double rot_angle, vertex_
 }
 
 void ellipse::print_summary() const{
-	cout << "\tShape: " << object_name << " major axis: " << axis_maj << " minor axis: " << axis_min << " rotation angle: " << rotation_angle << " center: " << center.x << ", " << center.y << endl;
+	cout << "\tShape: " << _object_name << " major axis: " << axis_maj << " minor axis: " << axis_min << " rotation angle: " << rotation_angle << " center: " << _center.x << ", " << _center.y << endl;
 }
 
 triangle::triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, std::vector<double> properties){
 	// common parameters
-	object_name = "Triangle";
+	_object_name = "Triangle";
 	phys_properties = properties;
 
 	vertices.push_back(vert1);
@@ -104,35 +104,35 @@ triangle::triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, std::vecto
 	v2 = vert2;
 	v3 = vert3;
 
-	center.x = (vert1.x + vert2.x + vert3.x)/3.0;
-	center.y = (vert1.y + vert2.y + vert3.y)/3.0;
+	_center.x = (vert1.x + vert2.x + vert3.x)/3.0;
+	_center.y = (vert1.y + vert2.y + vert3.y)/3.0;
 }
 
 void triangle::print_summary() const{
-	cout << "\tShape: " << object_name << " vertex1: " << v1.x << ", " << v1.y << " vertex2: " << v2.x << ", " << v2.y << " vertex3: " << v3.x << ", " << v3.y << " center: " << center.x << ", " << center.y << endl;
+	cout << "\tShape: " << _object_name << " vertex1: " << v1.x << ", " << v1.y << " vertex2: " << v2.x << ", " << v2.y << " vertex3: " << v3.x << ", " << v3.y << " center: " << _center.x << ", " << _center.y << endl;
 }
 
 polygon::polygon(std::vector<vertex_2d> verts, std::vector<double> properties){
 	// common parameters
-	object_name = "Polygon";
+	_object_name = "Polygon";
 
 	// polygon specific parameters
 	vertices = verts;
 
-	center.x = 0.0;
-	center.y = 0.0;
+	_center.x = 0.0;
+	_center.y = 0.0;
 	for (auto i=0; i<vertices.size(); i++){
-		center.x += vertices.at(i).x;
-		center.y += vertices.at(i).y;
+		_center.x += vertices.at(i).x;
+		_center.y += vertices.at(i).y;
 	}
-	center.x /= vertices.size();
-	center.y /= vertices.size();
+	_center.x /= vertices.size();
+	_center.y /= vertices.size();
 
 	phys_properties = properties;
 }
 
 void polygon::print_summary() const{
-	cout << "\tShape: " << object_name << " # vertices: " << vertices.size() << endl;
+	cout << "\tShape: " << _object_name << " # vertices: " << vertices.size() << endl;
 }
 
 parametric_model_2d::parametric_model_2d(){
@@ -311,7 +311,7 @@ mesh_model * mesh_model::read_STL(string filename, unsigned int byte_offset){
   */
 
   if (munmap(stlmap, 84 + sizeof(stl_tri)*tricount) < 0){
-    cout << "ruh roh! problem unmapping LAS file" << endl;
+    cout << "ruh roh! problem unmapping STL file" << endl;
     throw -1;
   }
   close(fd);

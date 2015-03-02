@@ -28,15 +28,16 @@ public:
 
   void cycle_ramp();
   void set_ramp(CRamp ramp_name);
+  void set_interpolation(bool interp) {_rgb_interpolation = interp;};
   rgb get_ramp_color(float norm_value) const;
 
 private:
 
-  rgb * ramp;
-  CRamp current_ramp;
-  unsigned int rgb_max;
-  unsigned int num_values;
-  bool rgb_interpolation;
+  rgb * _ramp;
+  CRamp _current_ramp;
+  unsigned int _rgb_max;
+  unsigned int _num_values;
+  bool _rgb_interpolation;
 
   void reset_ramp_array();
 
@@ -45,16 +46,16 @@ private:
 class Color{
 public:
 
-  static rgb Red();
-  static rgb Blue();
-  static rgb Green();
-  static rgb Orange();
-  static rgb Yellow();
-  static rgb Violet();
-  static rgb Pink();
-  static rgb White();
-  static rgb Black();
-  static rgb Brown();
+  static rgb Red() {return {1.0, 0.0, 0.0};};
+  static rgb Blue() {return {0.0, 0.0, 1.0};};;
+  static rgb Green() {return {0.0, 1.0, 0.0};};;
+  static rgb Orange() {return {1.0, 128.0/255.0, 0.0};};;
+  static rgb Yellow() {return {1.0, 1.0, 0.0};};;
+  static rgb Violet() {return {127.0/255.0, 0.0, 1.0};};;
+  static rgb Pink() {return {1.0, 102.0/255.0, 1.0};};;
+  static rgb White() {return {1.0, 1.0, 1.0};};;
+  static rgb Black() {return {0.0, 0.0, 0.0};};;
+  static rgb Brown() {return {102.0/255.0, 51.0/255.0, 0.0};};;
 
 };
 

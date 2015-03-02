@@ -19,7 +19,9 @@ int main(int argc, char * argv[]){
 	paramodel.add_material("Vacuum", {1.0});
 	paramodel.add_material("Dielectric", {6.0});
 	circle c1 = circle(0.1, {0.5, 0.5}, paramodel.get_material("Dielectric"));
+	circle c2 = circle(0.06, {0.5, 0.5}, paramodel.get_material("Vacuum"));
 	paramodel.add_object(&c1);
+	paramodel.add_object(&c2);
 
 
 	// convert the model into a mesh
@@ -41,7 +43,7 @@ int main(int argc, char * argv[]){
 
 
 	// simple 1D simulation	
-	double num_iters = 500;	
+	double num_iters = 800;	
 
 	// set up the simulation data holder
 	SimulationData simdata;
@@ -71,7 +73,7 @@ int main(int argc, char * argv[]){
 	}
 
 	
-	double tcur, pulse, t0=10.0, spread = 12.0;
+	double tcur, pulse, t0=10.0, spread = 12.0, srcfreq=1.0e+9;
 	unsigned int cind, lind, rind, uind, dind ;
 	for (auto n=0; n<num_iters; n++){
 		tcur = dt;
@@ -99,9 +101,12 @@ int main(int argc, char * argv[]){
 
 
 		// impose a gaussian source (hard-coded)
-		pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);
+		//pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);
+		pulse = sin(2*VX_PI*srcfreq*n*dt); // oscillatory source
 		//E_z[paramesh.nodecount()/4] = pulse;
+		E_z[paramesh.nearest_node(0.25, 0.75)] = pulse;
 		E_z[paramesh.nearest_node(0.25, 0.5)] = pulse;
+		E_z[paramesh.nearest_node(0.25, 0.25)] = pulse;
 
 		
 		// update H field
@@ -134,6 +139,7 @@ int main(int argc, char * argv[]){
 	simulation_visualixer simvis;
 	simvis.bind_simulation(simdata);
 	simvis.set_colorby_field("E_z");
+	simvis.set_color_interpolation(false);
 	simvis.set_frequency_Hz(50);
 	simvis.run();
 	

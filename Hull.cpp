@@ -6,6 +6,7 @@ using namespace std;
 
 Point p0;
 
+/*
 Point::Point(){
 
 }
@@ -23,6 +24,7 @@ Point::Point(double _x, double _y, double _z){
   z = _z;
   ndims = 3;
 }
+*/
 
 // destructor
 Point::~Point(){
@@ -33,7 +35,7 @@ int Point::dist(Point p1, Point p2){
   return (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y) + (p1.z-p2.z)*(p1.z-p2.z);
 }
 
-void Point::print(){
+void Point::print_summary() const{
   cout << "x: " << x << ", y: " << y << ", z: " << z << endl;
   return;
 }
@@ -60,8 +62,8 @@ Hull::Hull(std::vector<Point> ordered_points){
   calc_extents();
 }
 
-Hull::Hull(double * x, double * y, unsigned int numpoints){
-
+Hull::Hull(const double * x, const double * y, unsigned int numpoints){
+  cout << "OH NOES THIS CTOR ISNT YET IMPLEMENTED" << endl;
 }
 
   // destructor
@@ -152,13 +154,13 @@ void Hull::construct_convex(vector<Point> allpts){
   // before p2 in sorted output if p2 has larger polar angle (in CCW
   // direction) than p1
   p0 = allpts[0];
-  //p0.print();
-  //for (int i=0; i<allpts.size(); i++) allpts[i].print();
+  //p0.print_summary();
+  //for (int i=0; i<allpts.size(); i++) allpts[i].print_summary();
   //cout << "about to enter qsort" << sizeof(Point) << endl;
   qsort(&allpts[1], allpts.size()-1, sizeof(Point), Hull::compare);
 
   //cout << "finished qsort" << endl;
-  //for (int i=0; i<allpts.size(); i++) allpts[i].print();
+  //for (int i=0; i<allpts.size(); i++) allpts[i].print_summary();
   //create an empty stack and push first three points to it
   stack<Point> S;
   S.push(allpts[0]);
@@ -179,7 +181,7 @@ void Hull::construct_convex(vector<Point> allpts){
       //cout << "size of S: " << S.size() << endl;
       //cout << "gonna pop from S" << endl;
       S.pop();
-      //S.top().print();
+      //S.top().print_summary();
       orient_val = orientation(next_to_top(S), S.top(), allpts[i]);
     } 
     //if (orient_val == 0) S.pop();
@@ -205,7 +207,7 @@ void Hull::construct_convex(vector<Point> allpts){
   return;
 }
 
-void Hull::construct_convex(double * x, double * y, unsigned int numpoints){
+void Hull::construct_convex(const double * x, const double * y, unsigned int numpoints){
   // declare vars
   vector<Point> setpts;
 
@@ -281,9 +283,9 @@ int Hull::orientation(Point p, Point q, Point r){
   double val = (q.y - p.y)*(r.x - q.x) - (q.x - p.x)*(r.y - q.y);
   
   /*
-  p.print();
-  q.print();
-  r.print();
+  p.print_summary();
+  q.print_summary();
+  r.print_summary();
   cout << "orientation succeeded... val is " << val << endl;
   */
   
@@ -380,7 +382,7 @@ int main(int argc, char * argv[]){
   cout << "hull contains (-1.0, 0.5)? " << (testhull->contains_point({-1.0, 0.5})? "yup!" : "no :X") << endl;
   cout << "hull contains (0, 0)? " << (testhull->contains_point({0.0, 0.0})? "yup!" : "no :X") << endl;
 
-  //for (unsigned int i=0; i<testhull->hull_points.size(); i++) testhull->hull_points[i].print();
+  //for (unsigned int i=0; i<testhull->hull_points.size(); i++) testhull->hull_points[i].print_summary();
 
   delete testhull;
 

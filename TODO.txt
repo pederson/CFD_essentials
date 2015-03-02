@@ -44,6 +44,8 @@ TODO:
 - Shading and Light source for mesh model viewer
 - Make the onPrepareData() call a base class function
 - Don't allow the viewing window to recenter itself for each timestep
+- add a colorby_alpha() function that allows you to set an array the dictates the alpha value for each point when colorby is being used. 
+- 
 
 
 - Doxygen comments for everything
