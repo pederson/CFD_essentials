@@ -194,8 +194,19 @@ void RegularMesh::create_regular_grid_internal(double res, unsigned int num_node
   return;
 }
 
-unsigned int RegularMesh::reg_inds_to_glob_ind(unsigned int i, unsigned int j, unsigned int k){
+unsigned int RegularMesh::reg_inds_to_glob_ind(unsigned int i, unsigned int j, unsigned int k) const {
   return k*(_num_nodes_x*_num_nodes_y) + j*(_num_nodes_x) + i;
+}
+
+unsigned int RegularMesh::nearest_node(double x_loc, double y_loc, double z_loc) const{
+
+  unsigned int xind, yind, zind;
+  xind = (unsigned int)(double(_num_nodes_x-1)*(x_loc-_xmin)/(_xmax-_xmin));
+  if (_num_nodes_y==1) yind = 0;
+  else yind = (unsigned int)(double(_num_nodes_y)*(y_loc-_ymin)/(_ymax-_ymin));
+  if (_num_nodes_z==1) zind = 0;
+  else zind = (unsigned int)(double(_num_nodes_z)*(z_loc-_zmin)/(_zmax-_zmin));
+  return reg_inds_to_glob_ind(xind, yind, zind);
 }
 
 /*

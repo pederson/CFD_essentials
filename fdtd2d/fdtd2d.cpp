@@ -2,6 +2,7 @@
 #include "../RegularMesh.hpp" 
 #include "../SimulationData.hpp"
 #include "../VisualixerSimulation.hpp"
+#include "../Converter.hpp"
 
 using namespace std;
 
@@ -12,16 +13,31 @@ int main(int argc, char * argv[]){
 	double dx = 0.005;
 	double dt = 0.5*dx/c0;
 
+	parametric_model_2d paramodel;
+	paramodel.set_model_name("DielecSphere");
+	paramodel.add_physical_property("eps_rel");
+	paramodel.add_material("Vacuum", {1.0});
+	paramodel.add_material("Dielectric", {6.0});
+	circle c1 = circle(0.1, {0.5, 0.5}, paramodel.get_material("Dielectric"));
+	paramodel.add_object(&c1);
+
+
 	// convert the model into a mesh
 	RegularMesh paramesh;
-	paramesh = RegularMesh::create_regular_grid_b(dx, 0.0, 1.0, 0.0, 1.0);
+	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, paramodel.get_material("Vacuum"));
 	paramesh.print_summary();
+
+	// convert the model into a mesh
+	//RegularMesh paramesh;
+	//paramesh = RegularMesh::create_regular_grid_b(dx, 0.0, 1.0, 0.0, 1.0);
+	//paramesh.print_summary();
 
 	// view the mesh
 	mesh_visualixer paravis;
 	paravis.add_mesh(&paramesh);
 	paravis.set_color_ramp(CRamp::DIVERGENT_9);
-	//paravis->run();
+	paravis.set_colorby(&paramesh.data("eps_rel"));
+	paravis.run();
 
 
 	// simple 1D simulation	
@@ -43,14 +59,15 @@ int main(int argc, char * argv[]){
 	double * H_x = new double[paramesh.nodecount()];
 	double * gaz = new double[paramesh.nodecount()];
 	double * gbz = new double[paramesh.nodecount()];
+	const double * epsilon_rel = &paramesh.data("eps_rel");
 	for (auto i=0; i<paramesh.nodecount(); i++){
 		D_z[i] = 0.0;
 		I_z[i] = 0.0;
 		H_x[i] = 0.0;
 		H_y[i] = 0.0;
 		E_z[i] = 0.0;
-		gaz[i] = 1.0;		// gax = 1/(epsilon+(sigma*dt/eps0));
-		gbz[i] = 0.0;		// gbx = sigma*dt/eps0;
+		gaz[i] = 1.0/epsilon_rel[i];		// gaz = 1/(epsilon+(sigma*dt/eps0));
+		gbz[i] = 0.0;		// gbz = sigma*dt/eps0;
 	}
 
 	
@@ -83,7 +100,8 @@ int main(int argc, char * argv[]){
 
 		// impose a gaussian source (hard-coded)
 		pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);
-		E_z[paramesh.nodecount()/2] = pulse;
+		//E_z[paramesh.nodecount()/4] = pulse;
+		E_z[paramesh.nearest_node(0.25, 0.5)] = pulse;
 
 		
 		// update H field
@@ -110,7 +128,7 @@ int main(int argc, char * argv[]){
 	}
 	//*/
 
-	//simdata.write_HDF5("simulation_data.h5");
+	//simdata.write_HDF5("free_space_gaussian.h5");
 
 	// visualize the simulation
 	simulation_visualixer simvis;

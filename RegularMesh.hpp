@@ -28,14 +28,14 @@ public:
   unsigned int reg_num_nodes_y() const {return _num_nodes_y;};
   unsigned int reg_num_nodes_z() const {return _num_nodes_z;};
   //unsigned int & reg_nodes_boundary(BoundaryLocation loc);
-  std::vector<unsigned int> reg_left_inds();
-  std::vector<unsigned int> reg_right_inds();
-  std::vector<unsigned int> reg_top_inds();
-  std::vector<unsigned int> reg_bottom_inds();
-  std::vector<unsigned int> reg_front_inds();
-  std::vector<unsigned int> reg_back_inds();
-  unsigned int reg_inds_to_glob_ind(unsigned int i, unsigned int j=0, unsigned int k=0);
-
+  std::vector<unsigned int> reg_left_inds() const;
+  std::vector<unsigned int> reg_right_inds() const;
+  std::vector<unsigned int> reg_top_inds() const;
+  std::vector<unsigned int> reg_bottom_inds() const;
+  std::vector<unsigned int> reg_front_inds() const;
+  std::vector<unsigned int> reg_back_inds() const;
+  unsigned int reg_inds_to_glob_ind(unsigned int i, unsigned int j=0, unsigned int k=0) const;
+  unsigned int nearest_node(double x_loc, double y_loc=0.0, double z_loc=0.0) const;
 
   // grid generation and refinement
   static RegularMesh create_regular_grid_n(double res, unsigned int num_nodes_x, unsigned int num_nodes_y = 1, 

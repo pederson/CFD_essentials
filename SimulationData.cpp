@@ -180,10 +180,14 @@ void SimulationData::write_HDF5(std::string outname) const{
 		H5::DataSpace fieldspace(2, fielddim);
 		H5::DataSet field_set;
 		
-		double fieldbuf[nnodes][ntime];
+		// double fieldbuf[nnodes][ntime];
+		double ** fieldbuf = new double*[nnodes];
+		for (auto i=0; i<nnodes; i++) fieldbuf[i] = new double[ntime];
+
 		string cfieldname;
 		for (auto i=0; i<_fieldnames.size(); i++){
 			cfieldname = _fieldnames.at(i);
+			//cout << "writing field: " << cfieldname << endl;
 
 			field_set = fields_group.createDataSet(_fieldnames.at(i), H5::PredType::NATIVE_DOUBLE, fieldspace);
 			
@@ -196,6 +200,8 @@ void SimulationData::write_HDF5(std::string outname) const{
 			field_set.write(fieldbuf, H5::PredType::NATIVE_DOUBLE);
 			field_set.close();
 		}
+		for (auto i=0; i<nnodes; i++) delete[] fieldbuf[i];
+		delete[] fieldbuf;
 
 
 	// ******* create a group for the Time values *******
