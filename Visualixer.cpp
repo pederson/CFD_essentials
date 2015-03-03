@@ -23,6 +23,7 @@ visualixer::visualixer(){
 	window_name = "Visualixer";
 	rotation_lock = false;
 	colorby = NULL;
+	_color_alpha = nullptr;
 	vertices = NULL;
 	elements = NULL;
 
@@ -546,35 +547,35 @@ void visualixer::onShaders(){
 
 bool visualixer::MainLoop(){
 
-  while(!glfwWindowShouldClose(window_ptr)){
+	while(!glfwWindowShouldClose(window_ptr)){
 
-    if (glfwGetKey(window_ptr, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window_ptr, GL_TRUE);
+	    if (glfwGetKey(window_ptr, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window_ptr, GL_TRUE);
 
-    glfwSwapBuffers(window_ptr);
-    glfwPollEvents();
+	    glfwSwapBuffers(window_ptr);
+	    glfwPollEvents();
 
-    // Clear the screen to black
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+	    // Clear the screen to black
+	    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	    glClear(GL_COLOR_BUFFER_BIT);
 
-    glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
+	    glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+	    glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
+	    glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
-    // Draw a triangle from the 3 vertices
-    glDrawElements(GL_TRIANGLES, num_per_element*num_elements, GL_UNSIGNED_INT, 0);
-    //cout << "looping \r" << flush;
-	}
+	    // Draw a triangle from the 3 vertices
+	    glDrawElements(GL_TRIANGLES, num_per_element*num_elements, GL_UNSIGNED_INT, 0);
+	    //cout << "looping \r" << flush;
+		}
 
 	return 0;
 }
 
 void visualixer::onExit(){
 	glDeleteProgram(shaderProgram);
-  glDeleteShader(fragmentShader);
-  glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+	glDeleteShader(vertexShader);
 
-  if (num_elements > 0) glDeleteBuffers(1, &ebo);
+	if (num_elements > 0) glDeleteBuffers(1, &ebo);
 	glDeleteBuffers(1, &vbo);
 
 	glDeleteVertexArrays(1, &vao);

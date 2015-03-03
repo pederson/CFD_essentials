@@ -56,6 +56,10 @@ void simulation_visualixer::set_colorby_field(std::string fieldname){
 	_colorby_field = fieldname;
 }
 
+void simulation_visualixer::set_alpha_field(std::string fieldname){
+	_alpha_field = fieldname;
+}
+
 void simulation_visualixer::increment_time_step(){
 	_cur_time_step = (_cur_time_step+1)%_simdata->num_time_steps();
 	set_colorby(&(_simdata->get_data_at_index(_cur_time_step, _colorby_field)), false);
@@ -161,6 +165,9 @@ void simulation_visualixer::onPrepareData(){
 		//cout << "set min and max colorby" << endl;
 		//cout << "max: " << colorby_max << "\t min: " << colorby_min << endl;
 	} 
+	if (_alpha_field.compare("") != 0){
+		set_color_alpha(&(_simdata->get_data_at_index(0, _alpha_field)), true);
+	}
 
 }
 

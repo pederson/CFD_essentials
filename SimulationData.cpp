@@ -125,7 +125,7 @@ void SimulationData::add_data_at_index(unsigned int t_index, std::string fieldna
 }
 
 void SimulationData::write_HDF5(std::string outname) const{
-	#ifdef _HDF5_H
+	//#ifdef _HDF5_H
 	// create an empty HDF5 file
 	H5::H5File outfile(outname, H5F_ACC_TRUNC);
 
@@ -221,9 +221,9 @@ void SimulationData::write_HDF5(std::string outname) const{
 
 	// close the file
 	outfile.close();
-	#else 
-		cout << "HDF5 library is not included...doing nothing" << endl;
-	#endif
+	//#else 
+	//	cout << "HDF5 library is not included...doing nothing" << endl;
+	//#endif
 
 }
 

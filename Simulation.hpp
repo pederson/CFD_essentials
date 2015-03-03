@@ -22,34 +22,32 @@ public:
 	void print_summary() const;
 
 	// mutators
-	bind_mesh(const Mesh & mesh);
-	add_equation(const Equation & eq) {_equations.push_back(eq);};
-	add_boundary_condition(const BoundaryCondition & BC) {_boundary_conditions.push_back(BC);};
-	add_initial_condition(const InitialCondition & IC) {_initial_conditions.push_back(IC);};
+	void bind_mesh(const Mesh & mesh) {_mesh = &mesh;};
+	void add_equation(const Equation & eq) {_equations.push_back(eq);};
+	void add_boundary_condition(const BoundaryCondition & BC) {_boundary_conditions.push_back(BC);};
+	void add_initial_condition(const InitialCondition & IC) {_initial_conditions.push_back(IC);};
+	void set_time_span(double tstart, double dt, double tstop) {_tstart=tstart; _tstop=tstop; _dt=dt;};
 	//set_solution_method
 
-	run();
+	virtual void run();
 
 private:
+
+	virtual void preRunCheck();
+
 	SimType _sim_type;			// this defines the type of discretization
 	const Mesh * _mesh;		// this links to the mesh
 	SimulationData _simdata;	// this holds the data that comes from the mesh
 	std::vector<BoundaryCondition> _boundary_conditions;	// this defines the boudnary conditions
 	std::vector<InitialCondition> _initial_conditions;
 	std::vector<Equation> _equations; 		// this defines the equations involved
-	double _tstart, _tstop;		// this defines the start and stop time
+	double _tstart, _dt, _tstop;		// this defines the start and stop time
 
 	// define linear algebra solution method
-	LinVector _vec;
+	//LinVector _vec;
 
 
 };
 
-class FDTDSimulation : public Simulation{
-public:
 
-private:
-
-};
-
-#endif _SIMULATION_H
+#endif

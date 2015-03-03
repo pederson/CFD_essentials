@@ -23,7 +23,6 @@ int main(int argc, char * argv[]){
 	paramodel.add_object(&c1);
 	paramodel.add_object(&c2);
 
-
 	// convert the model into a mesh
 	RegularMesh paramesh;
 	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, paramodel.get_material("Vacuum"));
@@ -104,9 +103,15 @@ int main(int argc, char * argv[]){
 		//pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);
 		pulse = sin(2*VX_PI*srcfreq*n*dt); // oscillatory source
 		//E_z[paramesh.nodecount()/4] = pulse;
-		E_z[paramesh.nearest_node(0.25, 0.75)] = pulse;
-		E_z[paramesh.nearest_node(0.25, 0.5)] = pulse;
-		E_z[paramesh.nearest_node(0.25, 0.25)] = pulse;
+		E_z[paramesh.nearest_node(0.25, 0.9)] = pulse;
+		E_z[paramesh.nearest_node(0.25, 0.8)] = sin(2*VX_PI*srcfreq*n*dt + VX_PI*30/180); ;
+		E_z[paramesh.nearest_node(0.25, 0.7)] = sin(2*VX_PI*srcfreq*n*dt + VX_PI*60/180); ;
+		E_z[paramesh.nearest_node(0.25, 0.6)] = sin(2*VX_PI*srcfreq*n*dt + VX_PI*90/180); ;
+		E_z[paramesh.nearest_node(0.25, 0.5)] = sin(2*VX_PI*srcfreq*n*dt + VX_PI*120/180); ;
+		E_z[paramesh.nearest_node(0.25, 0.4)] = sin(2*VX_PI*srcfreq*n*dt + VX_PI*150/180); ;
+		E_z[paramesh.nearest_node(0.25, 0.3)] = sin(2*VX_PI*srcfreq*n*dt + VX_PI*180/180); ;
+		E_z[paramesh.nearest_node(0.25, 0.2)] = sin(2*VX_PI*srcfreq*n*dt + VX_PI*210/180); ;
+		E_z[paramesh.nearest_node(0.25, 0.1)] = sin(2*VX_PI*srcfreq*n*dt + VX_PI*240/180); ;
 
 		
 		// update H field
@@ -135,18 +140,25 @@ int main(int argc, char * argv[]){
 
 	//simdata.write_HDF5("free_space_gaussian.h5");
 
+	
 	// visualize the simulation
 	simulation_visualixer simvis;
 	simvis.bind_simulation(simdata);
 	simvis.set_colorby_field("E_z");
 	simvis.set_color_interpolation(false);
-	simvis.set_frequency_Hz(50);
+	simvis.set_frequency_Hz(30);
 	simvis.run();
+	//*/
 	
 	
 
-
+	delete[] D_z;
+	delete[] I_z;
 	delete[] E_z;
 	delete[] H_y;
+	delete[] H_x;
+	delete[] gaz;
+	delete[] gbz;
+
 	return 0;
 }

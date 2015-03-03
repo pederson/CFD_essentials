@@ -82,11 +82,44 @@ public:
 		//std::cout << "found the min and max" << std::endl;
 		
 		// subtract out the min value
-		for (auto i=0; i<num_vertices; i++) colorby[i] = color_by[i]-colorby_min;
+		//for (auto i=0; i<num_vertices; i++) colorby[i] = color_by[i]-colorby_min;
+		for (auto i=0; i<num_vertices; i++) colorby[i] -= colorby_min;
 
 		//std::cout << "subtracted out the min value" << std::endl;
 
 		return;
+	}
+
+	template <class T>
+	void set_color_alpha(T const * alpha, bool recalcminmax=true){
+		if (alpha == nullptr){
+			//std::cout << "SHIT THE ALPHA INPUT IS NULL" << std::endl;
+			return;
+		}
+		if (_color_alpha == NULL) _color_alpha = new double[num_vertices];
+		for (unsigned int i=0; i<num_vertices; i++) _color_alpha[i] = double(alpha[i]);
+
+	
+		if (recalcminmax){
+			//std::cout << "readjusted the alpha" << std::endl;
+			_alpha_max = alpha[0];
+			for (auto i=1; i<num_vertices; i++){
+				if (alpha[i] > _alpha_max) _alpha_max = alpha[i];
+			}
+			_alpha_min = alpha[0];
+			for (auto i=1; i<num_vertices; i++){
+				if (alpha[i] < _alpha_min) _alpha_min = alpha[i];
+			}
+		}
+
+		// normalize the values from 0.1 to 1.0
+		if (_alpha_max == _alpha_min){
+			for (auto i=0; i<num_vertices; i++) _color_alpha[i] = 1.0;
+		}
+		else {
+			for (auto i=0; i<num_vertices; i++) _color_alpha[i] = (_color_alpha[i] - _alpha_min)/(_alpha_max-_alpha_min)*0.9 + 0.1;
+		}
+
 	}
 
 	//virtual void set_custom_colors(rgb * colors);
@@ -105,7 +138,8 @@ protected:
 	GLuint * elements;
   	ColorRamp color_ramp;
   	double * colorby; // one per vertex
-  	double colorby_max, colorby_min;
+  	double * _color_alpha;
+  	double colorby_max, colorby_min, _alpha_max, _alpha_min;
 	float model_centroid[3]; // from [model_min, model_max]
 	float xmin, xmax, ymin, ymax, zmin, zmax;
 	unsigned int num_vertices, num_per_vertex, num_vertex_points;

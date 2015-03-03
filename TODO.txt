@@ -19,7 +19,7 @@ TODO:
 
 - Interface for libMesh, Eigen, Boost, CGAL, and any other third party libraries that are useful
 
-- make separate object files that can be used elsewhere, like Point. Or use CGAL.
+- make separate object files that can be used elsewhere, like Point3 and Vector3. Or use CGAL.
 
 - Something is wrong with the Hull->contains_point() code... is this a double to float conversion issue?
 
@@ -32,15 +32,13 @@ TODO:
 
 - create an actual converter class (or decide if it is really worth it)
 
-- Derive the RegularMesh from Static_Mesh instead of having a bunch of functions related to regular meshes
-
 - use max_element and min_element as a means to get the min/max
 
 	***Visualixer todo:
 - add a labelled colorbar to the visualixer
 - Panning scale needs refinement
 - Gimbal lock is still happening during manual rotation
-- adding a colorby before adding an object (mesh, pointcloud) doesn't work b/c it gets overwritten
+- adding a colorby before adding an object (mesh, pointcloud) doesn't work b/c it gets overwritten... I think this is fixed
 - Shading and Light source for mesh model viewer
 - Make the onPrepareData() call a base class function
 - Don't allow the viewing window to recenter itself for each timestep
@@ -67,3 +65,4 @@ X - Create separate Static Mesh and Mutable Mesh classes
 X - separate out the visualixer classes into separate files
 X - SimulationData class
 X - Linear Algebra wrapper
+X - RegularMesh derived from Mesh
