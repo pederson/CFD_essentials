@@ -1,5 +1,9 @@
 TODO:
 
+- Problem writing holey_waveguide_defect geometry simulation to HDF5... not sure why
+
+- Geometric Objects need to have an options to do a repeating pattern (either rectangular or circular)
+
 - Explore using Boost library (what can it do for me?)
 
 - Make Simulation class that handles the setup and execution of a simulation

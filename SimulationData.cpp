@@ -168,10 +168,20 @@ void SimulationData::write_HDF5(std::string outname) const{
 		// insert nodedata
 
 		// insert elementdata
-		
+
+		// mesh cleanup
+		nodespace.close();
+		elemspace.close();
+		elementdata_group.close();
+		nodedata_group.close();
+		elements_group.close();
+		nodes_group.close();
+		meshgroup.close();
+	//cout << "WROTE MESH" << endl;
 
 	// ******* create a group for the Fields *******
 	H5::Group fields_group(outfile.createGroup("/Fields"));
+	//cout << "CREATED FIELDS" << endl;
 
 		hsize_t ntime = num_time_steps();
 		hsize_t fielddim[2];
@@ -180,6 +190,8 @@ void SimulationData::write_HDF5(std::string outname) const{
 
 		H5::DataSpace fieldspace(2, fielddim);
 		H5::DataSet field_set;
+
+		//cout << "CREATED FIELD DATASETS" << endl;
 		
 		// double fieldbuf[nnodes][ntime];
 		double ** fieldbuf = new double*[nnodes];
@@ -191,19 +203,25 @@ void SimulationData::write_HDF5(std::string outname) const{
 			//cout << "writing field: " << cfieldname << endl;
 
 			field_set = fields_group.createDataSet(_fieldnames.at(i), H5::PredType::NATIVE_DOUBLE, fieldspace);
-			
+			//cout << "created dataset" << endl;
 			for (auto j=0; j<ntime; j++){
 				for (auto k=0; k<nnodes; k++){
 					fieldbuf[k][j] = _datasnapshots.at(j)._datafields.at(cfieldname).at(k);
 				}
 			}
-
+			//cout << "wrote to buffer: " << fieldbuf[0][0] << endl;
 			field_set.write(fieldbuf, H5::PredType::NATIVE_DOUBLE);
+			//cout << "wrote to file" << endl;
 			field_set.close();
 		}
 		for (auto i=0; i<nnodes; i++) delete[] fieldbuf[i];
 		delete[] fieldbuf;
 
+		// fields cleanup
+		fieldspace.close();
+		fields_group.close();
+
+	//cout << "WROTE FIELDS" << endl;
 
 	// ******* create a group for the Time values *******
 	H5::Group time_group(outfile.createGroup("/Time"));
@@ -217,7 +235,11 @@ void SimulationData::write_HDF5(std::string outname) const{
 		time_set.write(timebuf, H5::PredType::NATIVE_DOUBLE);
 		time_set.close();
 
+		// time cleanup
+		timespace.close();
+		time_group.close();
 
+	//cout << "WROTE TIME " << endl;
 
 	// close the file
 	outfile.close();
