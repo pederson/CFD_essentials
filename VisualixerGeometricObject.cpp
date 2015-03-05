@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#define _TEST_
+//#define _TEST_
 
 vector<visualixer*> _vGeometricObjectInstances;
 
@@ -16,6 +16,7 @@ mesh_model_visualixer::mesh_model_visualixer(){
 	rotation_lock = false;
 	//color_ramp = NULL;
 	_colorby = nullptr;
+	_color_alpha = nullptr;
 	vertices = NULL;
 	elements = NULL;
 	normals = NULL;
@@ -46,67 +47,15 @@ mesh_model_visualixer::~mesh_model_visualixer(){
 }
 
 
-void mesh_model_visualixer::add_model(mesh_model * model){
-  // declare vars
+void mesh_model_visualixer::add_model(const mesh_model & model){
+	// bind the model
+	_model = &model;
 
-  // assign basic info
-  num_vertices = model->vertex_count;
+	// assign basic info
+	num_vertices = _model->vertex_count;
 	num_per_vertex = 7;
 	num_vertex_points = 3;
-	vertices = new GLfloat[num_vertices*num_per_vertex];
-  for (unsigned int i=0; i<num_vertices; i++){
-      vertices[i*num_per_vertex] = model->vertices[i*3];
-      vertices[i*num_per_vertex+1] = model->vertices[i*3+1];
-      vertices[i*num_per_vertex+2]= model->vertices[i*3+2];
-      if (i%2==0){
-          vertices[i*num_per_vertex + 3] = 0.81f;
-          vertices[i*num_per_vertex + 4]  = 0.81f;
-          vertices[i*num_per_vertex + 5] = 0.81f;
-        }
-      else {
-          vertices[i*num_per_vertex + 3] = 0.41f;
-          vertices[i*num_per_vertex + 4]  = 0.41f;
-          vertices[i*num_per_vertex + 5] = 0.41f;
-        }
-    	vertices[i*num_per_vertex + 6] = 1.0f;
-  }
-
-  num_elements = num_vertices/3;
-	num_per_element = 3;
-  elements = new GLuint[num_elements*num_per_element];
-	// set the triangle elements
-	for (unsigned int i=0; i<num_elements; i++){
-		elements[i*num_per_element] = i*num_per_element;
-    elements[i*num_per_element+1] = i*num_per_element+1;
-    elements[i*num_per_element+2] = i*num_per_element+2;
-	}
-
-
-  model_centroid[0] = 0.0;
-	model_centroid[1] = 0.0;
-	model_centroid[2] = 0.0;
-	xmax = vertices[0];
-	ymax = vertices[1];
-	zmax = vertices[2];
-	xmin = vertices[0];
-	ymin = vertices[1];
-	zmin = vertices[2];
-  for (unsigned int i=0; i<num_vertices; i++){
-    if (vertices[i*num_per_vertex] > xmax) xmax = vertices[i*num_per_vertex];
-    if (vertices[i*num_per_vertex] < xmin) xmin = vertices[i*num_per_vertex];
-    if (vertices[i*num_per_vertex+1] > ymax) ymax = vertices[i*num_per_vertex+1];
-    if (vertices[i*num_per_vertex+1] < ymin) ymin = vertices[i*num_per_vertex+1];
-    if (vertices[i*num_per_vertex+2] > zmax) zmax = vertices[i*num_per_vertex+2];
-    if (vertices[i*num_per_vertex+2] < zmin) zmin = vertices[i*num_per_vertex+2];
-
-    model_centroid[0] += vertices[i*num_per_vertex];
-    model_centroid[1] += vertices[i*num_per_vertex+1];
-    model_centroid[2] += vertices[i*num_per_vertex+2];
-  }
-  model_centroid[0] /= num_vertices;
-  model_centroid[1] /= num_vertices;
-  model_centroid[2] /= num_vertices;
-
+	
   return;
 }
 
@@ -165,6 +114,7 @@ void mesh_model_visualixer::set_test_case(){
 	return;
 }
 
+/*
 const GLchar * mesh_model_visualixer::VertexShaderSource(){
 	// vertex shader sources
 	const GLchar* vertexSource =
@@ -195,6 +145,65 @@ const GLchar * mesh_model_visualixer::FragmentShaderSource(){
     "   outColor = vec4(Color, 1.0);"
     "}";
   return fragmentSource;
+}
+*/
+
+void mesh_model_visualixer::onPrepareData(){
+
+	vertices = new GLfloat[num_vertices*num_per_vertex];
+	for (unsigned int i=0; i<num_vertices; i++){
+		vertices[i*num_per_vertex] = _model->vertices[i*3];
+		vertices[i*num_per_vertex+1] = _model->vertices[i*3+1];
+		vertices[i*num_per_vertex+2]= _model->vertices[i*3+2];
+		if (i%2==0){
+			vertices[i*num_per_vertex + 3] = 0.81f;
+			vertices[i*num_per_vertex + 4]  = 0.81f;
+			vertices[i*num_per_vertex + 5] = 0.81f;
+		}
+		else {
+			vertices[i*num_per_vertex + 3] = 0.41f;
+			vertices[i*num_per_vertex + 4]  = 0.41f;
+			vertices[i*num_per_vertex + 5] = 0.41f;
+		}
+		vertices[i*num_per_vertex + 6] = 1.0f;
+	}
+
+	num_elements = num_vertices/3;
+	num_per_element = 3;
+	elements = new GLuint[num_elements*num_per_element];
+	// set the triangle elements
+	for (unsigned int i=0; i<num_elements; i++){
+		elements[i*num_per_element] = i*num_per_element;
+		elements[i*num_per_element+1] = i*num_per_element+1;
+		elements[i*num_per_element+2] = i*num_per_element+2;
+	}
+
+
+	model_centroid[0] = 0.0;
+	model_centroid[1] = 0.0;
+	model_centroid[2] = 0.0;
+	xmax = vertices[0];
+	ymax = vertices[1];
+	zmax = vertices[2];
+	xmin = vertices[0];
+	ymin = vertices[1];
+	zmin = vertices[2];
+	for (unsigned int i=0; i<num_vertices; i++){
+		if (vertices[i*num_per_vertex] > xmax) xmax = vertices[i*num_per_vertex];
+		if (vertices[i*num_per_vertex] < xmin) xmin = vertices[i*num_per_vertex];
+		if (vertices[i*num_per_vertex+1] > ymax) ymax = vertices[i*num_per_vertex+1];
+		if (vertices[i*num_per_vertex+1] < ymin) ymin = vertices[i*num_per_vertex+1];
+		if (vertices[i*num_per_vertex+2] > zmax) zmax = vertices[i*num_per_vertex+2];
+		if (vertices[i*num_per_vertex+2] < zmin) zmin = vertices[i*num_per_vertex+2];
+
+		model_centroid[0] += vertices[i*num_per_vertex];
+		model_centroid[1] += vertices[i*num_per_vertex+1];
+		model_centroid[2] += vertices[i*num_per_vertex+2];
+	}
+	model_centroid[0] /= num_vertices;
+	model_centroid[1] /= num_vertices;
+	model_centroid[2] /= num_vertices;
+
 }
 
 void mesh_model_visualixer::onRender(){
@@ -393,7 +402,7 @@ int main(int argc, char * argv[]){
 	mesh_model_visualixer mymmodvis;
 	//mymmodvis->set_test_case();
 	mesh_model * mesh_test_model = mesh_model::read_STL("../testfiles/brain-gear.stl");
-	mymmodvis.add_model(mesh_test_model);
+	mymmodvis.add_model(*mesh_test_model);
 	mymmodvis.run();
 
 	return 0;

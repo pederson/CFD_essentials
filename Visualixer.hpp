@@ -113,7 +113,7 @@ public:
 				for (auto i=0; i<num_vertices; i++) _color_alpha[i] = 1.0;
 			}
 			else {
-				for (auto i=0; i<num_vertices; i++) _color_alpha[i] = (_color_alpha[i] - _alpha_min)/(_alpha_max-_alpha_min)*0.9 + 0.1;
+				for (auto i=0; i<num_vertices; i++) _color_alpha[i] = (_color_alpha[i] - _alpha_min)/(_alpha_max-_alpha_min)*0.7 + 0.3;
 			}
 		}
 

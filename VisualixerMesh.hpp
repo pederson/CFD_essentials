@@ -17,14 +17,16 @@ public:
 	mesh_visualixer();
 	~mesh_visualixer();
 
-	void add_mesh(Mesh * mesh);
+	void bind_mesh(const Mesh & mesh);
 	void set_test_case();
 
 protected:
 	void onRender();
-
+	void onPrepareData();
 	bool MainLoop();
 	void onExit();
+
+	const Mesh * _mesh;
 
 	GLuint * line_elements;
 	GLuint lebo;

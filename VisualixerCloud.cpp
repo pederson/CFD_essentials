@@ -16,6 +16,7 @@ cloud_visualixer::cloud_visualixer(){
 	window_name = "Cloud Visualixer";
 	rotation_lock = false;
 	_colorby = nullptr;
+	_color_alpha = nullptr;
 	vertices = NULL;
 	elements = NULL;
 
@@ -24,8 +25,8 @@ cloud_visualixer::cloud_visualixer(){
 	num_elements = 0;
 
 	model_centroid[0] = 0.0;
-  model_centroid[1] = 0.0;
-  model_centroid[2] = 0.0;
+	model_centroid[1] = 0.0;
+	model_centroid[2] = 0.0;
 }
 
 cloud_visualixer::~cloud_visualixer(){
@@ -40,6 +41,8 @@ cloud_visualixer::~cloud_visualixer(){
 	//if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
+	if (_color_alpha != nullptr) delete[] _color_alpha;
+	if (_colorby != nullptr) delete[] _colorby;
 }
 
 void cloud_visualixer::set_test_case(){
@@ -90,13 +93,20 @@ void cloud_visualixer::set_test_case(){
 }
 
 void cloud_visualixer::add_cloud(const PointCloud & cloud){
-	const double *x, *y, *z;
-	num_vertices = cloud.pointcount();
+	_cloud = &cloud;
+	num_vertices = _cloud->pointcount();
 	num_per_vertex = 7;
 	num_vertex_points = 3;
-	x = &cloud.x();
-	y = &cloud.y();
-	z = &cloud.z();
+	
+
+	return;
+}
+
+void cloud_visualixer::onPrepareData(){
+	const double *x, *y, *z;
+	x = &_cloud->x();
+	y = &_cloud->y();
+	z = &_cloud->z();
 	vertices = new GLfloat[num_vertices*num_per_vertex];
 	for (unsigned int i=0; i<num_vertices; i++){
 		vertices[i*num_per_vertex] = x[i];
@@ -113,8 +123,8 @@ void cloud_visualixer::add_cloud(const PointCloud & cloud){
 	}
 
 	
-  if (cloud.RGB_present()){
-  	const rgb48 * RGB = &cloud.RGB();
+  if (_cloud->RGB_present()){
+  	const rgb48 * RGB = &_cloud->RGB();
     for (unsigned int i=0; i<num_vertices; i){
       vertices[i*num_per_vertex + 3] = RGB[i].R/65,535;
       vertices[i*num_per_vertex + 4] = RGB[i].G/65,535;
@@ -133,27 +143,22 @@ void cloud_visualixer::add_cloud(const PointCloud & cloud){
     }
   }
 
-	model_centroid[0] = (cloud.xmax() + cloud.xmin())/2.0;
-	model_centroid[1] = (cloud.ymax() + cloud.ymin())/2.0;
-	model_centroid[2] = (cloud.zmax() + cloud.zmin())/2.0;
-	xmax = cloud.xmax();
-	ymax = cloud.ymax();
-	zmax = cloud.zmax();
-	xmin = cloud.xmin();
-	ymin = cloud.ymin();
-	zmin = cloud.zmin();
+	model_centroid[0] = (_cloud->xmax() + _cloud->xmin())/2.0;
+	model_centroid[1] = (_cloud->ymax() + _cloud->ymin())/2.0;
+	model_centroid[2] = (_cloud->zmax() + _cloud->zmin())/2.0;
+	xmax = _cloud->xmax();
+	ymax = _cloud->ymax();
+	zmax = _cloud->zmax();
+	xmin = _cloud->xmin();
+	ymin = _cloud->ymin();
+	zmin = _cloud->zmin();
 
 	// default color by Z
-	_colorby = new double[num_vertices];
-	for (auto i=0; i<num_vertices; i++){
-		_colorby[i] = z[i];
-	}
-	_colorby_max = zmax;
-	_colorby_min = zmin;
+	set_colorby(&_cloud->z());
 
 	// default alpha by intensity
+	if (_cloud->intensity_present()) set_color_alpha(&_cloud->intensity());
 
-	return;
 }
 
 bool cloud_visualixer::MainLoop(){
@@ -195,9 +200,9 @@ int main(int argc, char * argv[]){
 	//PointCloud cloud = PointCloud::read_LAS("../testfiles/xyzrgb_manuscript.las");
 	//PointCloud cloud = PointCloud::read_LAS("../testfiles/LAS12_Sample_withRGB_Quick_Terrain_Modeler.las");
 	mycvis.add_cloud(cloud);
-    mycvis.set_color_ramp(CRamp::DIVERGENT_1);
-    mycvis.set_colorby(&cloud.z());
-    if (cloud.intensity_present()) mycvis.set_color_alpha(&cloud.intensity());
+    //mycvis.set_color_ramp(CRamp::DIVERGENT_1);
+    //mycvis.set_colorby(&cloud.z());
+    //mycvis.set_color_alpha());
 	mycvis.run();
 
 	return 0;

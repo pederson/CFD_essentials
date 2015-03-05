@@ -25,7 +25,7 @@ int main(int argc, char * argv[]){
 	//*/
 
 	// ring model
-	
+	/*
 	parametric_model_2d paramodel;
 	paramodel.set_model_name("DielecSphere");
 	paramodel.add_physical_property("eps_rel");
@@ -39,7 +39,7 @@ int main(int argc, char * argv[]){
 	
 
 	// holey waveguide model
-	/*
+	
 	parametric_model_2d paramodel;
 	paramodel.set_model_name("DielecSphere");
 	paramodel.add_physical_property("eps_rel");
@@ -90,7 +90,7 @@ int main(int argc, char * argv[]){
 
 	// view the mesh
 	mesh_visualixer paravis;
-	paravis.add_mesh(&paramesh);
+	paravis.bind_mesh(paramesh);
 	paravis.set_color_ramp(CRamp::DIVERGENT_9);
 	paravis.set_colorby(&paramesh.data("eps_rel"));
 	paravis.run();

@@ -44,8 +44,6 @@ visualixer::~visualixer(){
 		}
 	}
 
-	//delete[] window_name;
-	//if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
 	if (_color_alpha != nullptr) delete[] _color_alpha;
@@ -61,50 +59,6 @@ void visualixer::set_color_ramp(CRamp ramp_name){
   color_ramp.set_ramp(ramp_name);
 }
 
-
-/*
-void visualixer::set_colorby(const bool * color_by){
-	if (colorby == NULL) colorby = new float[num_vertices];
-	for (unsigned int i=0; i<num_vertices; i++){
-		if (color_by[i]) colorby[i] = 1.0;
-		else colorby[i] = 0.0;
-	}
-
-	colorby_max = colorby[0]; colorby_min = colorby[0];
-	for (auto i=1; i<num_vertices; i++){
-		if (colorby[i] > colorby_max) colorby_max = colorby[i];
-		if (colorby[i] < colorby_min) colorby_min = colorby[i];
-	}
-
-	return;
-}
-
-void visualixer::set_colorby(const float * color_by){
-	if (colorby == NULL) colorby = new float[num_vertices];
-	for (unsigned int i=0; i<num_vertices; i++) colorby[i] = float(color_by[i]);
-
-	colorby_max = colorby[0]; colorby_min = colorby[0];
-	for (auto i=1; i<num_vertices; i++){
-		if (colorby[i] > colorby_max) colorby_max = colorby[i];
-		if (colorby[i] < colorby_min) colorby_min = colorby[i];
-	}
-
-	return;
-}
-
-void visualixer::set_colorby(const double * color_by){
-	if (colorby == NULL) colorby = new float[num_vertices];
-	for (unsigned int i=0; i<num_vertices; i++) colorby[i] = float(color_by[i]);
-
-	colorby_max = colorby[0]; colorby_min = colorby[0];
-	for (auto i=1; i<num_vertices; i++){
-		if (colorby[i] > colorby_max) colorby_max = colorby[i];
-		if (colorby[i] < colorby_min) colorby_min = colorby[i];
-	}
-
-	return;
-}
-*/
 
 
 

@@ -42,6 +42,8 @@ simulation_visualixer::~simulation_visualixer(){
 	//delete[] window_name;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
+	if (_color_alpha != nullptr) delete[] _color_alpha;
+	if (_colorby != nullptr) delete[] _colorby;
 
 }
 

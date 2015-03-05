@@ -19,7 +19,7 @@ public:
 	mesh_model_visualixer();
 	~mesh_model_visualixer();
 
-	void add_model(mesh_model * model);
+	void add_model(const mesh_model & model);
 	void set_test_case();
 
 protected:
@@ -27,9 +27,12 @@ protected:
 	GLfloat * normals;
 	GLuint normalbuffer, num_normals;
 
-	const GLchar * VertexShaderSource();
-	const GLchar * FragmentShaderSource();
+	const mesh_model * _model;
 
+	//const GLchar * VertexShaderSource();
+	//const GLchar * FragmentShaderSource();
+
+	void onPrepareData();
 	void onRender();
 	void onShaders();
 	bool MainLoop();

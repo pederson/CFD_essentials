@@ -3,7 +3,6 @@
 using namespace std;
 
 //#define _TEST_
-
 vector<visualixer*> _vMeshInstances;
 
 //*************************************** Mesh Visualixer Class *******************************************
@@ -15,6 +14,7 @@ mesh_visualixer::mesh_visualixer(){
 	window_name = "Mesh Visualixer";
 	rotation_lock = false;
 	_colorby = nullptr;
+	_color_alpha = nullptr;
 	vertices = NULL;
 	elements = NULL;
 
@@ -36,84 +36,29 @@ mesh_visualixer::~mesh_visualixer(){
 		}
 	}
 
-	//delete[] window_name;
-	//if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
-	//if (normals != NULL) delete[] normals;
+	if (_colorby != nullptr) delete[] _colorby;
+	if (_color_alpha != nullptr) delete[] _color_alpha;
+
 }
 
-void mesh_visualixer::add_mesh(Mesh * mesh){
-	MeshNode nd;
-	MeshElement elem;
+void mesh_visualixer::bind_mesh(const Mesh & mesh){
 
-	xmax = mesh->xmax();
-	ymax = mesh->ymax();
-	zmax = mesh->zmax();
-	xmin = mesh->xmin();
-	ymin = mesh->ymin();
-	zmin = mesh->zmin();
+	_mesh = &mesh;
+
+	xmax = _mesh->xmax();
+	ymax = _mesh->ymax();
+	zmax = _mesh->zmax();
+	xmin = _mesh->xmin();
+	ymin = _mesh->ymin();
+	zmin = _mesh->zmin();
 	//GLfloat scale = (xmax-xmin)/1.0;
 
-	num_vertices = mesh->nodecount();
+	num_vertices = _mesh->nodecount();
 	num_per_vertex = 7;
 	num_vertex_points = 3;
-	vertices = new GLfloat[num_vertices*num_per_vertex];
-	for (unsigned int i=0; i<num_vertices; i++){
-		nd = mesh->node(i);
-
-		vertices[i*num_per_vertex] = nd.x();
-		vertices[i*num_per_vertex + 1] = nd.y();
-		vertices[i*num_per_vertex + 2] = nd.z();
-		if (nd.boundary()){
-			vertices[i*num_per_vertex + 3] = 1.0f;
-			vertices[i*num_per_vertex + 4] = 0.0f;
-			vertices[i*num_per_vertex + 5] = 0.0f;
-		}
-		else {
-			vertices[i*num_per_vertex + 3] = 1.0f;
-			vertices[i*num_per_vertex + 4] = 1.0f;
-			vertices[i*num_per_vertex + 5] = 1.0f;
-		}
-		vertices[i*num_per_vertex + 6] = 1.0f;
-	}
-
-	// figure out how many line elements are needed
-	// DYLAN_TODO: this should really be more rigorous and count for each element
-	//				in the mesh
-	num_line_elements = 0;
-	for (unsigned int i=0; i<mesh->elementcount(); i++){
-		elem = mesh->element(i);
-		num_line_elements += elem.num_vertices();
-	}
-
-	num_elements = num_vertices;
-	num_per_element = 1;
-	num_per_line_element = 2;
-	elements = new GLuint[num_elements*num_per_element + num_line_elements*num_per_line_element];
-	line_element_offset = num_elements*num_per_element;
-	// set the point elements
-	for (unsigned int i=0; i<num_vertices; i++){
-		elements[i] = i;
-	}
-
 	
-	unsigned int jp1, elements_added=0;
-	for (unsigned int i=0; i<mesh->elementcount(); i++){
-		elem = mesh->element(i);
-		for (unsigned int j=0; j<elem.num_vertices(); j++){
-			jp1 = (j+1)%elem.num_vertices();
-			elements[line_element_offset + elements_added*num_per_line_element] = elem.vertex_ind(j);
-			elements[line_element_offset + elements_added*num_per_line_element + 1] = elem.vertex_ind(jp1);
-
-			elements_added++;
-		}
-	}
-
-
-	model_centroid[0] = (xmax + xmin)/2.0;
-	model_centroid[1] = (ymax + ymin)/2.0;
-	model_centroid[2] = (zmax + zmin)/2.0;
 
 	return;
 }
@@ -180,6 +125,70 @@ void mesh_visualixer::set_test_case(){
 	zmin = 0;
 
 	return;
+}
+
+void mesh_visualixer::onPrepareData(){
+
+	MeshNode nd;
+	MeshElement elem;
+
+	vertices = new GLfloat[num_vertices*num_per_vertex];
+	for (unsigned int i=0; i<num_vertices; i++){
+		nd = _mesh->node(i);
+
+		vertices[i*num_per_vertex] = nd.x();
+		vertices[i*num_per_vertex + 1] = nd.y();
+		vertices[i*num_per_vertex + 2] = nd.z();
+		if (nd.boundary()){
+			vertices[i*num_per_vertex + 3] = 1.0f;
+			vertices[i*num_per_vertex + 4] = 0.0f;
+			vertices[i*num_per_vertex + 5] = 0.0f;
+		}
+		else {
+			vertices[i*num_per_vertex + 3] = 1.0f;
+			vertices[i*num_per_vertex + 4] = 1.0f;
+			vertices[i*num_per_vertex + 5] = 1.0f;
+		}
+		vertices[i*num_per_vertex + 6] = 1.0f;
+	}
+
+	// figure out how many line elements are needed
+	// DYLAN_TODO: this should really be more rigorous and count for each element
+	//				in the mesh
+	num_line_elements = 0;
+	for (unsigned int i=0; i<_mesh->elementcount(); i++){
+		elem = _mesh->element(i);
+		num_line_elements += elem.num_vertices();
+	}
+
+	num_elements = num_vertices;
+	num_per_element = 1;
+	num_per_line_element = 2;
+	elements = new GLuint[num_elements*num_per_element + num_line_elements*num_per_line_element];
+	line_element_offset = num_elements*num_per_element;
+	// set the point elements
+	for (unsigned int i=0; i<num_vertices; i++){
+		elements[i] = i;
+	}
+
+	
+	unsigned int jp1, elements_added=0;
+	for (unsigned int i=0; i<_mesh->elementcount(); i++){
+		elem = _mesh->element(i);
+		for (unsigned int j=0; j<elem.num_vertices(); j++){
+			jp1 = (j+1)%elem.num_vertices();
+			elements[line_element_offset + elements_added*num_per_line_element] = elem.vertex_ind(j);
+			elements[line_element_offset + elements_added*num_per_line_element + 1] = elem.vertex_ind(jp1);
+
+			elements_added++;
+		}
+	}
+
+
+	model_centroid[0] = (xmax + xmin)/2.0;
+	model_centroid[1] = (ymax + ymin)/2.0;
+	model_centroid[2] = (zmax + zmin)/2.0;
+
 }
 
 void mesh_visualixer::onRender(){
@@ -266,10 +275,9 @@ int main(int argc, char * argv[]){
 	// test the mesh viewer
 	mesh_visualixer mymvis;
 	RegularMesh mesh = RegularMesh::create_regular_grid_n(0.1, 50, 50);//, (unsigned int)30);
-	mymvis.add_mesh(&mesh);
+	mymvis.bind_mesh(mesh);
 	mymvis.set_color_ramp(CRamp::DIVERGENT_9);
-	//if (&mesh->x() == NULL) cout << "damn coloby is null" << endl;
-	mymvis.set_colorby(&mesh.z());
+	mymvis.set_colorby(&mesh.x());
 	//mymvis->set_test_case();
 	
 	mymvis.run();

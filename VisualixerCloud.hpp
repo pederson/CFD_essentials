@@ -22,7 +22,11 @@ public:
 	void set_test_case();
 
 protected:
+
+	void onPrepareData();
 	bool MainLoop();
+
+	const PointCloud * _cloud;
 
 };
 
