@@ -15,7 +15,7 @@ cloud_visualixer::cloud_visualixer(){
 	visualixer_active = false;
 	window_name = "Cloud Visualixer";
 	rotation_lock = false;
-	colorby = NULL;
+	_colorby = nullptr;
 	vertices = NULL;
 	elements = NULL;
 

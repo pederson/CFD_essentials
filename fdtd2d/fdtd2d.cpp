@@ -25,7 +25,7 @@ int main(int argc, char * argv[]){
 	//*/
 
 	// ring model
-	/*
+	
 	parametric_model_2d paramodel;
 	paramodel.set_model_name("DielecSphere");
 	paramodel.add_physical_property("eps_rel");
@@ -59,7 +59,7 @@ int main(int argc, char * argv[]){
 
 
 	// holey waveguide defect model
-	
+	/*
 	parametric_model_2d paramodel;
 	paramodel.set_model_name("DielecSphere");
 	paramodel.add_physical_property("eps_rel");
@@ -342,7 +342,7 @@ int main(int argc, char * argv[]){
 	simvis.bind_simulation(simdata);
 	simvis.set_colorby_field("E_z");
 	simvis.set_color_interpolation(false);
-	simvis.set_color_alpha(epsilon_rel);
+	simvis.set_color_alpha(&paramesh.data("eps_rel"));
 	simvis.set_frequency_Hz(30);
 	simvis.run();
 	//*/

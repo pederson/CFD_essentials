@@ -15,7 +15,7 @@ mesh_model_visualixer::mesh_model_visualixer(){
 	window_name = "Mesh Model Visualixer";
 	rotation_lock = false;
 	//color_ramp = NULL;
-	colorby = NULL;
+	_colorby = nullptr;
 	vertices = NULL;
 	elements = NULL;
 	normals = NULL;

@@ -14,7 +14,7 @@ mesh_visualixer::mesh_visualixer(){
 	visualixer_active = false;
 	window_name = "Mesh Visualixer";
 	rotation_lock = false;
-	colorby = NULL;
+	_colorby = nullptr;
 	vertices = NULL;
 	elements = NULL;
 

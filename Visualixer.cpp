@@ -22,7 +22,7 @@ visualixer::visualixer(){
 	visualixer_active = false;
 	window_name = "Visualixer";
 	rotation_lock = false;
-	colorby = NULL;
+	_colorby = nullptr;
 	_color_alpha = nullptr;
 	vertices = NULL;
 	elements = NULL;
@@ -49,7 +49,7 @@ visualixer::~visualixer(){
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
 	if (_color_alpha != nullptr) delete[] _color_alpha;
-	if (colorby != NULL) delete[] colorby;
+	if (_colorby != nullptr) delete[] _colorby;
 }
 
 void visualixer::set_window_name(string w_name){
@@ -336,7 +336,7 @@ void visualixer::recalcCamera(){
 }
 
 void visualixer::cycleColorRamp(){
-	if (colorby==NULL) return;
+	if (_colorby==nullptr) return;
 	color_ramp.cycle_ramp();
 	onColors();
 	onRender();
@@ -417,38 +417,22 @@ void visualixer::onInit(){
 
 void visualixer::onPrepareData(){
 
-	if (colorby == NULL){
-		/*
-		for (auto i=0; i<num_vertices; i++){
-			vertices[i*num_per_vertex + 3] = 1.0;
-			vertices[i*num_per_vertex + 4] = 1.0;
-			vertices[i*num_per_vertex + 5] = 1.0;
-		}
-		*/
-	}
-
-	if (_color_alpha == nullptr){
-		/*
-		for (auto i=0; i<num_vertices; i++){
-			vertices[i*num_per_vertex + 6] = 1.0;
-		}
-		*/
-	}
 
 }
 
 
 void visualixer::onColors(){
-	if (colorby == NULL) return;
-	if (colorby_max - colorby_min == 0.0) return;
+	if (_colorby == nullptr) return;
+	if (_colorby_max - _colorby_min == 0.0) return;
 	// modify the vertex array to incorporate user-defined colors
-	rgb ptcolor;
 
+
+	rgb ptcolor;
 	for (auto i=0; i<num_vertices; i++){
-		ptcolor = color_ramp.get_ramp_color(float((colorby[i])/(colorby_max - colorby_min)));
-		vertices[i*num_per_vertex + 3] = ptcolor.R;
-		vertices[i*num_per_vertex + 4] = ptcolor.G;
-		vertices[i*num_per_vertex + 5] = ptcolor.B;
+		ptcolor = color_ramp.get_ramp_color(float((_colorby[i])/(_colorby_max - _colorby_min)));
+		vertices[(i+1)*num_per_vertex - 4] = ptcolor.R;
+		vertices[(i+1)*num_per_vertex - 3] = ptcolor.G;
+		vertices[(i+1)*num_per_vertex - 2] = ptcolor.B;
 	}
 
 	return;
@@ -458,8 +442,9 @@ void visualixer::onColors(){
 void visualixer::onAlpha(){
 	if (_color_alpha == nullptr) return;
 
+	
 	for (auto i=0; i<num_vertices; i++){
-		vertices[i*num_per_vertex + 6] = _color_alpha[i];
+		vertices[(i+1)*num_per_vertex - 1] = _color_alpha[i];
 	}
 
 }

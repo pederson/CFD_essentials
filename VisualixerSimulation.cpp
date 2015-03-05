@@ -11,7 +11,8 @@ simulation_visualixer::simulation_visualixer(){
 	visualixer_active = false;
 	window_name = "Simulation Visualixer";
 	rotation_lock = false;
-	colorby = NULL;
+	_colorby = nullptr;
+	_color_alpha = nullptr;
 	vertices = NULL;
 	elements = NULL;
 
@@ -46,6 +47,19 @@ simulation_visualixer::~simulation_visualixer(){
 
 void simulation_visualixer::bind_simulation(const SimulationData & simdata){
 	_simdata = &simdata;
+
+	const Mesh * themesh = _simdata->mesh();
+
+	xmax = themesh->xmax();
+	ymax = themesh->ymax();
+	zmax = themesh->zmax();
+	xmin = themesh->xmin();
+	ymin = themesh->ymin();
+	zmin = themesh->zmin();
+
+	num_vertices = themesh->nodecount();
+	num_per_vertex = 7;
+	num_vertex_points = 3;
 }
 
 void simulation_visualixer::set_frequency_Hz(unsigned int freq){
@@ -63,7 +77,6 @@ void simulation_visualixer::set_alpha_field(std::string fieldname){
 void simulation_visualixer::increment_time_step(){
 	_cur_time_step = (_cur_time_step+1)%_simdata->num_time_steps();
 	set_colorby(&(_simdata->get_data_at_index(_cur_time_step, _colorby_field)), false);
-	//set_colorby(&(_simdata->get_data_at_index(_cur_time_step, _colorby_field)));
 	onColors();
 	onRender();
 	onShaders();
@@ -73,6 +86,7 @@ void simulation_visualixer::run(){
 	onInit();
 	onPrepareData();
 	onColors();
+	onAlpha();
 	onRender();
 	onShaders();
 	MainLoop();
@@ -85,6 +99,7 @@ void simulation_visualixer::onPrepareData(){
 	MeshNode nd;
 	MeshElement elem;
 
+	/*
 	xmax = themesh->xmax();
 	ymax = themesh->ymax();
 	zmax = themesh->zmax();
@@ -95,6 +110,7 @@ void simulation_visualixer::onPrepareData(){
 	num_vertices = themesh->nodecount();
 	num_per_vertex = 7;
 	num_vertex_points = 3;
+	*/
 	vertices = new GLfloat[num_vertices*num_per_vertex];
 	for (unsigned int i=0; i<num_vertices; i++){
 		nd = themesh->node(i);
@@ -153,26 +169,28 @@ void simulation_visualixer::onPrepareData(){
 
 	if (_colorby_field.compare("") != 0){
 		// set colorby max and min
+		
 		const double * dat = &(_simdata->get_data_at_index(0, _colorby_field));
-		colorby_max = dat[0]; colorby_min = dat[0];
+		_colorby_max = dat[0]; _colorby_min = dat[0];
 		for (auto t=0; t<_simdata->num_time_steps(); t++){
 			dat = &(_simdata->get_data_at_index(t, _colorby_field));
 			for (auto i=0; i<num_vertices; i++){
-				if (dat[i] > colorby_max) colorby_max = dat[i];
-				if (dat[i] < colorby_min) colorby_min = dat[i];
+				if (dat[i] > _colorby_max) _colorby_max = dat[i];
+				if (dat[i] < _colorby_min) _colorby_min = dat[i];
 			}
 		}
+		
 		set_colorby(&(_simdata->get_data_at_index(0, _colorby_field)), false);
 		//cout << "set min and max colorby" << endl;
 		//cout << "max: " << colorby_max << "\t min: " << colorby_min << endl;
 	} 
 	if (_alpha_field.compare("") != 0){
-		set_color_alpha(&(_simdata->get_data_at_index(0, _alpha_field)), true);
+		set_color_alpha(&(_simdata->get_data_at_index(0, _alpha_field)));
 	}
 
 }
 
-/*
+
 void simulation_visualixer::onRender(){
 	// Create Vertex Array Object
   glGenVertexArrays(1, &vao);
@@ -182,7 +200,7 @@ void simulation_visualixer::onRender(){
   glGenBuffers (1, &vbo);
 
   // visualizer specific data definitions
-  // this one happens to be XYRGB
+  // this one happens to be XYZRGBA
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, num_vertices * num_per_vertex * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
@@ -198,11 +216,13 @@ void simulation_visualixer::onRender(){
   // enable point size specification
   glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
-  // enable 
+  // enable alpha shading
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   return;
 }
-*/
+
 
 bool simulation_visualixer::MainLoop(){
 

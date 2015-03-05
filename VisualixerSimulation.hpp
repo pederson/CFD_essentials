@@ -41,7 +41,7 @@ private:
 	void increment_time_step();
 
 	void onPrepareData();
-	//void onRender();
+	void onRender();
 	bool MainLoop();
 	void onExit();
 
