@@ -56,7 +56,7 @@ void mesh_visualixer::add_mesh(Mesh * mesh){
 	//GLfloat scale = (xmax-xmin)/1.0;
 
 	num_vertices = mesh->nodecount();
-	num_per_vertex = 6;
+	num_per_vertex = 7;
 	num_vertex_points = 3;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
 	for (unsigned int i=0; i<num_vertices; i++){
@@ -75,6 +75,7 @@ void mesh_visualixer::add_mesh(Mesh * mesh){
 			vertices[i*num_per_vertex + 4] = 1.0f;
 			vertices[i*num_per_vertex + 5] = 1.0f;
 		}
+		vertices[i*num_per_vertex + 6] = 1.0f;
 	}
 
 	// figure out how many line elements are needed
@@ -120,7 +121,7 @@ void mesh_visualixer::add_mesh(Mesh * mesh){
 
 void mesh_visualixer::set_test_case(){
 	num_vertices = 100;
-	num_per_vertex = 6;
+	num_per_vertex = 7;
 	num_vertex_points = 3;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
 	for (unsigned int i=0; i<10; i++){
@@ -143,6 +144,7 @@ void mesh_visualixer::set_test_case(){
 				vertices[(i*10+j)*num_per_vertex + 4] = 1.0f;
 				vertices[(i*10+j)*num_per_vertex + 5] = 1.0f;
 			}
+			vertices[(i*10+j)*num_per_vertex + 6] = 1.0f;
 		}
 	}
 
@@ -256,20 +258,21 @@ void mesh_visualixer::onExit(){
 #ifdef _TEST_
 // use cmake to compile
 
+#include "RegularMesh.hpp"
+
 int main(int argc, char * argv[]){
 	// declare vars
 
 	// test the mesh viewer
-	mesh_visualixer * mymvis = new mesh_visualixer();
-	Static_Mesh * mesh = Static_Mesh::create_regular_grid_n(0.1, 50, 50);//, (unsigned int)30);
-	mymvis->add_mesh(mesh);
-	mymvis->set_color_ramp(CRamp::DIVERGENT_9);
+	mesh_visualixer mymvis;
+	RegularMesh mesh = RegularMesh::create_regular_grid_n(0.1, 50, 50);//, (unsigned int)30);
+	mymvis.add_mesh(&mesh);
+	mymvis.set_color_ramp(CRamp::DIVERGENT_9);
 	//if (&mesh->x() == NULL) cout << "damn coloby is null" << endl;
-	mymvis->set_colorby(&mesh->z());
+	mymvis.set_colorby(&mesh.z());
 	//mymvis->set_test_case();
 	
-	mymvis->run();
-	delete mymvis;
+	mymvis.run();
 
 	return 0;
 

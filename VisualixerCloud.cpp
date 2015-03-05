@@ -44,7 +44,7 @@ cloud_visualixer::~cloud_visualixer(){
 
 void cloud_visualixer::set_test_case(){
 	num_vertices = 100;
-	num_per_vertex = 6;
+	num_per_vertex = 7;
 	num_vertex_points = 3;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
 	for (unsigned int i=0; i<10; i++){
@@ -92,7 +92,7 @@ void cloud_visualixer::set_test_case(){
 void cloud_visualixer::add_cloud(const PointCloud & cloud){
 	const double *x, *y, *z;
 	num_vertices = cloud.pointcount();
-	num_per_vertex = 6;
+	num_per_vertex = 7;
 	num_vertex_points = 3;
 	x = &cloud.x();
 	y = &cloud.y();
@@ -119,6 +119,7 @@ void cloud_visualixer::add_cloud(const PointCloud & cloud){
       vertices[i*num_per_vertex + 3] = RGB[i].R/65,535;
       vertices[i*num_per_vertex + 4] = RGB[i].G/65,535;
       vertices[i*num_per_vertex + 5] = RGB[i].B/65,535;
+      vertices[i*num_per_vertex + 6] = 1.0;
     }
   }
   else {
@@ -128,6 +129,7 @@ void cloud_visualixer::add_cloud(const PointCloud & cloud){
       vertices[i*num_per_vertex + 3] = 0.0;
       vertices[i*num_per_vertex + 4] = 0.0;
       vertices[i*num_per_vertex + 5] = 1.0;
+      vertices[i*num_per_vertex + 6] = 1.0;
     }
   }
 
@@ -142,12 +144,14 @@ void cloud_visualixer::add_cloud(const PointCloud & cloud){
 	zmin = cloud.zmin();
 
 	// default color by Z
-	colorby = new double[num_vertices];
+	_colorby = new double[num_vertices];
 	for (auto i=0; i<num_vertices; i++){
-		colorby[i] = z[i];
+		_colorby[i] = z[i];
 	}
-	colorby_max = zmax;
-	colorby_min = zmin;
+	_colorby_max = zmax;
+	_colorby_min = zmin;
+
+	// default alpha by intensity
 
 	return;
 }
@@ -185,16 +189,16 @@ int main(int argc, char * argv[]){
 	// declare vars
 
 	// test the point cloud viewer
-	cloud_visualixer * mycvis = new cloud_visualixer();
+	cloud_visualixer mycvis;
 	//mycvis->set_test_case();
 	PointCloud cloud = PointCloud::read_LAS("../testfiles/ComplexSRSInfo.las");
 	//PointCloud cloud = PointCloud::read_LAS("../testfiles/xyzrgb_manuscript.las");
 	//PointCloud cloud = PointCloud::read_LAS("../testfiles/LAS12_Sample_withRGB_Quick_Terrain_Modeler.las");
-	mycvis->add_cloud(cloud);
-    mycvis->set_color_ramp(CRamp::DIVERGENT_1);
-    mycvis->set_colorby(&cloud.z());
-	mycvis->run();
-	delete mycvis;
+	mycvis.add_cloud(cloud);
+    mycvis.set_color_ramp(CRamp::DIVERGENT_1);
+    mycvis.set_colorby(&cloud.z());
+    if (cloud.intensity_present()) mycvis.set_color_alpha(&cloud.intensity());
+	mycvis.run();
 
 	return 0;
 

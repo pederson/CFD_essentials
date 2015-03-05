@@ -2,7 +2,7 @@
 
 using namespace std;
 
-//#define _TEST_
+#define _TEST_
 
 vector<visualixer*> _vGeometricObjectInstances;
 
@@ -51,7 +51,7 @@ void mesh_model_visualixer::add_model(mesh_model * model){
 
   // assign basic info
   num_vertices = model->vertex_count;
-	num_per_vertex = 6;
+	num_per_vertex = 7;
 	num_vertex_points = 3;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
   for (unsigned int i=0; i<num_vertices; i++){
@@ -68,6 +68,7 @@ void mesh_model_visualixer::add_model(mesh_model * model){
           vertices[i*num_per_vertex + 4]  = 0.41f;
           vertices[i*num_per_vertex + 5] = 0.41f;
         }
+    	vertices[i*num_per_vertex + 6] = 1.0f;
   }
 
   num_elements = num_vertices/3;
@@ -112,7 +113,7 @@ void mesh_model_visualixer::add_model(mesh_model * model){
 
 void mesh_model_visualixer::set_test_case(){
   num_vertices = 100;
-	num_per_vertex = 6;
+	num_per_vertex = 7;
 	num_vertex_points = 3;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
 	for (unsigned int i=0; i<num_vertices; i++){
@@ -136,6 +137,7 @@ void mesh_model_visualixer::set_test_case(){
 				vertices[i*num_per_vertex + 4]  = 0.0f;
 				vertices[i*num_per_vertex + 5] = 1.0f;
 			}
+			vertices[i*num_per_vertex + 6] = 1.0f;
 	}
 
 
@@ -388,12 +390,11 @@ int main(int argc, char * argv[]){
 	// declare vars
 
 	// test the mesh model viewer
-	mesh_model_visualixer * mymmodvis = new mesh_model_visualixer();
+	mesh_model_visualixer mymmodvis;
 	//mymmodvis->set_test_case();
 	mesh_model * mesh_test_model = mesh_model::read_STL("../testfiles/brain-gear.stl");
-	mymmodvis->add_model(mesh_test_model);
-	mymmodvis->run();
-	delete mymmodvis;
+	mymmodvis.add_model(mesh_test_model);
+	mymmodvis.run();
 
 	return 0;
 
