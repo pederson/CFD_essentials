@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char * argv[]){
 	// constants
-	double eps0 = 8.854e-12;
+	const double eps0 = 8.854e-12;
 	double c0 = 3.0e+8;
 	double dx = 0.005;
 	double dt = 0.5*dx/c0;
@@ -83,10 +83,6 @@ int main(int argc, char * argv[]){
 	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, paramodel.get_material("Vacuum"));
 	paramesh.print_summary();
 
-	// convert the model into a mesh
-	//RegularMesh paramesh;
-	//paramesh = RegularMesh::create_regular_grid_b(dx, 0.0, 1.0, 0.0, 1.0);
-	//paramesh.print_summary();
 
 	// view the mesh
 	mesh_visualixer paravis;

@@ -1,7 +1,26 @@
 #include "FDTDSimulation.hpp"
 
 
-// mutators
+FDTDSimulation::~FDTDSimulation(){
+	delete[] D_z;
+	delete[] I_Hx;
+	delete[] I_Hy;
+	delete[] E_z;
+	delete[] H_y;
+	delete[] H_x;
+	delete[] gaz;
+
+	delete[] gi2;
+	delete[] gi3;
+	delete[] gj2;
+	delete[] gj3;
+	delete[] fi1;
+	delete[] fi2;
+	delete[] fi3;
+	delete[] fj1;
+	delete[] fj2;
+	delete[] fj3;
+}
 void FDTDSimulation::set_boundary(BoundaryLocation loc, BoundaryCondition type, unsigned int num_layers=0);
 
 void FDTDSimulation::add_gaussian_source(double t0, double spread, double xloc, double yloc=0, double zloc=0);
@@ -12,123 +31,35 @@ void FDTDSimulation::bind_rel_permittivity(const double * rel_permittivity){
 	_rel_permittivity = rel_permittivity;
 }
 
-void FDTDSimulation::set_view_results(bool opt){
-	_visualize_results = opt;
+void FDTDSimulation::view_results(){
+
+		// visualize the simulation
+		simulation_visualixer simvis;
+		simvis.bind_simulation(_simdata);
+		simvis.set_colorby_field("E_z");
+		simvis.set_color_interpolation(false);
+		simvis.set_frequency_Hz(30);
+		simvis.run();
+
 }
 
-void FDTDSimulation::set_output_HDF5(bool opt, std::string outname){
-	_output_HDF5 = opt;
+void FDTDSimulation::output_HDF5(std::string outname){
 	if (outname.compare("") == 0){
 		_output_HDF5_name = "FDTD_output.h5";
 	}
+	else _output_HDF5_name = outname;
+
+	_simdata.write_HDF5(_output_HDF5_name);
 }
 
 void FDTDSimulation::run(){
-
-	// set up the simulation data holder
-	_simdata.bind_mesh(_mesh);
-	_simdata.add_field("E_z");
-	_simdata.set_time_span(_tstart, _dt, _tstart);
-	_simdata.print_summary();
-
 	
-	double * D_z = new double[_mesh.nodecount()];
-	double * I_Hx = new double[_mesh.nodecount()];
-	double * I_Hy = new double[_mesh.nodecount()];
-	double * E_z = new double[_mesh.nodecount()];
-	double * H_y = new double[_mesh.nodecount()];
-	double * H_x = new double[_mesh.nodecount()];
-	double * gaz = new double[_mesh.nodecount()];
-	//double * gbz = new double[_mesh.nodecount()];
-	for (auto i=0; i<_mesh.nodecount(); i++){
-		D_z[i] = 0.0;
-		I_z[i] = 0.0;
-		I_Hx[i] = 0.0;
-		I_Hy[i] = 0.0;
-		H_x[i] = 0.0;
-		H_y[i] = 0.0;
-		E_z[i] = 0.0;
-		gaz[i] = 1.0/_rel_permittivity[i];		// gaz = 1/(epsilon+(sigma*dt/eps0));
-		//gbz[i] = 0.0;		// gbz = sigma*dt/eps0;
-	}
-
-	// PML related
-	float npml, xnum, xd, xxn, xn;
-	npml = 8;
-	double * gi2 = new double[_mesh.reg_num_nodes_x()];
-	double * gi3 = new double[_mesh.reg_num_nodes_x()];
-	double * gj2 = new double[_mesh.reg_num_nodes_y()];
-	double * gj3 = new double[_mesh.reg_num_nodes_y()];
-	double * fi1 = new double[_mesh.reg_num_nodes_x()];
-	double * fi2 = new double[_mesh.reg_num_nodes_x()];
-	double * fi3 = new double[_mesh.reg_num_nodes_x()];
-	double * fj1 = new double[_mesh.reg_num_nodes_y()];
-	double * fj2 = new double[_mesh.reg_num_nodes_y()];
-	double * fj3 = new double[_mesh.reg_num_nodes_y()];
-	for (auto i=0; i<_mesh.reg_num_nodes_x(); i++){
-		gi2[i] = 1.0;
-		gi3[i] = 1.0;
-		fi1[i] = 0.0;
-		fi2[i] = 1.0;
-		fi3[i] = 1.0;
-	}
-	for (auto i=0; i<_mesh.reg_num_nodes_y(); i++){
-		gj2[i] = 1.0;
-		gj3[i] = 1.0;
-		fj1[i] = 0.0;
-		fj2[i] = 1.0;
-		fj3[i] = 1.0;
-	}
-	// 
-	for (auto i=0; i<= npml; i++){
-		xnum = npml-i;
-		xd = npml;
-
-		// left and right boundaries
-		xxn = xnum/xd;
-		xn = 0.33*xxn*xxn*xxn;
-		gi2[i] = 1.0/(1.0+xn);
-		gi3[i] = (1.0-xn)/(1.0+xn);
-		gi2[_mesh.reg_num_nodes_x()-1-i] = 1.0/(1.0+xn);
-		gi3[_mesh.reg_num_nodes_x()-1-i] = (1.0-xn)/(1.0+xn);
-
-		xxn = (xnum-0.5)/xd;
-		xn = 0.25*xxn*xxn*xxn;
-		fi1[i] = xn;
-		fi2[i] = 1.0/(1.0+xn);
-		fi3[i] = (1.0-xn)/(1.0+xn);
-		fi1[_mesh.reg_num_nodes_x()-2-i] = xn;
-		fi2[_mesh.reg_num_nodes_x()-2-i] = 1.0/(1.0+xn);
-		fi3[_mesh.reg_num_nodes_x()-2-i] = (1.0-xn)/(1.0+xn);
-
-
-		// top and bottom boundaries
-		xxn = xnum/xd;
-		xn = 0.33*xxn*xxn*xxn;
-		gj2[i] = 1.0/(1.0+xn);
-		gj3[i] = (1.0-xn)/(1.0+xn);
-		gj2[_mesh.reg_num_nodes_y()-1-i] = 1.0/(1.0+xn);
-		gj3[_mesh.reg_num_nodes_y()-1-i] = (1.0-xn)/(1.0+xn);
-
-		xxn = (xnum-0.5)/xd;
-		xn = 0.25*xxn*xxn*xxn;
-		fj1[i] = xn;
-		fj2[i] = 1.0/(1.0+xn);
-		fj3[i] = (1.0-xn)/(1.0+xn);
-		fj1[_mesh.reg_num_nodes_y()-2-i] = xn;
-		fj2[_mesh.reg_num_nodes_y()-2-i] = 1.0/(1.0+xn);
-		fj3[_mesh.reg_num_nodes_y()-2-i] = (1.0-xn)/(1.0+xn);
-
-
-	}
-
-	double CourantFactor = 0.5;
-	double tcur, pulse, t0=10.0, spread = 12.0, srcfreq=1.0e+9, curle;
+	double _tcur=-_dt, pulse, t0=10.0, spread = 12.0, srcfreq=1.0e+9, curle;
 	unsigned int cind, lind, rind, uind, dind ;
-	for (auto n=0; n<num_iters; n++){
-		tcur = dt;
+	for (auto n=0; n<_num_iters; n++){
+		tcur += dt;
 
-		cout << "on time step " << n << "/" << num_iters-1 << "\r" << flush;
+		cout << "on time step " << _current_iter << "/" << _num_iters-1 << "\r" << flush;
 
 
 		// update D field
@@ -143,14 +74,14 @@ void FDTDSimulation::run(){
 
 				
 				D_z[cind] = gi3[i]*gj3[j]*D_z[cind]
-						  + gi2[i]*gj2[j]*CourantFactor*(H_y[cind] - H_y[lind] - H_x[cind] + H_x[dind]);
+						  + gi2[i]*gj2[j]*_CourantFactor*(H_y[cind] - H_y[lind] - H_x[cind] + H_x[dind]);
 
 				
 			}
 		}
 
 
-		// impose a gaussian source (hard-coded)
+		// impose sources
 		//pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);
 		pulse = sin(2*VX_PI*srcfreq*n*dt); // oscillatory source
 		D_z[_mesh.nearest_node(0.5, 0.5)] = pulse;
@@ -213,40 +144,114 @@ void FDTDSimulation::run(){
 		simdata.add_data_at_index(n, "E_z", E_z[0]);
 		simdata.add_data_at_index(n, "H_y", H_y[0]);
 
-		tcur += dt;
 	}
 
-	if (_output_HDF5) _simdata.write_HDF5(_output_HDF5_name);
 
-	if (_visualize_results){
-		// visualize the simulation
-		simulation_visualixer simvis;
-		simvis.bind_simulation(_simdata);
-		simvis.set_colorby_field("E_z");
-		simvis.set_color_interpolation(false);
-		simvis.set_frequency_Hz(30);
-		simvis.run();
-		//*/
+}
+
+void FDTDSimulation::allocate_fields(){
+	D_z = new double[_mesh.nodecount()];
+	I_Hx = new double[_mesh.nodecount()];
+	I_Hy = new double[_mesh.nodecount()];
+	E_z = new double[_mesh.nodecount()];
+	H_y = new double[_mesh.nodecount()];
+	H_x = new double[_mesh.nodecount()];
+	gaz = new double[_mesh.nodecount()];
+	//gbz = new double[_mesh.nodecount()];
+	for (auto i=0; i<_mesh.nodecount(); i++){
+		D_z[i] = 0.0;
+		I_z[i] = 0.0;
+		I_Hx[i] = 0.0;
+		I_Hy[i] = 0.0;
+		H_x[i] = 0.0;
+		H_y[i] = 0.0;
+		E_z[i] = 0.0;
+		gaz[i] = 1.0/_rel_permittivity[i];		// gaz = 1/(epsilon+(sigma*dt/eps0));
+		//gbz[i] = 0.0;		// gbz = sigma*dt/eps0;
 	}
 
-	delete[] D_z;
-	delete[] I_Hx;
-	delete[] I_Hy;
-	delete[] E_z;
-	delete[] H_y;
-	delete[] H_x;
-	delete[] gaz;
+}
 
-	delete[] gi2;
-	delete[] gi3;
-	delete[] gj2;
-	delete[] gj3;
-	delete[] fi1;
-	delete[] fi2;
-	delete[] fi3;
-	delete[] fj1;
-	delete[] fj2;
-	delete[] fj3;
+void FDTDSimulation::allocate_PML(){
 
+	// PML related
+	float xnum, xd, xxn, xn;
+	gi2 = new double[_mesh.reg_num_nodes_x()];
+	gi3 = new double[_mesh.reg_num_nodes_x()];
+	gj2 = new double[_mesh.reg_num_nodes_y()];
+	gj3 = new double[_mesh.reg_num_nodes_y()];
+	fi1 = new double[_mesh.reg_num_nodes_x()];
+	fi2 = new double[_mesh.reg_num_nodes_x()];
+	fi3 = new double[_mesh.reg_num_nodes_x()];
+	fj1 = new double[_mesh.reg_num_nodes_y()];
+	fj2 = new double[_mesh.reg_num_nodes_y()];
+	fj3 = new double[_mesh.reg_num_nodes_y()];
+	for (auto i=0; i<_mesh.reg_num_nodes_x(); i++){
+		gi2[i] = 1.0;
+		gi3[i] = 1.0;
+		fi1[i] = 0.0;
+		fi2[i] = 1.0;
+		fi3[i] = 1.0;
+	}
+	for (auto i=0; i<_mesh.reg_num_nodes_y(); i++){
+		gj2[i] = 1.0;
+		gj3[i] = 1.0;
+		fj1[i] = 0.0;
+		fj2[i] = 1.0;
+		fj3[i] = 1.0;
+	}
+
+	if (_nPML == 0) return;
+
+	// 
+	for (auto i=0; i<= _nPML; i++){
+		xnum = _nPML-i;
+		xd = _nPML;
+
+		// left and right boundaries
+		xxn = xnum/xd;
+		xn = 0.33*xxn*xxn*xxn;
+		gi2[i] = 1.0/(1.0+xn);
+		gi3[i] = (1.0-xn)/(1.0+xn);
+		gi2[_mesh.reg_num_nodes_x()-1-i] = 1.0/(1.0+xn);
+		gi3[_mesh.reg_num_nodes_x()-1-i] = (1.0-xn)/(1.0+xn);
+
+		xxn = (xnum-0.5)/xd;
+		xn = 0.25*xxn*xxn*xxn;
+		fi1[i] = xn;
+		fi2[i] = 1.0/(1.0+xn);
+		fi3[i] = (1.0-xn)/(1.0+xn);
+		fi1[_mesh.reg_num_nodes_x()-2-i] = xn;
+		fi2[_mesh.reg_num_nodes_x()-2-i] = 1.0/(1.0+xn);
+		fi3[_mesh.reg_num_nodes_x()-2-i] = (1.0-xn)/(1.0+xn);
+
+
+		// top and bottom boundaries
+		xxn = xnum/xd;
+		xn = 0.33*xxn*xxn*xxn;
+		gj2[i] = 1.0/(1.0+xn);
+		gj3[i] = (1.0-xn)/(1.0+xn);
+		gj2[_mesh.reg_num_nodes_y()-1-i] = 1.0/(1.0+xn);
+		gj3[_mesh.reg_num_nodes_y()-1-i] = (1.0-xn)/(1.0+xn);
+
+		xxn = (xnum-0.5)/xd;
+		xn = 0.25*xxn*xxn*xxn;
+		fj1[i] = xn;
+		fj2[i] = 1.0/(1.0+xn);
+		fj3[i] = (1.0-xn)/(1.0+xn);
+		fj1[_mesh.reg_num_nodes_y()-2-i] = xn;
+		fj2[_mesh.reg_num_nodes_y()-2-i] = 1.0/(1.0+xn);
+		fj3[_mesh.reg_num_nodes_y()-2-i] = (1.0-xn)/(1.0+xn);
+
+
+	}
+}
+
+void FDTDSimulation::allocate_simdata(){
+	// set up the simulation data holder
+	_simdata.bind_mesh(_mesh);
+	_simdata.add_field("E_z");
+	_simdata.set_time_span(_tstart, _dt, _tstart);
+	_simdata.print_summary();
 }
 

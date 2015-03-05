@@ -1,6 +1,10 @@
 TODO:
 
-- Problem writing holey_waveguide_defect geometry simulation to HDF5... not sure why
+- Figure out how to output the OpenGL window to .png, .tif, .jpg OR make movies to .gif
+
+- Make sure that everything follows the model of having all necessary information contained in the base class, but with added functionality implemented in the derived classes
+
+- Problem writing holey_waveguide_defect geometry simulation to HDF5... only on school computer though
 
 - Geometric Objects need to have an options to do a repeating pattern (either rectangular or circular)
 
@@ -9,12 +13,13 @@ TODO:
 - Make Simulation class that handles the setup and execution of a simulation
 	- Need to finish the equation class and boundary conditions class to do this
 	- Make this a base class maybe. Derived classes of FESimulation, FVSimulation, FDSimulation, FDTDSimulation, etc... can be made
+	- This should allow the user to run the simulation incrementally (n steps at a time) and access fields in the middle of the simulation
 
 - start using iterators when possible
 
 - Fix Mesh class and SimulationData class to have storage fields for both NodeData and ElementData (where data is associated per node or element, respectively)
 
-- fix Mesh accessors to have both const and non-const options... this is important
+- fix all class accessors to have both const and non-const options... this is important
 
 - support boundary properties (with conditions that v=0, etc...)
 
@@ -42,12 +47,10 @@ TODO:
 - add a labelled colorbar to the visualixer
 - Panning scale needs refinement
 - Gimbal lock is still happening during manual rotation
-- adding a colorby before adding an object (mesh, pointcloud) doesn't work b/c it gets overwritten... I think this is fixed
+- adding a colorby or alpha before adding an object (mesh, pointcloud) doesn't work b/c the number of points is still unknown... is there a workaround for this?
 - Shading and Light source for mesh model viewer
-- Make the onPrepareData() call a base class function
-- Don't allow the viewing window to recenter itself for each timestep
-- add a colorby_alpha() function that allows you to set an array the dictates the alpha value for each point when colorby is being used. 
-- 
+- Don't allow the viewing window to recenter itself for each timestep during simulation
+
 
 
 - Doxygen comments for everything
