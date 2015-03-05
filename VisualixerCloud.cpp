@@ -142,7 +142,7 @@ void cloud_visualixer::add_cloud(const PointCloud & cloud){
 	zmin = cloud.zmin();
 
 	// default color by Z
-	colorby = new float[num_vertices];
+	colorby = new double[num_vertices];
 	for (auto i=0; i<num_vertices; i++){
 		colorby[i] = z[i];
 	}

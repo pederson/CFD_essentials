@@ -93,7 +93,7 @@ void simulation_visualixer::onPrepareData(){
 	zmin = themesh->zmin();
 
 	num_vertices = themesh->nodecount();
-	num_per_vertex = 6;
+	num_per_vertex = 7;
 	num_vertex_points = 3;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
 	for (unsigned int i=0; i<num_vertices; i++){
@@ -112,6 +112,7 @@ void simulation_visualixer::onPrepareData(){
 			vertices[i*num_per_vertex + 4] = 1.0f;
 			vertices[i*num_per_vertex + 5] = 1.0f;
 		}
+		vertices[i*num_per_vertex + 6] = 1.0f;
 	}
 
 	// figure out how many line elements are needed
@@ -171,7 +172,7 @@ void simulation_visualixer::onPrepareData(){
 
 }
 
-
+/*
 void simulation_visualixer::onRender(){
 	// Create Vertex Array Object
   glGenVertexArrays(1, &vao);
@@ -197,8 +198,11 @@ void simulation_visualixer::onRender(){
   // enable point size specification
   glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
+  // enable 
+
   return;
 }
+*/
 
 bool simulation_visualixer::MainLoop(){
 

@@ -30,6 +30,7 @@ public:
 	void set_colorby_field(std::string fieldname);
 	void set_alpha_field(std::string fieldname);
 
+
 	// action
 	void run();
 
@@ -40,7 +41,7 @@ private:
 	void increment_time_step();
 
 	void onPrepareData();
-	void onRender();
+	//void onRender();
 	bool MainLoop();
 	void onExit();
 

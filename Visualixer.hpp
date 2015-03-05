@@ -190,7 +190,9 @@ protected:
 	virtual const GLchar * VertexShaderSource();
 	virtual const GLchar * FragmentShaderSource();
 	virtual void onInit();
+	virtual void onPrepareData();
 	virtual void onColors();
+	virtual void onAlpha();
 	virtual void onRender();
 	virtual void onShaders();
 	virtual	bool MainLoop();

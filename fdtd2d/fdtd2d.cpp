@@ -334,7 +334,7 @@ int main(int argc, char * argv[]){
 	}
 	//*/
 
-	simdata.write_HDF5("freespace_pml.h5");
+	//simdata.write_HDF5("freespace_pml.h5");
 
 	
 	// visualize the simulation
@@ -342,6 +342,7 @@ int main(int argc, char * argv[]){
 	simvis.bind_simulation(simdata);
 	simvis.set_colorby_field("E_z");
 	simvis.set_color_interpolation(false);
+	simvis.set_color_alpha(epsilon_rel);
 	simvis.set_frequency_Hz(30);
 	simvis.run();
 	//*/

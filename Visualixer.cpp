@@ -32,8 +32,8 @@ visualixer::visualixer(){
 	num_elements = 0;
 
 	model_centroid[0] = 0.0;
-  model_centroid[1] = 0.0;
-  model_centroid[2] = 0.0;
+	model_centroid[1] = 0.0;
+	model_centroid[2] = 0.0;
 }
 
 visualixer::~visualixer(){
@@ -48,6 +48,8 @@ visualixer::~visualixer(){
 	//if (color_ramp != NULL) delete[] color_ramp;
 	if (vertices != NULL) delete[] vertices;
 	if (elements != NULL) delete[] elements;
+	if (_color_alpha != nullptr) delete[] _color_alpha;
+	if (colorby != NULL) delete[] colorby;
 }
 
 void visualixer::set_window_name(string w_name){
@@ -109,7 +111,9 @@ void visualixer::set_colorby(const double * color_by){
 
 void visualixer::run(){
 	onInit();
+	onPrepareData();
 	onColors();
+	onAlpha();
 	onRender();
 	onShaders();
 	MainLoop();
@@ -119,13 +123,13 @@ void visualixer::run(){
 
 void visualixer::set_test_case(){
 	num_vertices = 4;
-	num_per_vertex = 6;
+	num_per_vertex = 7;
 	num_vertex_points = 3;
 	vertices = new GLfloat[num_vertices*num_per_vertex];
-	vertices[0] = 10.0-0.5; vertices[1] = 10.0+0.5; vertices[2] = 0.0; vertices[3] = 1.0; vertices[4] = 0.0; vertices[5] = 0.0;
-	vertices[6] = 10.0+0.5; vertices[7] = 10.0+0.5; vertices[8] = 0.0; vertices[9] = 0.0; vertices[10] = 1.0; vertices[11] = 0.0;
-	vertices[12] = 10.0+0.5; vertices[13] = 10.0-0.5; vertices[14] = 0.0; vertices[15] = 0.0; vertices[16] = 0.0; vertices[17] = 1.0;
-	vertices[18] = 10.0-0.5; vertices[19] = 10.0-0.5; vertices[20] = 0.0; vertices[21] = 1.0; vertices[22] = 1.0; vertices[23] = 1.0;
+	vertices[0] = 10.0-0.5; vertices[1] = 10.0+0.5; vertices[2] = 0.0; vertices[3] = 1.0; vertices[4] = 0.0; vertices[5] = 0.0; vertices[6] = 1.0;
+	vertices[7] = 10.0+0.5; vertices[8] = 10.0+0.5; vertices[9] = 0.0; vertices[10] = 0.0; vertices[11] = 1.0; vertices[12] = 0.0; vertices[13] = 1.0;
+	vertices[14] = 10.0+0.5; vertices[15] = 10.0-0.5; vertices[16] = 0.0; vertices[17] = 0.0; vertices[18] = 0.0; vertices[19] = 1.0; vertices[20] = 0.1;
+	vertices[21] = 10.0-0.5; vertices[22] = 10.0-0.5; vertices[23] = 0.0; vertices[24] = 1.0; vertices[25] = 1.0; vertices[26] = 1.0; vertices[27] = 0.1;
 
   num_elements = 2;
   num_per_element = 3;
@@ -349,8 +353,8 @@ const GLchar * visualixer::VertexShaderSource(){
 	const GLchar* vertexSource =
 	    "#version 140\n"
 	    "in vec3 position;"
-	    "in vec3 color;"
-	    "out vec3 Color;"
+	    "in vec4 color;"
+	    "out vec4 Color;"
 	    "uniform mat4 model;"
 	    "uniform mat4 view;"
     	"uniform mat4 proj;"
@@ -367,10 +371,10 @@ const GLchar * visualixer::FragmentShaderSource(){
   // fragment shader source
 	const GLchar* fragmentSource =
     "#version 140\n"
-    "in vec3 Color;"
+    "in vec4 Color;"
     "out vec4 outColor;"
     "void main() {"
-    "   outColor = vec4(Color, 1.0);"
+    "   outColor = Color;"//vec4(Color, 1.0);"
     "}";
   return fragmentSource;
 }
@@ -410,13 +414,37 @@ void visualixer::onInit(){
   glfwSetCursorPosCallback(window_ptr, sCursorPosition);
 }
 
+
+void visualixer::onPrepareData(){
+
+	if (colorby == NULL){
+		/*
+		for (auto i=0; i<num_vertices; i++){
+			vertices[i*num_per_vertex + 3] = 1.0;
+			vertices[i*num_per_vertex + 4] = 1.0;
+			vertices[i*num_per_vertex + 5] = 1.0;
+		}
+		*/
+	}
+
+	if (_color_alpha == nullptr){
+		/*
+		for (auto i=0; i<num_vertices; i++){
+			vertices[i*num_per_vertex + 6] = 1.0;
+		}
+		*/
+	}
+
+}
+
+
 void visualixer::onColors(){
 	if (colorby == NULL) return;
 	if (colorby_max - colorby_min == 0.0) return;
 	// modify the vertex array to incorporate user-defined colors
 	rgb ptcolor;
 
-	for (unsigned int i=0; i<num_vertices; i++){
+	for (auto i=0; i<num_vertices; i++){
 		ptcolor = color_ramp.get_ramp_color(float((colorby[i])/(colorby_max - colorby_min)));
 		vertices[i*num_per_vertex + 3] = ptcolor.R;
 		vertices[i*num_per_vertex + 4] = ptcolor.G;
@@ -425,6 +453,17 @@ void visualixer::onColors(){
 
 	return;
 }
+
+
+void visualixer::onAlpha(){
+	if (_color_alpha == nullptr) return;
+
+	for (auto i=0; i<num_vertices; i++){
+		vertices[i*num_per_vertex + 6] = _color_alpha[i];
+	}
+
+}
+
 
 void visualixer::onRender(){
 	// Create Vertex Array Object
@@ -448,6 +487,10 @@ void visualixer::onRender(){
 
   // enable point size specification
   glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+
+  // enable alpha channel
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   return;
 }
@@ -509,7 +552,7 @@ void visualixer::onShaders(){
 
   GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
   glEnableVertexAttribArray(colAttrib);
-  glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), (void*)(num_vertex_points * sizeof(GLfloat)));
+  glVertexAttribPointer(colAttrib, 4, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), (void*)(num_vertex_points * sizeof(GLfloat)));
 
   rotdeg = 0;
 	model = glm::rotate(model, rotdeg, glm::vec3(0.0f, 0.0f, 1.0f)); // angle in radians to suppress some output
