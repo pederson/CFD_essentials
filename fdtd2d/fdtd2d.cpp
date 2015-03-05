@@ -14,6 +14,7 @@ int main(int argc, char * argv[]){
 	double dt = 0.5*dx/c0;
 
 	// empty space model
+	/*
 	parametric_model_2d paramodel;
 	paramodel.set_model_name("EmptySpace");
 	paramodel.add_physical_property("eps_rel");
@@ -21,6 +22,7 @@ int main(int argc, char * argv[]){
 	paramodel.add_material("Dielectric", {6.0});
 	circle c1 = circle(0.1, {0.5, 0.5}, paramodel.get_material("Vacuum"));
 	paramodel.add_object(&c1);
+	//*/
 
 	// ring model
 	/*
@@ -57,7 +59,7 @@ int main(int argc, char * argv[]){
 
 
 	// holey waveguide defect model
-	/*
+	
 	parametric_model_2d paramodel;
 	paramodel.set_model_name("DielecSphere");
 	paramodel.add_physical_property("eps_rel");
@@ -236,7 +238,7 @@ int main(int argc, char * argv[]){
 		// impose a gaussian source (hard-coded)
 		//pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);
 		pulse = sin(2*VX_PI*srcfreq*n*dt); // oscillatory source
-		D_z[paramesh.nearest_node(0.5, 0.5)] = pulse;
+		D_z[paramesh.nearest_node(0.05, 0.5)] = pulse;
 		//E_z[paramesh.nearest_node(0.5, 0.5)] = pulse; without pml
 		/*
 		E_z[paramesh.nearest_node(0.25, 0.9)] = pulse;
