@@ -163,6 +163,7 @@ protected:
 	bool visualixer_active; // is the window currently drawn?
 	bool rotation_lock; // lock mouse rotations?
 	bool pan_lock; // lock mouse panning
+	bool zoom_lock; // lock mouse zooming
 
 
 	// base callbacks to interface with GLFW

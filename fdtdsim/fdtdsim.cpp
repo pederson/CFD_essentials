@@ -9,7 +9,7 @@ using namespace std;
 
 int main(int argc, char * argv[]){
 	// constants
-	double dx = 0.005;
+	double dx = 0.05e-6;
 	//double dt = 0.5*dx/c0;
 
 	// empty space model
@@ -26,7 +26,7 @@ int main(int argc, char * argv[]){
 	// ring model
 	/*
 	parametric_model_2d paramodel;
-	paramodel.set_model_name("DielecSphere");
+	paramodel.set_model_name("Ring");
 	paramodel.add_physical_property("eps_rel");
 	paramodel.add_material("Vacuum", {1.0});
 	paramodel.add_material("Dielectric", {6.0});
@@ -40,15 +40,15 @@ int main(int argc, char * argv[]){
 	// holey waveguide model
 	
 	parametric_model_2d paramodel;
-	paramodel.set_model_name("DielecSphere");
+	paramodel.set_model_name("Holey Waveguide");
 	paramodel.add_physical_property("eps_rel");
 	paramodel.add_material("Vacuum", {1.0});
 	paramodel.add_material("Dielectric", {6.0});
-	rectangle r1 = rectangle(1.0, 0.3, {0.5, 0.5}, paramodel.get_material("Dielectric"));
-	circle c1 = circle(0.06, {0.2, 0.5}, paramodel.get_material("Vacuum"));
-	circle c2 = circle(0.06, {0.4, 0.5}, paramodel.get_material("Vacuum"));
-	circle c3 = circle(0.06, {0.6, 0.5}, paramodel.get_material("Vacuum"));
-	circle c4 = circle(0.06, {0.8, 0.5}, paramodel.get_material("Vacuum"));
+	rectangle r1 = rectangle(9.0e-6, 2.0e-6, {4.5e-6, 3.0e-6}, paramodel.get_material("Dielectric"));
+	circle c1 = circle(0.5e-6, {1.5e-6, 3.0e-6}, paramodel.get_material("Vacuum"));
+	circle c2 = circle(0.5e-6, {3.5e-6, 3.0e-6}, paramodel.get_material("Vacuum"));
+	circle c3 = circle(0.5e-6, {5.5e-6, 3.0e-6}, paramodel.get_material("Vacuum"));
+	circle c4 = circle(0.5e-6, {7.5e-6, 3.0e-6}, paramodel.get_material("Vacuum"));
 	paramodel.add_object(&r1);
 	paramodel.add_object(&c1);
 	paramodel.add_object(&c2);
@@ -60,7 +60,7 @@ int main(int argc, char * argv[]){
 	// holey waveguide defect model
 	/*
 	parametric_model_2d paramodel;
-	paramodel.set_model_name("DielecSphere");
+	paramodel.set_model_name("Holey Defect");
 	paramodel.add_physical_property("eps_rel");
 	paramodel.add_material("Vacuum", {1.0});
 	paramodel.add_material("Dielectric", {6.0});
@@ -79,7 +79,7 @@ int main(int argc, char * argv[]){
 
 	// convert the model into a mesh
 	RegularMesh paramesh;
-	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, paramodel.get_material("Vacuum"));
+	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 9.0e-6, 0.0, 6.0e-6, paramodel.get_material("Vacuum"));
 	paramesh.print_summary();
 
 	// view the mesh
@@ -97,6 +97,7 @@ int main(int argc, char * argv[]){
 	fsim.set_num_iters(800);
 	fsim.run();
 	fsim.view_results();
+	//fsim.output_HDF5("testout.h5");
 
 
 	return 0;

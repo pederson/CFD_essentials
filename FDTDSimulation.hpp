@@ -46,41 +46,43 @@ private:
 	const RegularMesh * _mesh;
 	SimulationData _simdata;
 
-	// internal variables
-	const double _eps0 = 8.854e-12;
-	const double _mu0 = 4*3.14159e-7;
-	const double _c0 = 2.99792458e+8;
-	double _dx, _dt, _CourantFactor;
-	double _nPML, _num_iters, _current_iter, _tcur;
-
 	// user options
 	bool _output_HDF5;
 	std::string _output_HDF5_name;
 	bool _visualize_results;
 
-	const double * _rel_permittivity;
-	const double * _rel_permeability;
+	// internal simulation variables
+		bool _is_allocated;
+		const double _eps0 = 8.854e-12;
+		const double _mu0 = 4*3.14159e-7;
+		const double _c0 = 2.99792458e+8;
+		double _dx, _dt, _CourantFactor;
+		double _nPML, _num_iters, _current_iter, _tcur;
 
-	// field stuff
-	double * D_z;
-	double * I_Hx;
-	double * I_Hy;
-	double * E_z;
-	double * H_y;
-	double * H_x;
-	double * gaz;
+		
+		const double * _rel_permittivity;
+		const double * _rel_permeability;
 
-	// PML stuff
-	double * gi2;
-	double * gi3;
-	double * gj2;
-	double * gj3;
-	double * fi1;
-	double * fi2;
-	double * fi3;
-	double * fj1;
-	double * fj2;
-	double * fj3;
+		// field stuff
+		double * D_z;
+		double * I_Hx;
+		double * I_Hy;
+		double * E_z;
+		double * H_y;
+		double * H_x;
+		double * gaz;
+
+		// PML stuff
+		double * gi2;
+		double * gi3;
+		double * gj2;
+		double * gj3;
+		double * fi1;
+		double * fi2;
+		double * fi3;
+		double * fj1;
+		double * fj2;
+		double * fj3;
 
 
 

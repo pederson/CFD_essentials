@@ -1,5 +1,7 @@
 TODO:
 
+- Chiggidy Check Yoself Before You Wreck Yoself for the visualizers and anything else that could easily crash
+
 - Figure out how to output the OpenGL window to .png, .tif, .jpg OR make movies to .gif
 
 - Make sure that everything follows the model of having all necessary information contained in the base class, but with added functionality implemented in the derived classes

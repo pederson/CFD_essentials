@@ -22,6 +22,9 @@ FDTDSimulation::FDTDSimulation(){
 	fj2 = nullptr;
 	fj3 = nullptr;
 
+	_rel_permittivity = nullptr;
+	_rel_permeability = nullptr;
+
 	_dx = 0.0;
 	_dt = 0.0;
 	_CourantFactor = 0.5;
@@ -29,6 +32,8 @@ FDTDSimulation::FDTDSimulation(){
 	_num_iters = 0;
 	_current_iter = 0;
 	_tcur = 0.0;
+
+	_is_allocated = false;
 
 
 }
@@ -79,6 +84,7 @@ void FDTDSimulation::view_results(){
 		// visualize the simulation
 		simulation_visualixer simvis;
 		simvis.bind_simulation(_simdata);
+		simvis.set_color_ramp(CRamp::DIVERGENT_5);
 		simvis.set_colorby_field("E_z");
 		simvis.set_color_alpha(_rel_permittivity);
 		simvis.set_color_interpolation(false);
@@ -99,10 +105,14 @@ void FDTDSimulation::output_HDF5(std::string outname){
 void FDTDSimulation::run(int num_iters){
 	_dt = _CourantFactor*_dx/_c0;
 
-	preRunCheck();
-	allocate_fields();
-	allocate_PML();
-	allocate_simdata();
+
+	if (!_is_allocated) {
+		preRunCheck();
+		allocate_fields();
+		allocate_PML();
+		allocate_simdata();
+		_is_allocated = true;
+	}
 
 	cout << "dx: " << _dx << endl;
 	cout << "Courant Factor: " << _CourantFactor << endl;
@@ -116,19 +126,24 @@ void FDTDSimulation::run(int num_iters){
 
 void FDTDSimulation::run_2D(int num_iters){
 
-	cout << "starting the run" << endl;
+	cout << "starting the run 2D" << endl;
+	double pulse, t0=10.0, spread = 12.0, srcfreq=1.0e+14;
+	double _srcx = 0.5e-6, _srcy = 3.0e-6;
 
 	unsigned int end_iter;
 	if (num_iters==-1) end_iter = _num_iters;
-	else end_iter = _current_iter + num_iters;
+	else {
+		end_iter = _current_iter + num_iters;
+		if (end_iter > _num_iters) end_iter = _num_iters;
+	}
 	
-	double pulse, t0=10.0, spread = 12.0, srcfreq=1.0e+9, curle;
+	double curle;
 	unsigned int cind, lind, rind, uind, dind ;
 	for (auto n=_current_iter; n<end_iter; n++){
 		_tcur += _dt;
 
 		cout << "on time step " << _current_iter << "/" << _num_iters-1 << "\r" << flush;
-
+		//cout << endl;
 
 		// update D field
 		for (auto i=1; i<_mesh->reg_num_nodes_x()-1; i++){ // cols
@@ -148,12 +163,12 @@ void FDTDSimulation::run_2D(int num_iters){
 			}
 		}
 
-
+		//cout << "about to impose source" << endl;
 		// impose sources
 		//pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);
-		pulse = sin(2*VX_PI*srcfreq*n*_dt); // oscillatory source
-		D_z[_mesh->nearest_node(0.5, 0.5)] = pulse;
-
+		pulse = sin(2*VX_PI*srcfreq*_tcur); // oscillatory source
+		D_z[_mesh->nearest_node(_srcx, _srcy)] = pulse;
+		//cout << "impose source" << endl;
 		
 		// calculate Ez field
 		for (auto i=0; i<_mesh->reg_num_nodes_x(); i++){ // cols
@@ -326,15 +341,11 @@ void FDTDSimulation::allocate_PML(){
 }
 
 void FDTDSimulation::allocate_simdata(){
-	cout << "allocating simdata" << endl;
 
 	// set up the simulation data holder
 	_simdata.bind_mesh(*_mesh);
-	cout << "mesh is bound to simdata" << endl;
 	_simdata.add_field("E_z");
-	cout << "field is added to simdata" << endl;
 	_simdata.set_time_span(0.0, _dt, _num_iters*_dt);
-	cout << "allocating simdata" << endl;
 	_simdata.print_summary();
 }
 
