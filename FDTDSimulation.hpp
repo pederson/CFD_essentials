@@ -4,6 +4,7 @@
 //#include "Simulation.hpp"
 #include "RegularMesh.hpp"
 #include "VisualixerSimulation.hpp"
+#include "SignalGenerator.hpp"
 
 #include <vector>
 #include <string>
@@ -24,12 +25,14 @@ public:
 	void set_boundary(BoundaryLocation loc, BoundaryCondition type, unsigned int num_layers=1);
 	void add_gaussian_source(double t0, double spread, double xloc, double yloc=0, double zloc=0);
 	void add_sinusoidal_source(double freq_Hz, double phase, double xloc, double yloc=0, double zloc=0);
+	void add_gaussian_modulator(unsigned int signal_idx, double t0, double spread);
+	void add_sinusoidal_modulator(unsigned int signal_idx, double freq_Hz, double phase=0.0);
 	void bind_mesh(const RegularMesh & mesh);
 	void bind_rel_permittivity(const double * rel_permittivity);
-	void bind_rel_permeability(const double * rel_permeability);
+	//void bind_rel_permeability(const double * rel_permeability);
 	void set_num_iters(unsigned int num_iters) {_num_iters = num_iters;};
-	void set_invariant_time(unsigned int timespan);
-	void set_invariant_resolution(unsigned int res);
+	//void set_invariant_time(unsigned int timespan);
+	//void set_invariant_resolution(unsigned int res);
 	void view_results();
 	void output_HDF5(std::string outname="");
 
@@ -46,10 +49,12 @@ private:
 	const RegularMesh * _mesh;
 	SimulationData _simdata;
 
-	// user options
-	bool _output_HDF5;
-	std::string _output_HDF5_name;
-	bool _visualize_results;
+	// user defined data
+	const double * _rel_permittivity;
+	const double * _rel_permeability;
+	std::vector<SignalGenerator> _signals;
+	std::vector<SignalGenerator> _modulators;
+
 
 	// internal simulation variables
 		bool _is_allocated;
@@ -60,8 +65,8 @@ private:
 		double _nPML, _num_iters, _current_iter, _tcur;
 
 		
-		const double * _rel_permittivity;
-		const double * _rel_permeability;
+		std::vector<double> _default_permittivity;
+		std::vector<double> _default_permeability;
 
 		// field stuff
 		double * D_z;

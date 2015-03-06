@@ -63,11 +63,38 @@ void FDTDSimulation::set_boundary(BoundaryLocation loc, BoundaryCondition type, 
 }
 
 void FDTDSimulation::add_gaussian_source(double t0, double spread, double xloc, double yloc, double zloc){
+	SignalGenerator sig, mod;
+	sig.set_gaussian(spread, t0);
+	sig.set_location(xloc, yloc, zloc);
+	mod.set_location(xloc, yloc, zloc);
+
+	_signals.push_back(sig);
+	_modulators.push_back(mod);
 
 }
 
 void FDTDSimulation::add_sinusoidal_source(double freq_Hz, double phase, double xloc, double yloc, double zloc){
+	SignalGenerator sig, mod;
+	sig.set_sinusoid(freq_Hz, phase);
+	sig.set_location(xloc, yloc, zloc);
+	mod.set_location(xloc, yloc, zloc);
 
+	_signals.push_back(sig);
+	_modulators.push_back(mod);
+}
+
+void FDTDSimulation::add_gaussian_modulator(unsigned int signal_idx, double t0, double spread){
+	SignalGenerator mod;
+	mod.set_gaussian(spread, t0);
+
+	_modulators.at(signal_idx) = mod;
+}
+
+void FDTDSimulation::add_sinusoidal_modulator(unsigned int signal_idx, double freq_Hz, double phase){
+	SignalGenerator mod;
+	mod.set_sinusoid(freq_Hz, phase);
+
+	_modulators.at(signal_idx) = mod;
 }
 
 void FDTDSimulation::bind_mesh(const RegularMesh & mesh) {
@@ -95,11 +122,11 @@ void FDTDSimulation::view_results(){
 
 void FDTDSimulation::output_HDF5(std::string outname){
 	if (outname.compare("") == 0){
-		_output_HDF5_name = "FDTD_output.h5";
+		outname = "FDTD_output.h5";
 	}
-	else _output_HDF5_name = outname;
 
-	_simdata.write_HDF5(_output_HDF5_name);
+
+	_simdata.write_HDF5(outname);
 }
 
 void FDTDSimulation::run(int num_iters){
@@ -116,6 +143,7 @@ void FDTDSimulation::run(int num_iters){
 
 	cout << "dx: " << _dx << endl;
 	cout << "Courant Factor: " << _CourantFactor << endl;
+	cout << "dt: " << _dt << endl;
 
 
 	
@@ -127,8 +155,8 @@ void FDTDSimulation::run(int num_iters){
 void FDTDSimulation::run_2D(int num_iters){
 
 	cout << "starting the run 2D" << endl;
-	double pulse, t0=10.0, spread = 12.0, srcfreq=1.0e+14;
-	double _srcx = 0.5e-6, _srcy = 3.0e-6;
+	double pulse;//, t0=10.0, spread = 12.0, srcfreq=3.0e+14/6.0;
+	double _srcx, _srcy;// = 0.5e-6, _srcy = 3.0e-6;
 
 	unsigned int end_iter;
 	if (num_iters==-1) end_iter = _num_iters;
@@ -166,8 +194,14 @@ void FDTDSimulation::run_2D(int num_iters){
 		//cout << "about to impose source" << endl;
 		// impose sources
 		//pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);
-		pulse = sin(2*VX_PI*srcfreq*_tcur); // oscillatory source
-		D_z[_mesh->nearest_node(_srcx, _srcy)] = pulse;
+		//pulse = sin(2*VX_PI*srcfreq*_tcur); // oscillatory source
+		//D_z[_mesh->nearest_node(_srcx, _srcy)] = pulse;
+		for (auto i=0; i<_signals.size(); i++){
+			pulse = _signals.at(i).value(_tcur)*_modulators.at(i).value(_tcur);
+			_srcx = _signals.at(i).xloc();
+			_srcy = _signals.at(i).yloc();
+			D_z[_mesh->nearest_node(_srcx, _srcy)] = pulse;
+		}
 		//cout << "impose source" << endl;
 		
 		// calculate Ez field
@@ -180,6 +214,8 @@ void FDTDSimulation::run_2D(int num_iters){
 				
 			}
 		}
+
+		// need generalized boundary conditions here
 		// set Ez at edges to zero for pml
 		for (auto j=0; j<_mesh->reg_num_nodes_y(); j++){
 			lind = _mesh->reg_inds_to_glob_ind(0, j);
@@ -241,7 +277,6 @@ void FDTDSimulation::preRunCheck(){
 }
 
 void FDTDSimulation::allocate_fields(){
-	cout << "allocating fields" << endl;
 
 	D_z = new double[_mesh->nodecount()];
 	I_Hx = new double[_mesh->nodecount()];
@@ -265,7 +300,6 @@ void FDTDSimulation::allocate_fields(){
 }
 
 void FDTDSimulation::allocate_PML(){
-	cout << "allocating pml" << endl;
 
 	// PML related
 	float xnum, xd, xxn, xn;

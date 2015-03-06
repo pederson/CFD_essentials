@@ -1,12 +1,14 @@
 TODO:
 
+- Frequency analysis tools (DFT) for the FDTD sim. Other signal processing tools are good too. 
+
 - Chiggidy Check Yoself Before You Wreck Yoself for the visualizers and anything else that could easily crash
 
 - Figure out how to output the OpenGL window to .png, .tif, .jpg OR make movies to .gif
 
 - Make sure that everything follows the model of having all necessary information contained in the base class, but with added functionality implemented in the derived classes
 
-- Problem writing holey_waveguide_defect geometry simulation to HDF5... only on school computer though
+- Problem writing holey_waveguide_defect geometry simulation to HDF5... only on school computer though... and only happens sometimes...
 
 - Geometric Objects need to have an options to do a repeating pattern (either rectangular or circular)
 
@@ -52,7 +54,7 @@ TODO:
 - adding a colorby or alpha before adding an object (mesh, pointcloud) doesn't work b/c the number of points is still unknown... is there a workaround for this?
 - Shading and Light source for mesh model viewer
 - Don't allow the viewing window to recenter itself for each timestep during simulation
-
+- Make a convention where there are expected to be Point, Line, Triangle, and Quad elements. The number of them are set by the user, but they are always in that order
 
 
 - Doxygen comments for everything

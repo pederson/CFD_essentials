@@ -39,7 +39,7 @@ SET(ALL_LIBRARIES ${ALL_LIBRARIES} ${HDF5_LIBRARIES})
 # OpenGL
 SET(ALL_LIBRARIES ${ALL_LIBRARIES} ${OPENGL_gl_LIBRARY})
 
-ADD_EXECUTABLE( fdtdsim fdtdsim.cpp ../Visualixer.cpp ../VisualixerMesh.cpp ../VisualixerSimulation.cpp ../Mesh.cpp ../RegularMesh.cpp ../ColorRamp.cpp ../SimulationData.cpp ../GeometricObject.cpp ../Converter.cpp ../Hull.cpp ../FDTDSimulation.cpp)
+ADD_EXECUTABLE( fdtdsim fdtdsim.cpp ../Visualixer.cpp ../VisualixerMesh.cpp ../VisualixerSimulation.cpp ../Mesh.cpp ../RegularMesh.cpp ../ColorRamp.cpp ../SimulationData.cpp ../GeometricObject.cpp ../Converter.cpp ../Hull.cpp ../FDTDSimulation.cpp ../SignalGenerator.cpp)
 
 FOREACH(item ${ALL_LIBRARIES})
     MESSAGE(STATUS "  using lib: " ${item})
