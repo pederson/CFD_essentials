@@ -1,16 +1,22 @@
 #ifndef _FDTDSIMULATION_H
 #define _FDTDSIMULATION_H
 
-#include "Simulation.hpp"
+//#include "Simulation.hpp"
+#include "RegularMesh.hpp"
+#include "VisualixerSimulation.hpp"
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 enum BoundaryLocation{BOUNDARY_RIGHT, BOUNDARY_LEFT, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_FRONT, BOUNDARY_BACK};
 enum BoundaryCondition{BOUNDARY_PML, BOUNDARY_PERIODIC, BOUNDARY_PEC, BOUNDARY_PMC};
 
-class FDTDSimulation : public Simulation{
+class FDTDSimulation{
 public:
+
+	FDTDSimulation();
+	~FDTDSimulation();
 
 	// inspectors
 
@@ -21,6 +27,9 @@ public:
 	void bind_mesh(const RegularMesh & mesh);
 	void bind_rel_permittivity(const double * rel_permittivity);
 	void bind_rel_permeability(const double * rel_permeability);
+	void set_num_iters(unsigned int num_iters) {_num_iters = num_iters;};
+	void set_invariant_time(unsigned int timespan);
+	void set_invariant_resolution(unsigned int res);
 	void view_results();
 	void output_HDF5(std::string outname="");
 
@@ -32,8 +41,10 @@ private:
 	void allocate_fields();
 	void allocate_PML();
 	void allocate_simdata();
+	void run_2D(int num_iters = -1);
 
 	const RegularMesh * _mesh;
+	SimulationData _simdata;
 
 	// internal variables
 	const double _eps0 = 8.854e-12;

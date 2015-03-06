@@ -27,6 +27,7 @@ public:
   unsigned int reg_num_nodes_x() const {return _num_nodes_x;};
   unsigned int reg_num_nodes_y() const {return _num_nodes_y;};
   unsigned int reg_num_nodes_z() const {return _num_nodes_z;};
+  double res() const {return _res;};
   //unsigned int & reg_nodes_boundary(BoundaryLocation loc);
   std::vector<unsigned int> left_inds() const;
   std::vector<unsigned int> right_inds() const;
