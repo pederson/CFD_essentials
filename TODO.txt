@@ -6,7 +6,7 @@ TODO:
 
 - Figure out how to output the OpenGL window to .png, .tif, .jpg OR make movies to .gif
 
-- Make sure that everything follows the model of having all necessary information contained in the base class, but with added functionality implemented in the derived classes
+- Make sure that everything follows the model of having all necessary information contained in the base class, but with added functionality implemented in the derived classes. If this isn't satisfied, maybe they should be separate classes. 
 
 - Problem writing holey_waveguide_defect geometry simulation to HDF5... only on school computer though... and only happens sometimes...
 

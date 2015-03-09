@@ -298,7 +298,7 @@ void FDTDSimulation::run_2D(int num_iters){
 
 		// fill in the simdata for this time step
 		_simdata.add_data_at_index(n, "E_z", E_z[0]);
-		//_simdata.add_data_at_index(n, "H_y", H_y[0]);
+		_simdata.add_data_at_index(n, "H_y", H_y[0]);
 
 		// update iteration count
 		_current_iter++;
@@ -467,7 +467,7 @@ void FDTDSimulation::allocate_simdata(){
 	// set up the simulation data holder
 	_simdata.bind_mesh(*_mesh);
 	_simdata.add_field("E_z");
-	//_simdata.add_field("H_y");
+	_simdata.add_field("H_y");
 	_simdata.set_time_span(0.0, _dt, _num_iters*_dt);
 	_simdata.print_summary();
 }
