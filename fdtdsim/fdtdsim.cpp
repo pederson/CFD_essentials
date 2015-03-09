@@ -117,6 +117,14 @@ int main(int argc, char * argv[]){
 
 	// initialize the simulation
 	FDTDSimulation fsim;
+	/*
+	double * cur_dens_z = new double[paramesh.nodecount()];
+	for (auto i=0; i<paramesh.nodecount(); i++) cur_dens_z[i] = 0;
+	cur_dens_z[paramesh.nearest_node(1.0e-6, 3.0e-6)] = 1.0e+8;
+	cur_dens_z[paramesh.nearest_node(1.0e-6, 3.0e-6) + 1] = 1.0e+8;
+	cur_dens_z[paramesh.nearest_node(1.0e-6, 3.0e-6) - 1] = 1.0e+8;
+	fsim.bind_current_density_z(cur_dens_z);
+	*/
 	fsim.bind_mesh(paramesh);
 	fsim.bind_rel_permittivity(&paramesh.data("eps_rel"));
 	fsim.add_sinusoidal_source(3.0e+14/6.0, 0.0, 0.5e-6, 3.0e-6);

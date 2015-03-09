@@ -10,6 +10,9 @@ FDTDSimulation::FDTDSimulation(){
 	H_y = nullptr;
 	H_x = nullptr;
 	gaz = nullptr;
+	jnx = nullptr; 
+	jny = nullptr;
+	jnz = nullptr;
 
 	gi2 = nullptr;
 	gi3 = nullptr;
@@ -24,6 +27,12 @@ FDTDSimulation::FDTDSimulation(){
 
 	_rel_permittivity = nullptr;
 	_rel_permeability = nullptr;
+	_current_density_x = nullptr;
+	_field_multiplier_x = nullptr;
+	_current_density_y = nullptr;
+	_field_multiplier_y = nullptr;
+	_current_density_z = nullptr;
+	_field_multiplier_z = nullptr;
 
 	_dx = 0.0;
 	_dt = 0.0;
@@ -34,29 +43,34 @@ FDTDSimulation::FDTDSimulation(){
 	_tcur = 0.0;
 
 	_is_allocated = false;
+	_include_current_density = false;
+	_time_variable_coefficients = false;
 
 
 }
 
 FDTDSimulation::~FDTDSimulation(){
-	delete[] D_z;
-	delete[] I_Hx;
-	delete[] I_Hy;
-	delete[] E_z;
-	delete[] H_y;
-	delete[] H_x;
-	delete[] gaz;
+	if (D_z != nullptr) delete[] D_z;
+	if (I_Hx != nullptr) delete[] I_Hx;
+	if (I_Hy != nullptr) delete[] I_Hy;
+	if (E_z != nullptr) delete[] E_z;
+	if (H_y != nullptr) delete[] H_y;
+	if (H_x != nullptr) delete[] H_x;
+	if (gaz != nullptr) delete[] gaz;
+	if (jnx != nullptr) delete[] jnx;
+	if (jny != nullptr) delete[] jny;
+	if (jnz != nullptr) delete[] jnz;
 
-	delete[] gi2;
-	delete[] gi3;
-	delete[] gj2;
-	delete[] gj3;
-	delete[] fi1;
-	delete[] fi2;
-	delete[] fi3;
-	delete[] fj1;
-	delete[] fj2;
-	delete[] fj3;
+	if (gi2 != nullptr) delete[] gi2;
+	if (gi3 != nullptr) delete[] gi3;
+	if (gj2 != nullptr) delete[] gj2;
+	if (gj3 != nullptr) delete[] gj3;
+	if (fi1 != nullptr) delete[] fi1;
+	if (fi2 != nullptr) delete[] fi2;
+	if (fi3 != nullptr) delete[] fi3;
+	if (fj1 != nullptr) delete[] fj1;
+	if (fj2 != nullptr) delete[] fj2;
+	if (fj3 != nullptr) delete[] fj3;
 }
 void FDTDSimulation::set_boundary(BoundaryLocation loc, BoundaryCondition type, unsigned int num_layers){
 
@@ -106,6 +120,20 @@ void FDTDSimulation::bind_rel_permittivity(const double * rel_permittivity){
 	_rel_permittivity = rel_permittivity;
 }
 
+void FDTDSimulation::bind_current_density_x(const double * current_density_x){
+	_current_density_x = current_density_x;
+}
+
+void FDTDSimulation::bind_current_density_y(const double * current_density_y){
+	_current_density_y = current_density_y;
+}
+
+void FDTDSimulation::bind_current_density_z(const double * current_density_z){
+	_current_density_z = current_density_z;
+}
+
+
+
 void FDTDSimulation::view_results(){
 
 		// visualize the simulation
@@ -113,6 +141,7 @@ void FDTDSimulation::view_results(){
 		simvis.bind_simulation(_simdata);
 		simvis.set_color_ramp(CRamp::DIVERGENT_5);
 		simvis.set_colorby_field("E_z");
+		//simvis.set_colorby_field("H_y");
 		simvis.set_color_alpha(_rel_permittivity);
 		simvis.set_color_interpolation(false);
 		simvis.set_frequency_Hz(30);
@@ -140,15 +169,22 @@ void FDTDSimulation::run(int num_iters){
 		allocate_simdata();
 		_is_allocated = true;
 	}
+	//if (_is_allocated && _time_variable_coefficients) recalcCoeffs();
 
 	cout << "dx: " << _dx << endl;
 	cout << "Courant Factor: " << _CourantFactor << endl;
 	cout << "dt: " << _dt << endl;
 
 
-	
-
-	run_2D(num_iters);
+	if (_mesh->num_dims() == 1){
+		cout << "1D FDTD is not yet plugged in!" << endl;
+	}
+	else if (_mesh->num_dims() == 2){
+		run_2D(num_iters);
+	}
+	else if (_mesh->num_dims() == 3){
+		cout << "3D FDTD is not yet implemented!" << endl;
+	}
 
 }
 
@@ -185,7 +221,8 @@ void FDTDSimulation::run_2D(int num_iters){
 
 				
 				D_z[cind] = gi3[i]*gj3[j]*D_z[cind]
-						  + gi2[i]*gj2[j]*_CourantFactor*(H_y[cind] - H_y[lind] - H_x[cind] + H_x[dind]);
+						  + gi2[i]*gj2[j]*_CourantFactor*(H_y[cind] - H_y[lind] - H_x[cind] + H_x[dind])
+						  - _CourantFactor*_dx*jnz[cind];
 
 				
 			}
@@ -274,6 +311,15 @@ void FDTDSimulation::run_2D(int num_iters){
 
 void FDTDSimulation::preRunCheck(){
 
+	if (_current_density_x == nullptr && _current_density_y == nullptr && _current_density_z == nullptr){
+		_include_current_density = false;
+	}
+	else {
+		_include_current_density = true;		
+	}
+
+	
+
 }
 
 void FDTDSimulation::allocate_fields(){
@@ -285,7 +331,12 @@ void FDTDSimulation::allocate_fields(){
 	H_y = new double[_mesh->nodecount()];
 	H_x = new double[_mesh->nodecount()];
 	gaz = new double[_mesh->nodecount()];
+	jnx = new double[_mesh->nodecount()];
+	jny = new double[_mesh->nodecount()];
+	jnz = new double[_mesh->nodecount()];
 	//gbz = new double[_mesh.nodecount()];
+
+
 	for (auto i=0; i<_mesh->nodecount(); i++){
 		D_z[i] = 0.0;
 		I_Hx[i] = 0.0;
@@ -293,9 +344,46 @@ void FDTDSimulation::allocate_fields(){
 		H_x[i] = 0.0;
 		H_y[i] = 0.0;
 		E_z[i] = 0.0;
-		gaz[i] = 1.0/_rel_permittivity[i];		// gaz = 1/(epsilon+(sigma*dt/eps0));
 		//gbz[i] = 0.0;		// gbz = sigma*dt/eps0;
 	}
+
+	// deal with relative permittivity
+	if (_rel_permittivity == nullptr){
+		for (auto i=0; i<_mesh->nodecount(); i++) gaz[i] = 1.0;
+	}
+	else{
+		for (auto i=0; i<_mesh->nodecount(); i++) gaz[i] = 1.0/_rel_permittivity[i];
+	}
+
+	// deal with relative permeability
+	if (_rel_permeability == nullptr){
+
+	}
+
+	// deal with current density
+	if (_current_density_x == nullptr){
+		for (auto i=0; i<_mesh->nodecount(); i++) jnx[i] = 0.0;
+	}
+	else{
+		for (auto i=0; i<_mesh->nodecount(); i++) jnx[i] = _current_density_x[i];	
+	}
+
+	if (_current_density_y == nullptr){
+		for (auto i=0; i<_mesh->nodecount(); i++) jny[i] = 0.0;
+	}
+	else{
+		for (auto i=0; i<_mesh->nodecount(); i++) jny[i] = _current_density_y[i];
+	}
+
+	if (_current_density_z == nullptr){
+		for (auto i=0; i<_mesh->nodecount(); i++) jnz[i] = 0.0;
+	}
+	else{
+		for (auto i=0; i<_mesh->nodecount(); i++)jnz[i] = _current_density_z[i];	
+	}
+
+
+
 
 }
 
@@ -379,6 +467,7 @@ void FDTDSimulation::allocate_simdata(){
 	// set up the simulation data holder
 	_simdata.bind_mesh(*_mesh);
 	_simdata.add_field("E_z");
+	//_simdata.add_field("H_y");
 	_simdata.set_time_span(0.0, _dt, _num_iters*_dt);
 	_simdata.print_summary();
 }
