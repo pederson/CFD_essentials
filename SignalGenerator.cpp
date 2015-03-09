@@ -62,6 +62,10 @@ void SignalGenerator::set_ramp(double t0, double t1){
 	_type = Signal::SIGNAL_RAMP;
 }
 
+void SignalGenerator::set_tanh(){
+
+}
+
 double SignalGenerator::value(double t) const{
 
 	switch (_type){
@@ -78,6 +82,9 @@ double SignalGenerator::value(double t) const{
 			if (t>_t1) return _magnitude;
 			else if (t<_t0) return 0.0;
 			else return _magnitude/(_t1-_t0)*t;
+
+		case Signal::SIGNAL_TANH:
+			return _magnitude*tanh(t);
 
 		otherwise:
 			return 0.0;

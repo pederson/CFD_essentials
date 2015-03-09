@@ -27,7 +27,9 @@ public:
 	void add_sinusoidal_source(double freq_Hz, double phase, double xloc, double yloc=0, double zloc=0);
 	void add_gaussian_modulator(unsigned int signal_idx, double t0, double spread);
 	void add_sinusoidal_modulator(unsigned int signal_idx, double freq_Hz, double phase=0.0);
+	
 	void bind_mesh(const RegularMesh & mesh);
+	//void bind_metal(const double * metal_regions);
 	void bind_rel_permittivity(const double * rel_permittivity);
 	//void bind_rel_permeability(const double * rel_permeability);
 	void bind_current_density_x(const double * current_density_x);
@@ -36,6 +38,7 @@ public:
 	void bind_current_density_y(const double * velocity_y, const double * density_multiplier_y, const double cdymult=1.0);
 	void bind_current_density_z(const double * current_density_z);
 	void bind_current_density_z(const double * velocity_z, const double * density_multiplier_z, const double cdzmult=1.0);
+	
 	void set_num_iters(unsigned int num_iters) {_num_iters = num_iters;};
 	//void set_invariant_time(unsigned int timespan);
 	//void set_invariant_resolution(unsigned int res);
@@ -47,6 +50,7 @@ public:
 private:
 
 	void preRunCheck();
+	void prepareModulator();
 	void allocate_fields();
 	void allocate_PML();
 	void allocate_simdata();
@@ -85,6 +89,9 @@ private:
 		std::vector<double> _default_field_multiplier_x;
 		std::vector<double> _default_field_multiplier_y;
 		std::vector<double> _default_field_multiplier_z;
+
+		SignalGenerator _source_modulator; // modulates all sources with tanh
+		double _source_modulator_width; 	// how many time steps until it reaches max value
 		
 
 		// field stuff

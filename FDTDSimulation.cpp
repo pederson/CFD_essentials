@@ -141,7 +141,7 @@ void FDTDSimulation::view_results(){
 		simvis.bind_simulation(_simdata);
 		simvis.set_color_ramp(CRamp::DIVERGENT_5);
 		simvis.set_colorby_field("E_z");
-		//simvis.set_colorby_field("H_y");
+		simvis.set_colorby_field("H_y");
 		simvis.set_color_alpha(_rel_permittivity);
 		simvis.set_color_interpolation(false);
 		simvis.set_frequency_Hz(30);
@@ -201,12 +201,13 @@ void FDTDSimulation::run_2D(int num_iters){
 		if (end_iter > _num_iters) end_iter = _num_iters;
 	}
 	
-	double curle;
+	double curle, sourcemodval;
 	unsigned int cind, lind, rind, uind, dind ;
 	for (auto n=_current_iter; n<end_iter; n++){
 		_tcur += _dt;
 
 		cout << "on time step " << _current_iter << "/" << _num_iters-1 << "\r" << flush;
+		sourcemodval = _source_modulator.value(double(n)/_source_modulator_width*SIGNALGENERATOR_PI/2.0);
 		//cout << endl;
 
 		// update D field
@@ -222,7 +223,7 @@ void FDTDSimulation::run_2D(int num_iters){
 				
 				D_z[cind] = gi3[i]*gj3[j]*D_z[cind]
 						  + gi2[i]*gj2[j]*_CourantFactor*(H_y[cind] - H_y[lind] - H_x[cind] + H_x[dind])
-						  - _CourantFactor*_dx*jnz[cind];
+						  - _CourantFactor*_dx*jnz[cind]*sourcemodval;
 
 				
 			}
@@ -234,7 +235,7 @@ void FDTDSimulation::run_2D(int num_iters){
 		//pulse = sin(2*VX_PI*srcfreq*_tcur); // oscillatory source
 		//D_z[_mesh->nearest_node(_srcx, _srcy)] = pulse;
 		for (auto i=0; i<_signals.size(); i++){
-			pulse = _signals.at(i).value(_tcur)*_modulators.at(i).value(_tcur);
+			pulse = _signals.at(i).value(_tcur)*_modulators.at(i).value(_tcur) * sourcemodval;
 			_srcx = _signals.at(i).xloc();
 			_srcy = _signals.at(i).yloc();
 			D_z[_mesh->nearest_node(_srcx, _srcy)] = pulse;
@@ -318,8 +319,11 @@ void FDTDSimulation::preRunCheck(){
 		_include_current_density = true;		
 	}
 
-	
+}
 
+void FDTDSimulation::prepareModulator(){
+	_source_modulator.set_tanh();
+	_source_modulator_width = 20;
 }
 
 void FDTDSimulation::allocate_fields(){

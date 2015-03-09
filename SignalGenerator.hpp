@@ -8,7 +8,8 @@ const double SIGNALGENERATOR_PI=3.14159265358979323846264338327950288;
 enum class Signal : char{SIGNAL_GAUSSIAN, 
 						 SIGNAL_SINUSOID, 
 						 SIGNAL_CONSTANT,
-						 SIGNAL_RAMP};
+						 SIGNAL_RAMP,
+						 SIGNAL_TANH};
 
 class SignalGenerator{
 public:
@@ -28,6 +29,7 @@ public:
 	void set_sinusoid(double freq, double phase=0.0);
 	void set_constant(double magnitude);
 	void set_ramp(double t0, double t1);
+	void set_tanh();
 
 	
 
@@ -50,6 +52,8 @@ private:
 
 	// ramp specific
 	double _t1;
+
+	// tanh specific
 
 };
 
