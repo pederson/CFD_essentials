@@ -147,7 +147,7 @@ int main(int argc, char * argv[]){
 	fsim.bind_current_density_z(&paramesh.data("current_density"));
 	//fsim.add_sinusoidal_source(3.0e+14/6.0, 0.0, 0.5e-6, 3.0e-6);
 	//fsim.add_gaussian_source(10.0, 10.0, 4.5e-6, 4.0e-6);
-	fsim.set_num_iters(900);
+	fsim.set_num_iters(1000);
 	fsim.run();
 	fsim.view_results();
 	//fsim.output_HDF5("testout.h5");

@@ -207,7 +207,7 @@ void FDTDSimulation::run_2D(int num_iters){
 		_tcur += _dt;
 
 		cout << "on time step " << _current_iter << "/" << _num_iters-1 << "\r" << flush;
-		sourcemodval = _source_modulator.value(double(n)/_source_modulator_width*SIGNALGENERATOR_PI/2.0);
+		sourcemodval = _source_modulator.value(double(_current_iter)/_source_modulator_width*SIGNALGENERATOR_PI/2.0);
 		//cout << endl;
 
 		// update D field
