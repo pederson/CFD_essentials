@@ -81,9 +81,11 @@ int main(int argc, char * argv[]){
 	parametric_model_2d paramodel;
 	paramodel.set_model_name("Rod Array");
 	paramodel.add_physical_property("eps_rel");
-	paramodel.add_material("Vacuum", {1.0});
-	paramodel.add_material("Dielectric", {6.0});
-	//circle c1 = circle(0.5e-6, {1.5e-6, 4.0e-6}, paramodel.get_material("Dielectric"));
+	paramodel.add_physical_property("current_density_z");
+	paramodel.add_material("Vacuum", {1.0, 0.0});
+	paramodel.add_material("Dielectric", {6.0, 0.0});
+	paramodel.add_material("CurrentWire", {10.0, 1.0e+7});
+	circle c1 = circle(0.1e-6, {1.5e-6, 3.0e-6}, paramodel.get_material("CurrentWire"));
 	circle c2 = circle(0.5e-6, {3.5e-6, 4.0e-6}, paramodel.get_material("Dielectric"));
 	circle c3 = circle(0.5e-6, {5.5e-6, 4.0e-6}, paramodel.get_material("Dielectric"));
 	circle c4 = circle(0.5e-6, {7.5e-6, 4.0e-6}, paramodel.get_material("Dielectric"));
@@ -91,7 +93,7 @@ int main(int argc, char * argv[]){
 	circle c6 = circle(0.5e-6, {3.5e-6, 2.0e-6}, paramodel.get_material("Dielectric"));
 	circle c7 = circle(0.5e-6, {5.5e-6, 2.0e-6}, paramodel.get_material("Dielectric"));
 	circle c8 = circle(0.5e-6, {7.5e-6, 2.0e-6}, paramodel.get_material("Dielectric"));
-	//paramodel.add_object(&c1);
+	paramodel.add_object(&c1);
 	paramodel.add_object(&c2);
 	paramodel.add_object(&c3);
 	paramodel.add_object(&c4);
@@ -117,14 +119,7 @@ int main(int argc, char * argv[]){
 
 	// initialize the simulation
 	FDTDSimulation fsim;
-	/*
-	double * cur_dens_z = new double[paramesh.nodecount()];
-	for (auto i=0; i<paramesh.nodecount(); i++) cur_dens_z[i] = 0;
-	cur_dens_z[paramesh.nearest_node(1.0e-6, 3.0e-6)] = 1.0e+8;
-	cur_dens_z[paramesh.nearest_node(1.0e-6, 3.0e-6) + 1] = 1.0e+8;
-	cur_dens_z[paramesh.nearest_node(1.0e-6, 3.0e-6) - 1] = 1.0e+8;
-	fsim.bind_current_density_z(cur_dens_z);
-	*/
+	fsim.bind_current_density_z(&paramesh.data("current_density_z"));
 	fsim.bind_mesh(paramesh);
 	fsim.bind_rel_permittivity(&paramesh.data("eps_rel"));
 	fsim.add_sinusoidal_source(3.0e+14/6.0, 0.0, 0.5e-6, 3.0e-6);

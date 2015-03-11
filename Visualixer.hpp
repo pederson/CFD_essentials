@@ -195,6 +195,7 @@ protected:
 	virtual void onShaders();
 	virtual	bool MainLoop();
 	virtual void onExit();
+	virtual void onRefresh();	// everything is already prepared, just refresh the screen
 
 
 private:

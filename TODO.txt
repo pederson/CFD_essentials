@@ -1,5 +1,10 @@
 TODO:
 
+
+- Plasma drift-diffusion equation simulation with bindings for variable coefficients
+
+- Simplified momentum transfer equation simulation with bindings for variable coefficients
+
 - Frequency analysis tools (DFT) for the FDTD sim. Other signal processing tools are good too. 
 
 - Chiggidy Check Yoself Before You Wreck Yoself for the visualizers and anything else that could easily crash
@@ -53,8 +58,8 @@ TODO:
 - Gimbal lock is still happening during manual rotation
 - adding a colorby or alpha before adding an object (mesh, pointcloud) doesn't work b/c the number of points is still unknown... is there a workaround for this?
 - Shading and Light source for mesh model viewer
-- Don't allow the viewing window to recenter itself for each timestep during simulation
 - Make a convention where there are expected to be Point, Line, Triangle, and Quad elements. The number of them are set by the user, but they are always in that order
+
 
 
 - Doxygen comments for everything

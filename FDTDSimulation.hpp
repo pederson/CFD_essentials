@@ -20,6 +20,12 @@ public:
 	~FDTDSimulation();
 
 	// inspectors
+	
+	const double & E_z() const {return _E_z[0];};
+	const double & H_y() const {return _H_y[0];};
+	const double & H_x() const {return _H_x[0];};
+	const double & E_z(double t) {return _simdata.get_data_at_time(t, "E_z");}; 
+	
 
 	// mutators
 	void set_boundary(BoundaryLocation loc, BoundaryCondition type, unsigned int num_layers=1);
@@ -33,17 +39,17 @@ public:
 	void bind_rel_permittivity(const double * rel_permittivity);
 	//void bind_rel_permeability(const double * rel_permeability);
 	void bind_current_density_x(const double * current_density_x);
-	void bind_current_density_x(const double * velocity_x, const double * density_multiplier_x, const double cdxmult=1.0);
+	//void bind_current_density_x(const double * velocity_x, const double * density_multiplier_x, const double cdxmult=1.0);
 	void bind_current_density_y(const double * current_density_y);
-	void bind_current_density_y(const double * velocity_y, const double * density_multiplier_y, const double cdymult=1.0);
+	//void bind_current_density_y(const double * velocity_y, const double * density_multiplier_y, const double cdymult=1.0);
 	void bind_current_density_z(const double * current_density_z);
-	void bind_current_density_z(const double * velocity_z, const double * density_multiplier_z, const double cdzmult=1.0);
+	//void bind_current_density_z(const double * velocity_z, const double * density_multiplier_z, const double cdzmult=1.0);
 	
 	void set_num_iters(unsigned int num_iters) {_num_iters = num_iters;};
 	//void set_invariant_time(unsigned int timespan);
 	//void set_invariant_resolution(unsigned int res);
 	void view_results();
-	void output_HDF5(std::string outname="");
+	void output_HDF5(std::string outname="FDTD_output.h5");
 
 	void run(int num_iters = -1);
 
@@ -76,8 +82,9 @@ private:
 
 	// internal simulation variables
 		bool _is_allocated, _include_current_density, _time_variable_coefficients;
+		const double _pi = 3.14159265358979323846264338327950288;
 		const double _eps0 = 8.854e-12;
-		const double _mu0 = 4*3.14159e-7;
+		const double _mu0 = _pi*4.0e-7;
 		const double _c0 = 2.99792458e+8;
 		double _dx, _dt, _CourantFactor;
 		double _nPML, _num_iters, _current_iter, _tcur;
@@ -95,18 +102,19 @@ private:
 		
 
 		// field stuff
-		double * D_z;	// note that this is not the real D field, but it is normalized
-		double * I_Hx;
-		double * I_Hy;
-		double * E_z;	// note that this is not the real E field, but it is normalized
-		double * H_y;
-		double * H_x;
-		double * gaz;
-		double * jnx; 
-		double * jny;
-		double * jnz;
+		double * _Dn_z;	// note that this is not the real D field, but it is normalized
+		double * _I_Hx;
+		double * _I_Hy;
+		double * _En_z;	// note that this is not the real E field, but it is normalized
+		double * _E_z;	// this is the real E field
+		double * _H_y;
+		double * _H_x;
+		double * _gaz;
+		double * _jnx; 
+		double * _jny;
+		double * _jnz;
 
-		// PML stuff
+		// PML stuff only used internally
 		double * gi2;
 		double * gi3;
 		double * gj2;

@@ -3,16 +3,17 @@
 using namespace std;
 
 FDTDSimulation::FDTDSimulation(){
-	D_z = nullptr;
-	I_Hx = nullptr;
-	I_Hy = nullptr;
-	E_z = nullptr;
-	H_y = nullptr;
-	H_x = nullptr;
-	gaz = nullptr;
-	jnx = nullptr; 
-	jny = nullptr;
-	jnz = nullptr;
+	_Dn_z = nullptr;
+	_I_Hx = nullptr;
+	_I_Hy = nullptr;
+	_En_z = nullptr;
+	_E_z = nullptr;
+	_H_y = nullptr;
+	_H_x = nullptr;
+	_gaz = nullptr;
+	_jnx = nullptr; 
+	_jny = nullptr;
+	_jnz = nullptr;
 
 	gi2 = nullptr;
 	gi3 = nullptr;
@@ -50,16 +51,17 @@ FDTDSimulation::FDTDSimulation(){
 }
 
 FDTDSimulation::~FDTDSimulation(){
-	if (D_z != nullptr) delete[] D_z;
-	if (I_Hx != nullptr) delete[] I_Hx;
-	if (I_Hy != nullptr) delete[] I_Hy;
-	if (E_z != nullptr) delete[] E_z;
-	if (H_y != nullptr) delete[] H_y;
-	if (H_x != nullptr) delete[] H_x;
-	if (gaz != nullptr) delete[] gaz;
-	if (jnx != nullptr) delete[] jnx;
-	if (jny != nullptr) delete[] jny;
-	if (jnz != nullptr) delete[] jnz;
+	if (_Dn_z != nullptr) delete[] _Dn_z;
+	if (_I_Hx != nullptr) delete[] _I_Hx;
+	if (_I_Hy != nullptr) delete[] _I_Hy;
+	if (_En_z != nullptr) delete[] _En_z;
+	if (_E_z != nullptr) delete[] _E_z;
+	if (_H_y != nullptr) delete[] _H_y;
+	if (_H_x != nullptr) delete[] _H_x;
+	if (_gaz != nullptr) delete[] _gaz;
+	if (_jnx != nullptr) delete[] _jnx;
+	if (_jny != nullptr) delete[] _jny;
+	if (_jnz != nullptr) delete[] _jnz;
 
 	if (gi2 != nullptr) delete[] gi2;
 	if (gi3 != nullptr) delete[] gi3;
@@ -141,7 +143,7 @@ void FDTDSimulation::view_results(){
 		simvis.bind_simulation(_simdata);
 		simvis.set_color_ramp(CRamp::DIVERGENT_5);
 		simvis.set_colorby_field("E_z");
-		simvis.set_colorby_field("H_y");
+		//simvis.set_colorby_field("H_y");
 		simvis.set_color_alpha(_rel_permittivity);
 		simvis.set_color_interpolation(false);
 		simvis.set_frequency_Hz(30);
@@ -150,11 +152,6 @@ void FDTDSimulation::view_results(){
 }
 
 void FDTDSimulation::output_HDF5(std::string outname){
-	if (outname.compare("") == 0){
-		outname = "FDTD_output.h5";
-	}
-
-
 	_simdata.write_HDF5(outname);
 }
 
@@ -221,9 +218,9 @@ void FDTDSimulation::run_2D(int num_iters){
 				dind = _mesh->reg_inds_to_glob_ind(i, j-1);
 
 				
-				D_z[cind] = gi3[i]*gj3[j]*D_z[cind]
-						  + gi2[i]*gj2[j]*_CourantFactor*(H_y[cind] - H_y[lind] - H_x[cind] + H_x[dind])
-						  - _CourantFactor*_dx*jnz[cind]*sourcemodval;
+				_Dn_z[cind] = gi3[i]*gj3[j]*_Dn_z[cind]
+						  + gi2[i]*gj2[j]*_CourantFactor*(_H_y[cind] - _H_y[lind] - _H_x[cind] + _H_x[dind])
+						  - _CourantFactor*_dx*_jnz[cind]*sourcemodval;
 
 				
 			}
@@ -238,7 +235,7 @@ void FDTDSimulation::run_2D(int num_iters){
 			pulse = _signals.at(i).value(_tcur)*_modulators.at(i).value(_tcur) * sourcemodval;
 			_srcx = _signals.at(i).xloc();
 			_srcy = _signals.at(i).yloc();
-			D_z[_mesh->nearest_node(_srcx, _srcy)] = pulse;
+			_Dn_z[_mesh->nearest_node(_srcx, _srcy)] = pulse;
 		}
 		//cout << "impose source" << endl;
 		
@@ -248,8 +245,8 @@ void FDTDSimulation::run_2D(int num_iters){
 				cind = _mesh->reg_inds_to_glob_ind(i, j);
 
 				// with pml
-				E_z[cind] = gaz[cind] * D_z[cind];
-				
+				_En_z[cind] = _gaz[cind] * _Dn_z[cind];
+				_E_z[cind] = _En_z[cind] * sqrt(_mu0/_eps0); // this can be made faster
 			}
 		}
 
@@ -258,14 +255,14 @@ void FDTDSimulation::run_2D(int num_iters){
 		for (auto j=0; j<_mesh->reg_num_nodes_y(); j++){
 			lind = _mesh->reg_inds_to_glob_ind(0, j);
 			rind = _mesh->reg_inds_to_glob_ind(_mesh->reg_num_nodes_x()-1, j);
-			E_z[lind] = 0.0;
-			E_z[rind] = 0.0;
+			_En_z[lind] = 0.0;
+			_En_z[rind] = 0.0;
 		}
 		for (auto i=0; i<_mesh->reg_num_nodes_x(); i++){
 			uind = _mesh->reg_inds_to_glob_ind(i, _mesh->reg_num_nodes_y()-1);
 			dind = _mesh->reg_inds_to_glob_ind(i, 0);
-			E_z[uind] = 0.0;
-			E_z[dind] = 0.0;
+			_En_z[uind] = 0.0;
+			_En_z[dind] = 0.0;
 		}
 		
 
@@ -275,10 +272,10 @@ void FDTDSimulation::run_2D(int num_iters){
 				cind = _mesh->reg_inds_to_glob_ind(i, j);
 				uind = _mesh->reg_inds_to_glob_ind(i, j+1);
 
-				curle = E_z[cind] - E_z[uind];
-				I_Hx[cind] = I_Hx[cind] + fi1[i]*curle;
-				H_x[cind] = fj3[j]*H_x[cind]
-						  + fj2[j]*_CourantFactor*(curle + I_Hx[cind]);
+				curle = _En_z[cind] - _En_z[uind];
+				_I_Hx[cind] = _I_Hx[cind] + fi1[i]*curle;
+				_H_x[cind] = fj3[j]*_H_x[cind]
+						  + fj2[j]*_CourantFactor*(curle + _I_Hx[cind]);
 
 			}
 		}
@@ -288,18 +285,18 @@ void FDTDSimulation::run_2D(int num_iters){
 				cind = _mesh->reg_inds_to_glob_ind(i, j);
 				rind = _mesh->reg_inds_to_glob_ind(i+1, j);
 
-				curle = E_z[rind] - E_z[cind];
-				I_Hy[cind] = I_Hy[cind] + fj1[j]*curle;
-				H_y[cind] = fi3[i]*H_y[cind]
-						  + fi2[i]*_CourantFactor*(curle + I_Hy[cind]);
+				curle = _En_z[rind] - _En_z[cind];
+				_I_Hy[cind] = _I_Hy[cind] + fj1[j]*curle;
+				_H_y[cind] = fi3[i]*_H_y[cind]
+						  + fi2[i]*_CourantFactor*(curle + _I_Hy[cind]);
 
 			}
 		}
 		
 
 		// fill in the simdata for this time step
-		_simdata.add_data_at_index(n, "E_z", E_z[0]);
-		_simdata.add_data_at_index(n, "H_y", H_y[0]);
+		_simdata.add_data_at_index(n, "E_z", _E_z[0]);
+		_simdata.add_data_at_index(n, "H_y", _H_y[0]);
 
 		// update iteration count
 		_current_iter++;
@@ -328,35 +325,37 @@ void FDTDSimulation::prepareModulator(){
 
 void FDTDSimulation::allocate_fields(){
 
-	D_z = new double[_mesh->nodecount()];
-	I_Hx = new double[_mesh->nodecount()];
-	I_Hy = new double[_mesh->nodecount()];
-	E_z = new double[_mesh->nodecount()];
-	H_y = new double[_mesh->nodecount()];
-	H_x = new double[_mesh->nodecount()];
-	gaz = new double[_mesh->nodecount()];
-	jnx = new double[_mesh->nodecount()];
-	jny = new double[_mesh->nodecount()];
-	jnz = new double[_mesh->nodecount()];
+	_Dn_z = new double[_mesh->nodecount()];
+	_I_Hx = new double[_mesh->nodecount()];
+	_I_Hy = new double[_mesh->nodecount()];
+	_En_z = new double[_mesh->nodecount()];
+	_E_z = new double[_mesh->nodecount()];
+	_H_y = new double[_mesh->nodecount()];
+	_H_x = new double[_mesh->nodecount()];
+	_gaz = new double[_mesh->nodecount()];
+	_jnx = new double[_mesh->nodecount()];
+	_jny = new double[_mesh->nodecount()];
+	_jnz = new double[_mesh->nodecount()];
 	//gbz = new double[_mesh.nodecount()];
 
 
 	for (auto i=0; i<_mesh->nodecount(); i++){
-		D_z[i] = 0.0;
-		I_Hx[i] = 0.0;
-		I_Hy[i] = 0.0;
-		H_x[i] = 0.0;
-		H_y[i] = 0.0;
-		E_z[i] = 0.0;
+		_Dn_z[i] = 0.0;
+		_I_Hx[i] = 0.0;
+		_I_Hy[i] = 0.0;
+		_H_x[i] = 0.0;
+		_H_y[i] = 0.0;
+		_En_z[i] = 0.0;
+		_E_z[i] = 0.0;
 		//gbz[i] = 0.0;		// gbz = sigma*dt/eps0;
 	}
 
 	// deal with relative permittivity
 	if (_rel_permittivity == nullptr){
-		for (auto i=0; i<_mesh->nodecount(); i++) gaz[i] = 1.0;
+		for (auto i=0; i<_mesh->nodecount(); i++) _gaz[i] = 1.0;
 	}
 	else{
-		for (auto i=0; i<_mesh->nodecount(); i++) gaz[i] = 1.0/_rel_permittivity[i];
+		for (auto i=0; i<_mesh->nodecount(); i++) _gaz[i] = 1.0/_rel_permittivity[i];
 	}
 
 	// deal with relative permeability
@@ -366,24 +365,24 @@ void FDTDSimulation::allocate_fields(){
 
 	// deal with current density
 	if (_current_density_x == nullptr){
-		for (auto i=0; i<_mesh->nodecount(); i++) jnx[i] = 0.0;
+		for (auto i=0; i<_mesh->nodecount(); i++) _jnx[i] = 0.0;
 	}
 	else{
-		for (auto i=0; i<_mesh->nodecount(); i++) jnx[i] = _current_density_x[i];	
+		for (auto i=0; i<_mesh->nodecount(); i++) _jnx[i] = _current_density_x[i];	
 	}
 
 	if (_current_density_y == nullptr){
-		for (auto i=0; i<_mesh->nodecount(); i++) jny[i] = 0.0;
+		for (auto i=0; i<_mesh->nodecount(); i++) _jny[i] = 0.0;
 	}
 	else{
-		for (auto i=0; i<_mesh->nodecount(); i++) jny[i] = _current_density_y[i];
+		for (auto i=0; i<_mesh->nodecount(); i++) _jny[i] = _current_density_y[i];
 	}
 
 	if (_current_density_z == nullptr){
-		for (auto i=0; i<_mesh->nodecount(); i++) jnz[i] = 0.0;
+		for (auto i=0; i<_mesh->nodecount(); i++) _jnz[i] = 0.0;
 	}
 	else{
-		for (auto i=0; i<_mesh->nodecount(); i++)jnz[i] = _current_density_z[i];	
+		for (auto i=0; i<_mesh->nodecount(); i++) _jnz[i] = _current_density_z[i];	
 	}
 
 

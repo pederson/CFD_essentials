@@ -9,6 +9,7 @@ using namespace std;
 
 int main(int argc, char * argv[]){
 	// constants
+	double dx = 5.0e-4;
 	
 	//double dt = 0.5*dx/c0;
 
@@ -102,7 +103,7 @@ int main(int argc, char * argv[]){
 	//*/
 
 	// current rod model
-	
+	/*
 	parametric_model_2d paramodel;
 	paramodel.set_model_name("Rod With Current");
 	paramodel.add_physical_property("eps_rel");
@@ -114,15 +115,35 @@ int main(int argc, char * argv[]){
 	circle c2 = circle(0.005, {0.07, 0.05}, paramodel.get_material("DielectricInverse"));
 	paramodel.add_object(&c1);
 	paramodel.add_object(&c2);
-	//*/
-
-	double dx = 5.0e-4;
-
-
 	// convert the model into a mesh
 	RegularMesh paramesh;
 	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 0.1, 0.0, 0.1, paramodel.get_material("Vacuum"));
 	paramesh.print_summary();
+	//*/
+
+
+	// metal aperture model
+	
+	parametric_model_2d paramodel;
+	paramodel.set_model_name("Aperture");
+	paramodel.add_physical_property("eps_rel");
+	paramodel.add_physical_property("current_density");
+	paramodel.add_material("Vacuum", {1.0, 0.0});
+	paramodel.add_material("Dielectric", {1000.0, 0.0});
+	rectangle r1 = rectangle(0.3/40, 0.2, {0.05, 0.05}, paramodel.get_material("Dielectric"));
+	rectangle r2 = rectangle(0.3/40, 0.03, {0.05, 0.05}, paramodel.get_material("Vacuum"));
+	paramodel.add_object(&r1);
+	paramodel.add_object(&r2);
+	// convert the model into a mesh
+	RegularMesh paramesh;
+	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 0.1, 0.0, 0.1, paramodel.get_material("Vacuum"));
+	paramesh.print_summary();
+	//*/
+
+	
+
+
+	
 
 	// view the mesh
 	mesh_visualixer paravis;
@@ -134,23 +155,15 @@ int main(int argc, char * argv[]){
 
 	// initialize the simulation
 	FDTDSimulation fsim;
-	/*
-	double * cur_dens_z = new double[paramesh.nodecount()];
-	for (auto i=0; i<paramesh.nodecount(); i++) cur_dens_z[i] = 0;
-	cur_dens_z[paramesh.nearest_node(1.0e-6, 3.0e-6)] = 1.0e+8;
-	cur_dens_z[paramesh.nearest_node(1.0e-6, 3.0e-6) + 1] = 1.0e+8;
-	cur_dens_z[paramesh.nearest_node(1.0e-6, 3.0e-6) - 1] = 1.0e+8;
-	fsim.bind_current_density_z(cur_dens_z);
-	*/
 	fsim.bind_mesh(paramesh);
 	fsim.bind_rel_permittivity(&paramesh.data("eps_rel"));
 	fsim.bind_current_density_z(&paramesh.data("current_density"));
-	//fsim.add_sinusoidal_source(3.0e+14/6.0, 0.0, 0.5e-6, 3.0e-6);
+	fsim.add_sinusoidal_source(1.0e+9, 0.0, 0.01, 0.05);
 	//fsim.add_gaussian_source(10.0, 10.0, 4.5e-6, 4.0e-6);
-	fsim.set_num_iters(1000);
+	fsim.set_num_iters(800);
 	fsim.run();
 	fsim.view_results();
-	//fsim.output_HDF5("testout.h5");
+	//fsim.output_HDF5();
 
 
 	return 0;

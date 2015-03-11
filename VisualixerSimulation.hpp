@@ -42,6 +42,7 @@ private:
 
 	void onPrepareData();
 	void onRender();
+	void onRefresh();
 	bool MainLoop();
 	void onExit();
 
@@ -51,7 +52,7 @@ private:
 	const SimulationData * _simdata;
 
 	std::string _colorby_field, _alpha_field;
-	unsigned int _freq_Hz, _cur_time_step; // frequency at which the simulation plays
+	unsigned int _freq_Hz, _cur_time_step, _increment_val; // frequency at which the simulation plays
 	unsigned int num_line_elements, num_per_line_element, line_element_offset;
 };
 

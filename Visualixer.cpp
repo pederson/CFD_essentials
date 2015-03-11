@@ -293,8 +293,7 @@ void visualixer::cycleColorRamp(){
 	if (_colorby==nullptr) return;
 	color_ramp.cycle_ramp();
 	onColors();
-	onRender();
-	onShaders();
+	onRefresh();
 	return;
 }
 
@@ -409,6 +408,7 @@ void visualixer::onRender(){
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
 
+  
 	// create VBO and copy data to it
   glGenBuffers (1, &vbo);
 
@@ -424,6 +424,7 @@ void visualixer::onRender(){
 	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_elements * num_per_element * sizeof(GLuint), elements, GL_STATIC_DRAW);
   }
 
+
   // enable point size specification
   glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
@@ -436,14 +437,14 @@ void visualixer::onRender(){
 
 void visualixer::onShaders(){
 
-  // create and compile the vertex shader
-  vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  const GLchar * vssource = this->VertexShaderSource();
-  glShaderSource(vertexShader, 1, &(vssource), NULL);
-  glCompileShader(vertexShader);
+	// create and compile the vertex shader
+	vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	const GLchar * vssource = this->VertexShaderSource();
+	glShaderSource(vertexShader, 1, &(vssource), NULL);
+	glCompileShader(vertexShader);
 
-  GLint status;
-  GLint logLength;
+	GLint status;
+	GLint logLength;
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
 	if (status != GL_TRUE){
 		cout << "vertex shader failed to compile" << endl;
@@ -456,13 +457,14 @@ void visualixer::onShaders(){
 		}
 	}
 
-  // create and compile the fragment shader
-  fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  const GLchar * fssource = this->FragmentShaderSource();
-  glShaderSource(fragmentShader, 1, &(fssource), NULL);
-  glCompileShader(fragmentShader);
 
-  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &status);
+	// create and compile the fragment shader
+	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	const GLchar * fssource = this->FragmentShaderSource();
+	glShaderSource(fragmentShader, 1, &(fssource), NULL);
+	glCompileShader(fragmentShader);
+
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &status);
 	if (status != GL_TRUE){
 		cout << "fragment shader failed to compile" << endl;
 		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH , &logLength);
@@ -475,25 +477,26 @@ void visualixer::onShaders(){
 	}
 
 
-  // link the vertex and fragment shader into a shader program
-  shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glBindFragDataLocation(shaderProgram, 0, "outColor");
-  glLinkProgram(shaderProgram);
-  glUseProgram(shaderProgram);
 
-  // Specify the layout of the vertex data
-  //cout << "num_vertices: " << num_vertices << " num_vertex_points: " << num_vertex_points << " num_per_vertex: " << num_per_vertex << endl;
-  GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-  glEnableVertexAttribArray(posAttrib);
-  glVertexAttribPointer(posAttrib, num_vertex_points, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), 0);
+	// link the vertex and fragment shader into a shader program
+	shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glBindFragDataLocation(shaderProgram, 0, "outColor");
+	glLinkProgram(shaderProgram);
+	glUseProgram(shaderProgram);
 
-  GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
-  glEnableVertexAttribArray(colAttrib);
-  glVertexAttribPointer(colAttrib, 4, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), (void*)(num_vertex_points * sizeof(GLfloat)));
+	// Specify the layout of the vertex data
+	//cout << "num_vertices: " << num_vertices << " num_vertex_points: " << num_vertex_points << " num_per_vertex: " << num_per_vertex << endl;
+	GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
+	glEnableVertexAttribArray(posAttrib);
+	glVertexAttribPointer(posAttrib, num_vertex_points, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), 0);
 
-  rotdeg = 0;
+	GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
+	glEnableVertexAttribArray(colAttrib);
+	glVertexAttribPointer(colAttrib, 4, GL_FLOAT, GL_FALSE, num_per_vertex * sizeof(GLfloat), (void*)(num_vertex_points * sizeof(GLfloat)));
+
+	rotdeg = 0;
 	model = glm::rotate(model, rotdeg, glm::vec3(0.0f, 0.0f, 1.0f)); // angle in radians to suppress some output
 	uniModel = glGetUniformLocation(shaderProgram, "model");
 	glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -508,21 +511,21 @@ void visualixer::onShaders(){
 	//cout << "centroid is: " << model_centroid[0] << ", " << model_centroid[1] << ", " << model_centroid[2] << endl;
 	focus_vec = glm::vec3(model_centroid[0], model_centroid[1], model_centroid[2]);
 	eye_vec = glm::vec3(model_centroid[0], model_centroid[1], eyez_init);
-  view = glm::lookAt(
-    eye_vec, // camera position
-    focus_vec, // the position to be looking at
-    up_vec  // the up vector
-  );
-  recalcCamera();
+	view = glm::lookAt(
+				eye_vec, // camera position
+				focus_vec, // the position to be looking at
+				up_vec  // the up vector
+				);
+	recalcCamera();
 
-  uniView = glGetUniformLocation(shaderProgram, "view");
-  glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
+	uniView = glGetUniformLocation(shaderProgram, "view");
+	glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
-  // set up projection matrix
-  //proj = glm::perspective(0.785f, float(DEFAULT_WIDTH)/float(DEFAULT_HEIGHT), 0.05f, 100000.0f);
-  proj = glm::perspective(0.785f, float(DEFAULT_WIDTH)/float(DEFAULT_HEIGHT), 0.000005f, 100000.0f);
-  uniProj = glGetUniformLocation(shaderProgram, "proj");
-  glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
+	// set up projection matrix
+	//proj = glm::perspective(0.785f, float(DEFAULT_WIDTH)/float(DEFAULT_HEIGHT), 0.05f, 100000.0f);
+	proj = glm::perspective(0.785f, float(DEFAULT_WIDTH)/float(DEFAULT_HEIGHT), 0.000005f, 100000.0f);
+	uniProj = glGetUniformLocation(shaderProgram, "proj");
+	glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
 }
 
@@ -552,11 +555,12 @@ bool visualixer::MainLoop(){
 	return 0;
 }
 
+
 void visualixer::onExit(){
 	glDeleteProgram(shaderProgram);
 	glDeleteShader(fragmentShader);
 	glDeleteShader(vertexShader);
-
+	
 	if (num_elements > 0) glDeleteBuffers(1, &ebo);
 	glDeleteBuffers(1, &vbo);
 
@@ -565,6 +569,16 @@ void visualixer::onExit(){
 	glfwDestroyWindow( window_ptr );
 	glfwTerminate();
 	return;
+}
+
+
+void visualixer::onRefresh(){
+	glBufferData(GL_ARRAY_BUFFER, num_vertices * num_per_vertex * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+	if (num_elements > 0){
+	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_elements * num_per_element * sizeof(GLuint), elements, GL_STATIC_DRAW);
+	}
+
+	onShaders();
 }
 
 

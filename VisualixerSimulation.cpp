@@ -23,6 +23,7 @@ simulation_visualixer::simulation_visualixer(){
 	_freq_Hz = 30;
 	_colorby_field = "";
 	_cur_time_step = 0;
+	_increment_val = 1;
 	set_color_ramp(CRamp::DIVERGENT_9);
 
 	model_centroid[0] = 0.0;
@@ -77,11 +78,13 @@ void simulation_visualixer::set_alpha_field(std::string fieldname){
 }
 
 void simulation_visualixer::increment_time_step(){
-	_cur_time_step = (_cur_time_step+1)%_simdata->num_time_steps();
+	//_increment_val = 10;
+	_cur_time_step = (_cur_time_step+_increment_val)%_simdata->num_time_steps();
 	set_colorby(&(_simdata->get_data_at_index(_cur_time_step, _colorby_field)), false);
 	onColors();
-	onRender();
-	onShaders();
+	onRefresh();
+	//onRender();
+	//onShaders();
 }
 
 void simulation_visualixer::run(){
@@ -223,6 +226,13 @@ void simulation_visualixer::onRender(){
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   return;
+}
+
+void simulation_visualixer::onRefresh(){
+	glBufferData(GL_ARRAY_BUFFER, num_vertices * num_per_vertex * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+	if (num_elements > 0){
+	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (num_elements * num_per_element + num_line_elements * num_per_line_element) * sizeof(GLuint), elements, GL_STATIC_DRAW);
+	}
 }
 
 
