@@ -23,6 +23,11 @@ mesh_visualixer::mesh_visualixer(){
 	num_elements = 0;
 	num_line_elements = 0;
 
+	_num_point_elements = 0;
+	_num_line_elements = 0;
+	_num_tri_elements = 0;
+	_num_quad_elements = 0;
+
 	model_centroid[0] = 0.0;
 	model_centroid[1] = 0.0;
 	model_centroid[2] = 0.0;
@@ -161,6 +166,10 @@ void mesh_visualixer::onPrepareData(){
 		num_line_elements += elem.num_vertices();
 	}
 
+	_num_point_elements = num_vertices;
+	_num_line_elements = num_line_elements;
+
+
 	num_elements = num_vertices;
 	num_per_element = 1;
 	num_per_line_element = 2;
@@ -219,6 +228,7 @@ void mesh_visualixer::onRender(){
   return;
 }
 
+/*
 bool mesh_visualixer::MainLoop(){
 
   while(!glfwWindowShouldClose(window_ptr)){
@@ -246,6 +256,7 @@ bool mesh_visualixer::MainLoop(){
 
 	return 0;
 }
+*/
 
 void mesh_visualixer::onExit(){
 	glDeleteProgram(shaderProgram);
@@ -253,7 +264,7 @@ void mesh_visualixer::onExit(){
   glDeleteShader(vertexShader);
 
   if (num_elements > 0) glDeleteBuffers(1, &ebo);
-	if (num_line_elements > 0) glDeleteBuffers(1, &lebo);
+	//if (num_line_elements > 0) glDeleteBuffers(1, &lebo);
 	glDeleteBuffers(1, &vbo);
 
 	glDeleteVertexArrays(1, &vao);

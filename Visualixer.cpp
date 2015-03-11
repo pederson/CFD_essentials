@@ -30,6 +30,11 @@ visualixer::visualixer(){
 	num_vertices = 0;
 	num_per_vertex = 0;
 	num_elements = 0;
+	_num_point_elements = 0;
+	_num_line_elements = 0;
+	_num_tri_elements = 0;
+	_num_quad_elements = 0;
+
 
 	model_centroid[0] = 0.0;
 	model_centroid[1] = 0.0;
@@ -547,8 +552,16 @@ bool visualixer::MainLoop(){
 	    glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 	    glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
-	    // Draw a triangle from the 3 vertices
+	    // Draw points, lines, triangles, and quads in that order
+	    glDrawElements(GL_POINTS, _num_point_elements*_num_per_point_element , GL_UNSIGNED_INT, (void *)((0) * sizeof(GLuint)));
+	    glDrawElements(GL_LINES, _num_line_elements*_num_per_line_element , GL_UNSIGNED_INT, (void *)((_num_point_elements*_num_per_point_element) * sizeof(GLuint)));
+	    glDrawElements(GL_TRIANGLES, _num_tri_elements*_num_per_tri_element , GL_UNSIGNED_INT, (void *)((_num_point_elements*_num_per_point_element + _num_line_elements*_num_per_line_element) * sizeof(GLuint)));
+	    glDrawElements(GL_QUADS, _num_quad_elements*_num_per_quad_element , GL_UNSIGNED_INT, (void *)((_num_point_elements*_num_per_point_element + _num_line_elements*_num_per_line_element + _num_tri_elements*_num_per_tri_element) * sizeof(GLuint)));
+	    
+	    // this is the old command
 	    glDrawElements(GL_TRIANGLES, num_per_element*num_elements, GL_UNSIGNED_INT, 0);
+	    
+
 	    //cout << "looping \r" << flush;
 		}
 
@@ -575,10 +588,8 @@ void visualixer::onExit(){
 void visualixer::onRefresh(){
 	glBufferData(GL_ARRAY_BUFFER, num_vertices * num_per_vertex * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 	if (num_elements > 0){
-	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_elements * num_per_element * sizeof(GLuint), elements, GL_STATIC_DRAW);
+	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (_num_point_elements*_num_per_point_element + _num_line_elements*_num_per_line_element + _num_tri_elements*_num_per_tri_element + _num_quad_elements*_num_per_quad_element) * sizeof(GLuint), elements, GL_STATIC_DRAW);
 	}
-
-	onShaders();
 }
 
 

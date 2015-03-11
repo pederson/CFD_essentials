@@ -23,7 +23,7 @@ public:
 protected:
 	void onRender();
 	void onPrepareData();
-	bool MainLoop();
+	//bool MainLoop();
 	void onExit();
 
 	const Mesh * _mesh;
