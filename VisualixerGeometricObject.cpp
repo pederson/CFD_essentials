@@ -26,6 +26,11 @@ mesh_model_visualixer::mesh_model_visualixer(){
 	num_elements = 0;
 	num_normals = 0;
 
+	_num_point_elements = 0;
+	_num_line_elements = 0;
+	_num_tri_elements = 0;
+	_num_quad_elements = 0;
+
 	model_centroid[0] = 0.0;
   model_centroid[1] = 0.0;
   model_centroid[2] = 0.0;
@@ -170,6 +175,7 @@ void mesh_model_visualixer::onPrepareData(){
 
 	num_elements = num_vertices/3;
 	num_per_element = 3;
+	_num_tri_elements = num_vertices/3;
 	elements = new GLuint[num_elements*num_per_element];
 	// set the triangle elements
 	for (unsigned int i=0; i<num_elements; i++){
@@ -347,6 +353,7 @@ void mesh_model_visualixer::onShaders(){
 
 }
 
+/*
 bool mesh_model_visualixer::MainLoop(){
 
   while(!glfwWindowShouldClose(window_ptr)){
@@ -373,6 +380,7 @@ bool mesh_model_visualixer::MainLoop(){
 
 	return 0;
 }
+*/
 
 void mesh_model_visualixer::onExit(){
   glDeleteProgram(shaderProgram);

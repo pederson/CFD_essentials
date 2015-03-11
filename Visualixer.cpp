@@ -29,7 +29,7 @@ visualixer::visualixer(){
 
 	num_vertices = 0;
 	num_per_vertex = 0;
-	num_elements = 0;
+
 	_num_point_elements = 0;
 	_num_line_elements = 0;
 	_num_tri_elements = 0;
@@ -90,11 +90,12 @@ void visualixer::set_test_case(){
 	vertices[14] = 10.0+0.5; vertices[15] = 10.0-0.5; vertices[16] = 0.0; vertices[17] = 0.0; vertices[18] = 0.0; vertices[19] = 1.0; vertices[20] = 0.1;
 	vertices[21] = 10.0-0.5; vertices[22] = 10.0-0.5; vertices[23] = 0.0; vertices[24] = 1.0; vertices[25] = 1.0; vertices[26] = 1.0; vertices[27] = 0.1;
 
-  num_elements = 2;
-  num_per_element = 3;
-  elements = new GLuint[num_per_element*num_elements];
+  _num_tri_elements = 2;
+  elements = new GLuint[_num_per_tri_element*_num_tri_elements];
   elements[0] = 0; elements[1] = 1; elements[2] = 2;
   elements[3] = 2; elements[4] = 3; elements[5] = 0;
+
+
 
   model_centroid[0] = 10.0;
   model_centroid[1] = 10.0;
@@ -410,32 +411,29 @@ void visualixer::onAlpha(){
 
 void visualixer::onRender(){
 	// Create Vertex Array Object
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 
-  
+
 	// create VBO and copy data to it
-  glGenBuffers (1, &vbo);
+	glGenBuffers (1, &vbo);
 
-  // visualizer specific data definitions
-  // this one happens to be XYZRGB
+	// visualizer specific data definitions
+	// this one happens to be XYZRGB
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, num_vertices * num_per_vertex * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
 	// Create an element array if necessary
-	if (num_elements > 0){
-	    glGenBuffers(1, &ebo);
-	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, num_elements * num_per_element * sizeof(GLuint), elements, GL_STATIC_DRAW);
-  }
+	glGenBuffers(1, &ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (_num_point_elements*_num_per_point_element + _num_line_elements*_num_per_line_element + _num_tri_elements*_num_per_tri_element + _num_quad_elements*_num_per_quad_element) * sizeof(GLuint), elements, GL_STATIC_DRAW);
 
+	// enable point size specification
+	glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
-  // enable point size specification
-  glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-
-  // enable alpha channel
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// enable alpha channel
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   return;
 }
@@ -546,7 +544,7 @@ bool visualixer::MainLoop(){
 
 	    // Clear the screen to black
 	    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	    glClear(GL_COLOR_BUFFER_BIT);
+	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	    glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 	    glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
@@ -557,12 +555,8 @@ bool visualixer::MainLoop(){
 	    glDrawElements(GL_LINES, _num_line_elements*_num_per_line_element , GL_UNSIGNED_INT, (void *)((_num_point_elements*_num_per_point_element) * sizeof(GLuint)));
 	    glDrawElements(GL_TRIANGLES, _num_tri_elements*_num_per_tri_element , GL_UNSIGNED_INT, (void *)((_num_point_elements*_num_per_point_element + _num_line_elements*_num_per_line_element) * sizeof(GLuint)));
 	    glDrawElements(GL_QUADS, _num_quad_elements*_num_per_quad_element , GL_UNSIGNED_INT, (void *)((_num_point_elements*_num_per_point_element + _num_line_elements*_num_per_line_element + _num_tri_elements*_num_per_tri_element) * sizeof(GLuint)));
-	    
-	    // this is the old command
-	    glDrawElements(GL_TRIANGLES, num_per_element*num_elements, GL_UNSIGNED_INT, 0);
-	    
-
 	    //cout << "looping \r" << flush;
+
 		}
 
 	return 0;
@@ -574,7 +568,7 @@ void visualixer::onExit(){
 	glDeleteShader(fragmentShader);
 	glDeleteShader(vertexShader);
 	
-	if (num_elements > 0) glDeleteBuffers(1, &ebo);
+	glDeleteBuffers(1, &ebo);
 	glDeleteBuffers(1, &vbo);
 
 	glDeleteVertexArrays(1, &vao);
@@ -587,9 +581,7 @@ void visualixer::onExit(){
 
 void visualixer::onRefresh(){
 	glBufferData(GL_ARRAY_BUFFER, num_vertices * num_per_vertex * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
-	if (num_elements > 0){
-	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (_num_point_elements*_num_per_point_element + _num_line_elements*_num_per_line_element + _num_tri_elements*_num_per_tri_element + _num_quad_elements*_num_per_quad_element) * sizeof(GLuint), elements, GL_STATIC_DRAW);
-	}
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (_num_point_elements*_num_per_point_element + _num_line_elements*_num_per_line_element + _num_tri_elements*_num_per_tri_element + _num_quad_elements*_num_per_quad_element) * sizeof(GLuint), elements, GL_STATIC_DRAW);
 }
 
 

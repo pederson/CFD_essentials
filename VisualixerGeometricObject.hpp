@@ -35,7 +35,7 @@ protected:
 	void onPrepareData();
 	void onRender();
 	void onShaders();
-	bool MainLoop();
+	//bool MainLoop();
 	void onExit();
 
 };

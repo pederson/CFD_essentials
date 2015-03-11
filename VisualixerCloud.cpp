@@ -22,7 +22,11 @@ cloud_visualixer::cloud_visualixer(){
 
 	num_vertices = 0;
 	num_per_vertex = 0;
-	num_elements = 0;
+	
+	_num_point_elements = 0;
+	_num_line_elements = 0;
+	_num_tri_elements = 0;
+	_num_quad_elements = 0;
 
 	model_centroid[0] = 0.0;
 	model_centroid[1] = 0.0;
@@ -68,9 +72,8 @@ void cloud_visualixer::set_test_case(){
 		}
 	}
 
-	num_elements = num_vertices;
-	num_per_element = 1;
-	elements = new GLuint[num_elements*num_per_element];
+	_num_point_elements = num_vertices;
+	elements = new GLuint[_num_point_elements*_num_per_point_element];
 	for (unsigned int i=0; i<num_vertices; i++){
 		elements[i] = i;
 	}
@@ -115,9 +118,8 @@ void cloud_visualixer::onPrepareData(){
 
 	}
 
-	num_elements = num_vertices;
-	num_per_element = 1;
-	elements = new GLuint[num_elements];
+	_num_point_elements = num_vertices;
+	elements = new GLuint[_num_point_elements*_num_per_point_element];
 	for (unsigned int i=0; i<num_vertices; i++){
 		elements[i] = i;
 	}
@@ -161,6 +163,7 @@ void cloud_visualixer::onPrepareData(){
 
 }
 
+/*
 bool cloud_visualixer::MainLoop(){
 
   while(!glfwWindowShouldClose(window_ptr)){
@@ -185,6 +188,7 @@ bool cloud_visualixer::MainLoop(){
 
 	return 0;
 }
+*/
 
 
 #ifdef _TEST_

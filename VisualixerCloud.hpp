@@ -24,7 +24,6 @@ public:
 protected:
 
 	void onPrepareData();
-	bool MainLoop();
 
 	const PointCloud * _cloud;
 

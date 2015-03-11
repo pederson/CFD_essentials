@@ -18,8 +18,12 @@ simulation_visualixer::simulation_visualixer(){
 
 	num_vertices = 0;
 	num_per_vertex = 0;
-	num_elements = 0;
-	num_line_elements = 0;
+
+	_num_point_elements = 0;
+	_num_line_elements = 0;
+	_num_tri_elements = 0;
+	_num_quad_elements = 0;
+
 	_freq_Hz = 30;
 	_colorby_field = "";
 	_cur_time_step = 0;
@@ -83,8 +87,6 @@ void simulation_visualixer::increment_time_step(){
 	set_colorby(&(_simdata->get_data_at_index(_cur_time_step, _colorby_field)), false);
 	onColors();
 	onRefresh();
-	//onRender();
-	//onShaders();
 }
 
 void simulation_visualixer::run(){
@@ -139,17 +141,15 @@ void simulation_visualixer::onPrepareData(){
 	// figure out how many line elements are needed
 	// DYLAN_TODO: this should really be more rigorous and count for each element
 	//				in the mesh
-	num_line_elements = 0;
+	_num_line_elements = 0;
 	for (unsigned int i=0; i<themesh->elementcount(); i++){
 		elem = themesh->element(i);
-		num_line_elements += elem.num_vertices();
+		_num_line_elements += elem.num_vertices();
 	}
 
-	num_elements = num_vertices;
-	num_per_element = 1;
-	num_per_line_element = 2;
-	elements = new GLuint[num_elements*num_per_element + num_line_elements*num_per_line_element];
-	line_element_offset = num_elements*num_per_element;
+	_num_point_elements = num_vertices;
+	elements = new GLuint[_num_point_elements*_num_per_point_element + _num_line_elements*_num_per_line_element];
+	unsigned int line_element_offset = _num_point_elements*_num_per_point_element;
 	// set the point elements
 	for (unsigned int i=0; i<num_vertices; i++){
 		elements[i] = i;
@@ -161,8 +161,8 @@ void simulation_visualixer::onPrepareData(){
 		elem = themesh->element(i);
 		for (unsigned int j=0; j<elem.num_vertices(); j++){
 			jp1 = (j+1)%elem.num_vertices();
-			elements[line_element_offset + elements_added*num_per_line_element] = elem.vertex_ind(j);
-			elements[line_element_offset + elements_added*num_per_line_element + 1] = elem.vertex_ind(jp1);
+			elements[line_element_offset + elements_added*_num_per_line_element] = elem.vertex_ind(j);
+			elements[line_element_offset + elements_added*_num_per_line_element + 1] = elem.vertex_ind(jp1);
 
 			elements_added++;
 		}
@@ -196,46 +196,6 @@ void simulation_visualixer::onPrepareData(){
 }
 
 
-void simulation_visualixer::onRender(){
-	// Create Vertex Array Object
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-
-	// create VBO and copy data to it
-  glGenBuffers (1, &vbo);
-
-  // visualizer specific data definitions
-  // this one happens to be XYZRGBA
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, num_vertices * num_per_vertex * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
-
-	// Create an element array if necessary
-	if (num_elements > 0){
-	    glGenBuffers(1, &ebo);
-	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (num_elements * num_per_element + num_line_elements * num_per_line_element) * sizeof(GLuint), elements, GL_STATIC_DRAW);
-  }
-
-
-  //cout << "total elements buffered: " << num_elements * num_per_element + num_line_elements * num_per_line_element << endl;
-  // enable point size specification
-  glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-
-  // enable alpha shading
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  return;
-}
-
-void simulation_visualixer::onRefresh(){
-	glBufferData(GL_ARRAY_BUFFER, num_vertices * num_per_vertex * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
-	if (num_elements > 0){
-	    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (num_elements * num_per_element + num_line_elements * num_per_line_element) * sizeof(GLuint), elements, GL_STATIC_DRAW);
-	}
-}
-
-
 bool simulation_visualixer::MainLoop(){
 
 
@@ -264,29 +224,15 @@ bool simulation_visualixer::MainLoop(){
     glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
     // Draw nodes
-    glDrawElements(GL_POINTS, num_elements*num_per_element , GL_UNSIGNED_INT, NULL);
-    // Draw lines
-    glDrawElements(GL_LINES, num_line_elements*num_per_line_element , GL_UNSIGNED_INT, (void *)(line_element_offset * sizeof(GLuint)));
-
+    glDrawElements(GL_POINTS, _num_point_elements*_num_per_point_element , GL_UNSIGNED_INT, (void *)((0) * sizeof(GLuint)));
+    glDrawElements(GL_LINES, _num_line_elements*_num_per_line_element , GL_UNSIGNED_INT, (void *)((_num_point_elements*_num_per_point_element) * sizeof(GLuint)));
+    glDrawElements(GL_TRIANGLES, _num_tri_elements*_num_per_tri_element , GL_UNSIGNED_INT, (void *)((_num_point_elements*_num_per_point_element + _num_line_elements*_num_per_line_element) * sizeof(GLuint)));
+    glDrawElements(GL_QUADS, _num_quad_elements*_num_per_quad_element , GL_UNSIGNED_INT, (void *)((_num_point_elements*_num_per_point_element + _num_line_elements*_num_per_line_element + _num_tri_elements*_num_per_tri_element) * sizeof(GLuint)));
     //cout << "looping \r" << flush;
 	}
 
 	return 0;
 }
 
-void simulation_visualixer::onExit(){
-	glDeleteProgram(shaderProgram);
-  glDeleteShader(fragmentShader);
-  glDeleteShader(vertexShader);
 
-  if (num_elements > 0) glDeleteBuffers(1, &ebo);
-	if (num_line_elements > 0) glDeleteBuffers(1, &lebo);
-	glDeleteBuffers(1, &vbo);
-
-	glDeleteVertexArrays(1, &vao);
-
-	glfwDestroyWindow( window_ptr );
-	glfwTerminate();
-	return;
-}
 

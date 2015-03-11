@@ -140,7 +140,7 @@ protected:
 	float model_centroid[3]; // from [model_min, model_max]
 	float xmin, xmax, ymin, ymax, zmin, zmax;
 	unsigned int num_vertices, num_per_vertex, num_vertex_points;
-	unsigned int num_elements, num_per_element; // number of triangles that may share vertices
+	unsigned int num_elements, num_per_element; // this should be deleted one visualixerGeometricObject is fixed
 	unsigned int _num_point_elements, _num_per_point_element=1;
 	unsigned int _num_line_elements, _num_per_line_element=2;
 	unsigned int _num_tri_elements, _num_per_tri_element=3;
