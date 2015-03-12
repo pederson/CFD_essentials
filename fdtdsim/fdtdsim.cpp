@@ -56,7 +56,6 @@ int main(int argc, char * argv[]){
 	paramodel.add_object(&c4);
 	//*/
 
-
 	// holey waveguide defect model
 	/*
 	parametric_model_2d paramodel;

@@ -1,5 +1,6 @@
 TODO:
 
+- lxcat for cross section and coefficient data
 
 - Plasma drift-diffusion equation simulation with bindings for variable coefficients
 
@@ -58,7 +59,7 @@ TODO:
 - Gimbal lock is still happening during manual rotation
 - adding a colorby or alpha before adding an object (mesh, pointcloud) doesn't work b/c the number of points is still unknown... is there a workaround for this?
 - Shading and Light source for mesh model viewer
-- Make a convention where there are expected to be Point, Line, Triangle, and Quad elements. The number of them are set by the user, but they are always in that order
+- Make a convention where there are expected to be Point, Line, Triangle, and Quad elements. The number of them are set by the user, but they are always in that order. Also, normals should be standard.
 
 
 
