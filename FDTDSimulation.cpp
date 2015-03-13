@@ -35,6 +35,8 @@ FDTDSimulation::FDTDSimulation(){
 	_current_density_z = nullptr;
 	_field_multiplier_z = nullptr;
 
+	_mesh = nullptr;
+
 	_dx = 0.0;
 	_dt = 0.0;
 	_CourantFactor = 0.5;
@@ -309,13 +311,15 @@ void FDTDSimulation::run_2D(int num_iters){
 
 void FDTDSimulation::preRunCheck(){
 
+	/*
 	if (_current_density_x == nullptr && _current_density_y == nullptr && _current_density_z == nullptr){
 		_include_current_density = false;
 	}
 	else {
 		_include_current_density = true;		
 	}
-
+	*/
+	
 }
 
 void FDTDSimulation::prepareModulator(){
