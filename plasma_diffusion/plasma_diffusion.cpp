@@ -10,8 +10,8 @@ using namespace std;
 int main(int argc, char * argv[]){
 	// constants
 	double dx = 0.5*1.36e-5;
-	double dt = 1.0e16*9.0e-12;
-	double plasma_dens = 1.0e+22;
+	//double dt = 1.0e16*9.0e-12;
+	double plasma_dens = 1.0e+22;		// in #/m^3
 
 	// dot of plasma model
 	
