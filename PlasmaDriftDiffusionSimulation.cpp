@@ -47,7 +47,7 @@ void PlasmaDriftDiffusionSimulation::view_results(){
 	// visualize the simulation
 		simulation_visualixer simvis;
 		simvis.bind_simulation(_simdata);
-		simvis.set_color_ramp(CRamp::DIVERGENT_5);
+		simvis.set_color_ramp(CRamp::MATLAB_PARULA);
 		simvis.set_colorby_field("density");
 		simvis.set_color_interpolation(false);
 		simvis.set_frequency_Hz(30);

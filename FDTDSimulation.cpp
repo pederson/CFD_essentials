@@ -143,7 +143,7 @@ void FDTDSimulation::view_results(){
 		// visualize the simulation
 		simulation_visualixer simvis;
 		simvis.bind_simulation(_simdata);
-		simvis.set_color_ramp(CRamp::DIVERGENT_5);
+		simvis.set_color_ramp(CRamp::MATLAB_PARULA);
 		simvis.set_colorby_field("E_z");
 		//simvis.set_colorby_field("H_y");
 		simvis.set_color_alpha(_rel_permittivity);
