@@ -1,8 +1,12 @@
 TODO:
 
+- Make a way to combine simulation data into one file if the mesh in each file matches
+
+- Make a way to get the "last" value for time stepping simulations
+
 - migrate some things to BitBucket or GitLab
 
-- make a composite vector object equipped with a [] operator to enable a vector that is composed of multiple other vectors already in memory and/or multiplicative coefficients. This is beneficial because it saves memory by avoiding copying data 
+- make a composite vector object equipped with a [] operator to enable a vector that is composed of multiple other vectors already in memory and/or multiplicative coefficients. This is beneficial because it saves memory by avoiding copying data. Also saves time to avoid looping to update coefficients. And makes it easier on the programmer to not have to remember to do these updates
 
 - lxcat for cross section and coefficient data
 
