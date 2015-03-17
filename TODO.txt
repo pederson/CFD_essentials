@@ -1,16 +1,30 @@
 TODO:
 
+- Should simdata be stored on heap instead of stack? Can be large sometimes
+
+- Make a poisson solver class (leverage the work already done for Poisson solver)
+
+- create an actual converter class (or decide if it is really worth it)
+
+- use max_element and min_element as a means to get the min/max
+
+- Allow the SimulationData class to store data even if the full data has not been allocated. Figure out how to add time data to a file that already exists
+
+- fix the issue with the gaussian geometric object overwriting all other properties on the mesh
+
+- Make a standard Finite difference derivative operator class or function that accepts a regular mesh and a field variable, then takes the requested derivative
+
 - Make a way to combine simulation data into one file if the mesh in each file matches
 
 - Make a way to get the "last" value for time stepping simulations
 
 - migrate some things to BitBucket or GitLab
 
-- make a composite vector object equipped with a [] operator to enable a vector that is composed of multiple other vectors already in memory and/or multiplicative coefficients. This is beneficial because it saves memory by avoiding copying data. Also saves time to avoid looping to update coefficients. And makes it easier on the programmer to not have to remember to do these updates
+- Do time analysis on cvector. Does it significantly affect performance?
 
 - lxcat for cross section and coefficient data
 
-- Simplified momentum transfer equation simulation with bindings for variable coefficients
+- Start using (and learn how to use) a time profiler. lcov/gcov? gprof? Valgrind? Or https://code.google.com/p/high-performance-cplusplus-profiler/ 
 
 - Frequency analysis tools (DFT) for the FDTD sim. Other signal processing tools are good too. 
 
@@ -18,7 +32,7 @@ TODO:
 
 - Figure out how to output the OpenGL window to .png, .tif, .jpg OR make movies to .gif
 
-- Make sure that everything follows the model of having all necessary information contained in the base class, but with added functionality implemented in the derived classes. If this isn't satisfied, maybe they should be separate classes. 
+ 
 
 - Problem writing holey_waveguide_defect geometry simulation to HDF5... only on school computer though... and only happens sometimes...
 
@@ -30,6 +44,7 @@ TODO:
 	- Need to finish the equation class and boundary conditions class to do this
 	- Make this a base class maybe. Derived classes of FESimulation, FVSimulation, FDSimulation, FDTDSimulation, etc... can be made
 	- This should allow the user to run the simulation incrementally (n steps at a time) and access fields in the middle of the simulation
+	- Is it possibly better to NOT have a base simulation class?
 
 - start using iterators when possible
 
@@ -55,13 +70,7 @@ TODO:
 - Check out the Fluent .cas, .msh and .neu files to see how they are stored. Maybe also be able to read these in and print them out. Also check out Ansys .cmdb and .dsdb format.
 - Check out AutoCAD .dxf file format for parametric models. Also look at .obj and .ply formats. Look at .step and .iges files for 3D models
 
-- fix the issue with the gaussian geometric object overwriting all other properties on the mesh
-
-- create an actual converter class (or decide if it is really worth it)
-
-- use max_element and min_element as a means to get the min/max
-
-- Allow the SimulationData class to store data even if the full data has not been allocated. Figure out how to add time data to a file that already exists
+- Make sure that everything follows the model of having all necessary information contained in the base class, but with added functionality implemented in the derived classes. If this isn't satisfied, maybe they should be separate classes.
 
 	***Visualixer todo:
 - add a labelled colorbar to the visualixer
@@ -95,4 +104,6 @@ X - SimulationData class
 X - Linear Algebra wrapper
 X - RegularMesh derived from Mesh
 X - Plasma Drift Diffusion Equation Solver
+X - Plasma Momentum Transfer Equation Solver
 X - FDTD Maxwell solver
+X - composite vector (cvector)

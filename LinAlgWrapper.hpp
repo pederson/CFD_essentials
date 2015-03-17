@@ -12,11 +12,14 @@
 
 //enum PreCondType{PRECOND_NONE, PRECOND_JACOBI};
 
+/*
 void clearLinAlg(){
 	PetscBool state;
 	PetscFinalized(&state);
 	if (!state) PetscFinalize();
 }
+*/
+
 
 class LinVector{
 public:

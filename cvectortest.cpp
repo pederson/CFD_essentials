@@ -2,6 +2,9 @@
 
 using namespace std;
 
+// compile with:
+// 				g++ -std=c++11 cvectortest.cpp -o cvectortest
+
 int main(int argc, char * argv[]){
 
 	//
@@ -19,6 +22,7 @@ int main(int argc, char * argv[]){
 
 	squaresp1.multiply(integers);
 	squaresp1.multiply(integers);
+	squaresp1.multiply(0.5);
 	squaresp1.set_additive_constant(1);
 
 	cubes.multiply(integers);
