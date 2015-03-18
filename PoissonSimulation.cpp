@@ -82,7 +82,7 @@ void PoissonSimulation::run_2D(){
 
     
 
-    cout << "about to init matrix" << endl;
+    //cout << "about to init matrix" << endl;
 
 	// set the matrix values for the laplace operator
 	unsigned int cind, lind, rind, uind, dind;
@@ -103,7 +103,7 @@ void PoissonSimulation::run_2D(){
 			cols[3] = uind;
 			cols[4] = rind;
 
-			if (j%10 == 0) cout << "on row: " << j << " / " << _mesh->reg_num_nodes_x() << " \r" << flush;
+			//if (j%10 == 0) cout << "on row: " << j << " / " << _mesh->reg_num_nodes_x() << " \r" << flush;
 
 			row = cind;
 			_A.insert_values(1, &row, 5, cols, oper);
@@ -116,10 +116,10 @@ void PoissonSimulation::run_2D(){
 		rhv = _rhs->at(i);
 		_rhsv.insert_values(1,&rhv, &i);
 	}
-    cout << "assembled rhs" << endl;
+    //cout << "assembled rhs" << endl;
 	
 	LinVector _soln = _krylov.solve(_A, _rhsv);
-    cout << "solved equation" << endl;
+    //cout << "solved equation" << endl;
     const double * dat;
     dat = &_soln.data();
     /*

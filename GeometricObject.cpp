@@ -42,18 +42,18 @@ rectangle::rectangle(double width_, double height_, vertex_2d center_, std::vect
 	parameters["Width"] = width_;
 	parameter_names.push_back("Height");
 	parameters["Height"] = height_;
-	width = width_;
-	height = height_;
+	_width = width_;
+	_height = height_;
 
 	
 }
 
 void rectangle::print_summary() const{
-	cout << "\tShape: " << _object_name << " width: " << width << " height: " << height << " center: " << _center.x << ", " << _center.y << endl;
+	cout << "\tShape: " << _object_name << " width: " << _width << " height: " << _height << " center: " << _center.x << ", " << _center.y << endl;
 }
 
 circle::circle(double radius_, vertex_2d center_, std::vector<double> properties){
-	radius = radius_;
+	_radius = radius_;
 
 	// common parameters
 	_object_name = "Circle";
@@ -66,7 +66,7 @@ circle::circle(double radius_, vertex_2d center_, std::vector<double> properties
 }
 
 void circle::print_summary() const{
-	cout << "\tShape: " << _object_name << " radius: " << radius << " center: " << _center.x << ", " << _center.y << endl;
+	cout << "\tShape: " << _object_name << " radius: " << _radius << " center: " << _center.x << ", " << _center.y << endl;
 }
 
 ellipse::ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, std::vector<double> properties){
@@ -82,13 +82,13 @@ ellipse::ellipse(double axis_major, double axis_minor, double rot_angle, vertex_
 	parameters["Axis_Minor"] = axis_minor;
 	parameter_names.push_back("Rotation_Angle");
 	parameters["Rotation_Angle"] = rot_angle;
-	axis_maj = axis_major;
-	axis_min = axis_minor;
-	rotation_angle = rot_angle;
+	_axis_maj = axis_major;
+	_axis_min = axis_minor;
+	_rotation_angle = rot_angle;
 }
 
 void ellipse::print_summary() const{
-	cout << "\tShape: " << _object_name << " major axis: " << axis_maj << " minor axis: " << axis_min << " rotation angle: " << rotation_angle << " center: " << _center.x << ", " << _center.y << endl;
+	cout << "\tShape: " << _object_name << " major axis: " << _axis_maj << " minor axis: " << _axis_min << " rotation angle: " << _rotation_angle << " center: " << _center.x << ", " << _center.y << endl;
 }
 
 triangle::triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, std::vector<double> properties){

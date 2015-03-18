@@ -2,8 +2,6 @@ TODO:
 
 - Should simdata be stored on heap instead of stack? Can be large sometimes
 
-- Make a poisson solver class (leverage the work already done for Poisson solver)
-
 - create an actual converter class (or decide if it is really worth it)
 
 - use max_element and min_element as a means to get the min/max
@@ -16,7 +14,7 @@ TODO:
 
 - Make a way to combine simulation data into one file if the mesh in each file matches
 
-- Make a way to get the "last" value for time stepping simulations
+- Make a way to get the "previous" value for time stepping simulations
 
 - migrate some things to BitBucket or GitLab
 
@@ -31,8 +29,6 @@ TODO:
 - Chiggidy Check Yoself Before You Wreck Yoself for the visualizers and anything else that could easily crash
 
 - Figure out how to output the OpenGL window to .png, .tif, .jpg OR make movies to .gif
-
- 
 
 - Problem writing holey_waveguide_defect geometry simulation to HDF5... only on school computer though... and only happens sometimes...
 
@@ -50,6 +46,8 @@ TODO:
 
 - Fix Mesh class and SimulationData class to have storage fields for both NodeData and ElementData (where data is associated per node or element, respectively)
 
+- Make a read_HDF5() method for SimulationData. Then make a script to quickly view simulation files or write to gif, jpg, etc.
+
 - fix all class accessors to have both const and non-const options... this is important
 
 - support boundary properties (with conditions that v=0, etc...)
@@ -57,6 +55,7 @@ TODO:
 - support initial conditions in a general manner
 
 - Increase encapsulation with getters and setters
+
 - support for cylindrical and polar coordinates (maybe not necessary)
 
 - Interface for libMesh, Eigen, Boost, CGAL, and any other third party libraries that are useful
@@ -68,6 +67,7 @@ TODO:
 - color by boundary doesn't work properly (b/c bool conversion to float maybe?)
 
 - Check out the Fluent .cas, .msh and .neu files to see how they are stored. Maybe also be able to read these in and print them out. Also check out Ansys .cmdb and .dsdb format.
+
 - Check out AutoCAD .dxf file format for parametric models. Also look at .obj and .ply formats. Look at .step and .iges files for 3D models
 
 - Make sure that everything follows the model of having all necessary information contained in the base class, but with added functionality implemented in the derived classes. If this isn't satisfied, maybe they should be separate classes.
@@ -87,7 +87,6 @@ TODO:
 - Equation setter
 - Chemistry setter and data (lxcat?)
 - Boundary conditions/ Initial Conditions
-- Source setter
 - Matrix equation assembler (parallelizable)
 - Matrix equation solver (parallelizable)
 
@@ -106,4 +105,5 @@ X - RegularMesh derived from Mesh
 X - Plasma Drift Diffusion Equation Solver
 X - Plasma Momentum Transfer Equation Solver
 X - FDTD Maxwell solver
+X - Poisson equation solver
 X - composite vector (cvector)

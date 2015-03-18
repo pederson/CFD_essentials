@@ -59,22 +59,28 @@ int main(int argc, char * argv[]){
 
 
 	// holey waveguide defect model
-	/*
+	
 	parametric_model_2d paramodel;
 	paramodel.set_model_name("Holey Defect");
 	paramodel.add_physical_property("eps_rel");
 	paramodel.add_material("Vacuum", {1.0});
 	paramodel.add_material("Dielectric", {6.0});
-	rectangle r1 = rectangle(1.0, 0.3, {0.5, 0.5}, paramodel.get_material("Dielectric"));
-	circle c1 = circle(0.05, {0.15, 0.5}, paramodel.get_material("Vacuum"));
-	circle c2 = circle(0.05, {0.3, 0.5}, paramodel.get_material("Vacuum"));
-	circle c3 = circle(0.05, {0.7, 0.5}, paramodel.get_material("Vacuum"));
-	circle c4 = circle(0.05, {0.85, 0.5}, paramodel.get_material("Vacuum"));
+	rectangle r1 = rectangle(1.0, 0.2, {0.5, 0.5}, paramodel.get_material("Dielectric"));
+	circle c1 = circle(0.05, {0.11, 0.5}, paramodel.get_material("Vacuum"));
+	circle c2 = circle(0.05, {0.31, 0.5}, paramodel.get_material("Vacuum"));
+	circle c3 = circle(0.05, {0.59, 0.5}, paramodel.get_material("Vacuum"));
+	circle c4 = circle(0.05, {0.79, 0.5}, paramodel.get_material("Vacuum"));
 	paramodel.add_object(&r1);
 	paramodel.add_object(&c1);
 	paramodel.add_object(&c2);
 	paramodel.add_object(&c3);
 	paramodel.add_object(&c4);
+	// convert the model into a mesh
+	cout << "about to make mesh" << endl;
+	dx = 0.005;
+	RegularMesh paramesh;
+	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, paramodel.get_material("Vacuum"));
+	paramesh.print_summary();
 	//*/
 
 	// rod array model
@@ -123,7 +129,7 @@ int main(int argc, char * argv[]){
 
 
 	// metal aperture model
-	
+	/*
 	parametric_model_2d paramodel;
 	paramodel.set_model_name("Aperture");
 	paramodel.add_physical_property("eps_rel");
@@ -157,8 +163,8 @@ int main(int argc, char * argv[]){
 	FDTDSimulation fsim;
 	fsim.bind_mesh(paramesh);
 	fsim.bind_rel_permittivity(&paramesh.data("eps_rel"));
-	fsim.bind_current_density_z(&paramesh.data("current_density"));
-	fsim.add_sinusoidal_source(1.0e+9, 0.0, 0.01, 0.05);
+	//fsim.bind_current_density_z(&paramesh.data("current_density"));
+	fsim.add_sinusoidal_source(5.0e+9, 0.0, 0.05, 0.5);
 	//fsim.add_gaussian_source(10.0, 10.0, 4.5e-6, 4.0e-6);
 	fsim.set_num_iters(800);
 	fsim.run();

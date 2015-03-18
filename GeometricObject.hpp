@@ -1,5 +1,5 @@
-#ifndef _GEOMETRIC_OBJECT_H
-#define _GEOMETRIC_OBJECT_H
+#ifndef _GEOMETRICOBJECT_H
+#define _GEOMETRICOBJECT_H
 
 #include <fstream>
 #include <iostream>
@@ -87,10 +87,13 @@ public:
 	rectangle(double width_, double height_, vertex_2d center_, std::vector<double> properties);
 	//~rectangle();
 
+	double width() const {return _width;};
+	double height() const {return _height;};
+
 	void print_summary() const;
 
 protected:
-	double width, height;
+	double _width, _height;
 
 };
 
@@ -102,10 +105,12 @@ public:
 	circle(double radius_, vertex_2d center_, std::vector<double> properties);
 	//~circle();
 
+	double radius() const {return _radius;};
+
 	void print_summary() const;
 
 protected:
-	double radius;
+	double _radius;
 
 };
 
@@ -117,10 +122,14 @@ public:
 	ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, std::vector<double> properties);
 	//~ellipse();
 
+	double axis_major() const {return _axis_maj;};
+	double axis_minor() const {return _axis_min;};
+	double rotation_angle() const {return _rotation_angle;};
+
 	void print_summary() const;
 
 protected:
-	double axis_maj, axis_min, rotation_angle;
+	double _axis_maj, _axis_min, _rotation_angle;
 
 };
 
@@ -152,7 +161,7 @@ protected:
 
 };
 
-class regular_polygon : public geometric_object_2d{
+class RegularPolygon : public geometric_object_2d{
 public:
 
 
@@ -193,7 +202,7 @@ protected:
 
 
 //********************************* 3D GEOMETRIES ****************************
-class geometric_object{
+class GeometricObject3D{
 public:
 
 protected:
@@ -201,51 +210,51 @@ protected:
 };
 
 
-class cylinder: public geometric_object{
+class Cylinder: public GeometricObject3D{
 public:
 
 private:
 
 };
 
-class sphere: public geometric_object{
+class Sphere: public GeometricObject3D{
 public:
 
 private:
 };
 
-class box: public geometric_object{
+class Box: public GeometricObject3D{
 public:
 
 private:
 
 };
 
-class prism: public geometric_object{
+class Prism: public GeometricObject3D{
 public:
 
 private:
 };
 
-class cone: public geometric_object{
+class Cone: public GeometricObject3D{
 public:
 
 private:
 };
 
-class pyramid: public geometric_object{
+class Pyramid: public GeometricObject3D{
 public:
 
 private:
 };
 
-class torus: public geometric_object{
+class Torus: public GeometricObject3D{
 public:
 
 private:
 };
 
-class mesh_model : public geometric_object{
+class mesh_model : public GeometricObject3D{
 public:
 
 	mesh_model();
@@ -289,7 +298,7 @@ struct stl_tri{
 };
 #pragma pack(pop)
 
-class parametric_model: public geometric_object{
+class ParametricModel3D: public GeometricObject3D{
 public:
 	//void union();
 	//void intersection();
