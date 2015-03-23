@@ -26,7 +26,8 @@ public:
 
 	// mutators
 	void bind_simulation(const SimulationData & simdat);
-	void set_frequency_Hz(unsigned int freq); // set the # of cycles per second
+	//void set_frequency_Hz(unsigned int freq); // set the # of cycles per second
+	void set_snapshot_increment(unsigned int inc);
 	void set_colorby_field(std::string fieldname);
 	void set_alpha_field(std::string fieldname);
 

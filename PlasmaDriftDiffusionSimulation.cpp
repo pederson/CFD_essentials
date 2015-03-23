@@ -43,6 +43,21 @@ void PlasmaDriftDiffusionSimulation::bind_loss_term(const double * loss_term){
 	_loss_term = loss_term;
 }
 
+void PlasmaDriftDiffusionSimulation::set_initial_density(const double * init_density){
+	_init_density = init_density;
+
+	if (_density.size() == 0){
+		_density.assign(_mesh->nodecount(), 0);
+		_density_old.assign(_mesh->nodecount(), 0);
+		for (auto i=0; i<_mesh->nodecount(); i++){
+			_density.at(i) = _init_density[i];
+			_density_old.at(i) = _init_density[i];
+		}
+	}
+
+};
+
+
 void PlasmaDriftDiffusionSimulation::view_results(){
 	// visualize the simulation
 		simulation_visualixer simvis;
@@ -50,7 +65,7 @@ void PlasmaDriftDiffusionSimulation::view_results(){
 		simvis.set_color_ramp(CRamp::MATLAB_PARULA);
 		simvis.set_colorby_field("density");
 		simvis.set_color_interpolation(false);
-		simvis.set_frequency_Hz(30);
+		simvis.set_snapshot_increment(3);
 		simvis.run();
 }
 
@@ -145,8 +160,10 @@ void PlasmaDriftDiffusionSimulation::preRunCheck(){
 
 void PlasmaDriftDiffusionSimulation::allocate_fields(){
 
-	_density.assign(_mesh->nodecount(), 0);
-	_density_old.assign(_mesh->nodecount(), 0);
+	if (_density.size() == 0){
+		_density.assign(_mesh->nodecount(), 0);
+		_density_old.assign(_mesh->nodecount(), 0);
+	}
 
 	if (_init_density != nullptr){
 		for (auto i=0; i<_mesh->nodecount(); i++){

@@ -17,13 +17,14 @@ public:
 
 	// inspectors
 	const double & density() const {return _density.front();};
-	const double & diffusion_coeff() const {return _diffusion_coeff[0];};
-	const double & gain_term() const {return _gain_term[0];};
-	const double & loss_term() const {return _loss_term[0];};
+	const double * density_ptr() const {return &_density.front();};
+	//const double & diffusion_coeff() const {return _diffusion_coeff[0];};
+	//const double & gain_term() const {return _gain_term[0];};
+	//const double & loss_term() const {return _loss_term[0];};
 
 	// mutators
 	//void set_boundary(BoundaryLocation loc, BoundaryCondition type, unsigned int num_layers=1);
-	void set_initial_density(const double * init_density) {_init_density = init_density;};
+	void set_initial_density(const double * init_density);
 	void set_time_step(double dt) {_dt = dt;};
 	void bind_mesh(const RegularMesh & mesh);
 	void bind_diffusion_coeff(const double * diffusion_coeff);
@@ -53,6 +54,7 @@ private:
 	const double * _gain_term;
 	const double * _loss_term;
 	const double * _init_density;
+	//const cvector _diffusion_coeff_cv, _gain_term_cv, _loss_term_cv;
 
 
 	// internal simulation variables

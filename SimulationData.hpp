@@ -56,7 +56,7 @@ public:
 	void write_HDF5(std::string outname) const;
 	//static read_HDF5(std::string filename);
 
-	//static combine(std::vector<SimulationData> datavec);
+	//static combine(std::vector<const SimulationData &> datavec);
 
 private:
 	void allocate_snapshots_mesh();

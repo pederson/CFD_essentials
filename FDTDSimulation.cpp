@@ -10,10 +10,10 @@ FDTDSimulation::FDTDSimulation(){
 	_E_z = nullptr;
 	_H_y = nullptr;
 	_H_x = nullptr;
-	_gaz = nullptr;
-	_jnx = nullptr; 
-	_jny = nullptr;
-	_jnz = nullptr;
+	//_gaz = nullptr;
+	//_jnx = nullptr; 
+	//_jny = nullptr;
+	//_jnz = nullptr;
 
 	gi2 = nullptr;
 	gi3 = nullptr;
@@ -29,11 +29,8 @@ FDTDSimulation::FDTDSimulation(){
 	_rel_permittivity = nullptr;
 	_rel_permeability = nullptr;
 	_current_density_x = nullptr;
-	_field_multiplier_x = nullptr;
 	_current_density_y = nullptr;
-	_field_multiplier_y = nullptr;
 	_current_density_z = nullptr;
-	_field_multiplier_z = nullptr;
 
 	_mesh = nullptr;
 
@@ -60,10 +57,6 @@ FDTDSimulation::~FDTDSimulation(){
 	if (_E_z != nullptr) delete[] _E_z;
 	if (_H_y != nullptr) delete[] _H_y;
 	if (_H_x != nullptr) delete[] _H_x;
-	if (_gaz != nullptr) delete[] _gaz;
-	if (_jnx != nullptr) delete[] _jnx;
-	if (_jny != nullptr) delete[] _jny;
-	if (_jnz != nullptr) delete[] _jnz;
 
 	if (gi2 != nullptr) delete[] gi2;
 	if (gi3 != nullptr) delete[] gi3;
@@ -124,6 +117,11 @@ void FDTDSimulation::bind_rel_permittivity(const double * rel_permittivity){
 	_rel_permittivity = rel_permittivity;
 }
 
+void FDTDSimulation::bind_rel_permittivity(const cvector & rel_permittivity_cv){
+	_rel_permittivity_cv = rel_permittivity_cv;
+	//if (!rel_permittivity_cv.isempty()) cout << "eps rel is populated internally" << endl;
+}
+
 void FDTDSimulation::bind_current_density_x(const double * current_density_x){
 	_current_density_x = current_density_x;
 }
@@ -148,7 +146,7 @@ void FDTDSimulation::view_results(){
 		//simvis.set_colorby_field("H_y");
 		simvis.set_color_alpha(_rel_permittivity);
 		simvis.set_color_interpolation(false);
-		simvis.set_frequency_Hz(30);
+		simvis.set_snapshot_increment(3);
 		simvis.run();
 
 }
@@ -167,12 +165,16 @@ void FDTDSimulation::run(int num_iters){
 		allocate_PML();
 		allocate_simdata();
 		_is_allocated = true;
+
+		cout << "dx: " << _dx << endl;
+		cout << "Courant Factor: " << _CourantFactor << endl;
+		cout << "dt: " << _dt << endl;
+
+		cout << "starting the run " << _mesh->num_dims() << "D" << endl;
 	}
 	//if (_is_allocated && _time_variable_coefficients) recalcCoeffs();
 
-	cout << "dx: " << _dx << endl;
-	cout << "Courant Factor: " << _CourantFactor << endl;
-	cout << "dt: " << _dt << endl;
+	
 
 
 	if (_mesh->num_dims() == 1){
@@ -189,7 +191,7 @@ void FDTDSimulation::run(int num_iters){
 
 void FDTDSimulation::run_2D(int num_iters){
 
-	cout << "starting the run 2D" << endl;
+	
 	double pulse;//, t0=10.0, spread = 12.0, srcfreq=3.0e+14/6.0;
 	double _srcx, _srcy;// = 0.5e-6, _srcy = 3.0e-6;
 
@@ -222,7 +224,7 @@ void FDTDSimulation::run_2D(int num_iters){
 				
 				_Dn_z[cind] = gi3[i]*gj3[j]*_Dn_z[cind]
 						  + gi2[i]*gj2[j]*_CourantFactor*(_H_y[cind] - _H_y[lind] - _H_x[cind] + _H_x[dind])
-						  - _CourantFactor*_dx*_jnz[cind]*sourcemodval;
+						  - _CourantFactor*_dx*_current_density_z[cind]*sourcemodval;
 
 				
 			}
@@ -247,7 +249,8 @@ void FDTDSimulation::run_2D(int num_iters){
 				cind = _mesh->reg_inds_to_glob_ind(i, j);
 
 				// with pml
-				_En_z[cind] = _gaz[cind] * _Dn_z[cind];
+				//_En_z[cind] = _gaz[cind] * _Dn_z[cind];
+				_En_z[cind] = _Dn_z[cind]/_rel_permittivity_cv.at(cind);
 				_E_z[cind] = _En_z[cind] * sqrt(_mu0/_eps0); // this can be made faster
 			}
 		}
@@ -336,10 +339,10 @@ void FDTDSimulation::allocate_fields(){
 	_E_z = new double[_mesh->nodecount()];
 	_H_y = new double[_mesh->nodecount()];
 	_H_x = new double[_mesh->nodecount()];
-	_gaz = new double[_mesh->nodecount()];
-	_jnx = new double[_mesh->nodecount()];
-	_jny = new double[_mesh->nodecount()];
-	_jnz = new double[_mesh->nodecount()];
+	//_gaz = new double[_mesh->nodecount()];
+	//_jnx = new double[_mesh->nodecount()];
+	//_jny = new double[_mesh->nodecount()];
+	//_jnz = new double[_mesh->nodecount()];
 	//gbz = new double[_mesh.nodecount()];
 
 
@@ -355,12 +358,20 @@ void FDTDSimulation::allocate_fields(){
 	}
 
 	// deal with relative permittivity
-	if (_rel_permittivity == nullptr){
-		for (auto i=0; i<_mesh->nodecount(); i++) _gaz[i] = 1.0;
+	if (_rel_permittivity_cv.isempty()){
+		if (_rel_permittivity == nullptr){
+			_default_rel_permittivity.assign(_mesh->nodecount(), 1.0);
+			_rel_permittivity = &_default_rel_permittivity.front();
+			//cout << "set default permittivity" << endl;
+			//for (auto i=0; i<_mesh->nodecount(); i++) _gaz[i] = 1.0;
+
+		}
+		_rel_permittivity_cv.multiply(_rel_permittivity);
+		cout << "RUH ROH" << endl;
 	}
-	else{
-		for (auto i=0; i<_mesh->nodecount(); i++) _gaz[i] = 1.0/_rel_permittivity[i];
-	}
+	//else{
+		//for (auto i=0; i<_mesh->nodecount(); i++) _gaz[i] = 1.0/_rel_permittivity[i];
+	//}
 
 	// deal with relative permeability
 	if (_rel_permeability == nullptr){
@@ -369,24 +380,30 @@ void FDTDSimulation::allocate_fields(){
 
 	// deal with current density
 	if (_current_density_x == nullptr){
-		for (auto i=0; i<_mesh->nodecount(); i++) _jnx[i] = 0.0;
-	}
-	else{
-		for (auto i=0; i<_mesh->nodecount(); i++) _jnx[i] = _current_density_x[i];	
+		_default_current_density_x.assign(_mesh->nodecount(), 0.0);
+		_current_density_x = &_default_current_density_x.front();
+		//for (auto i=0; i<_mesh->nodecount(); i++) _jnx[i] = 0.0;
+	//}
+	//else{
+		//for (auto i=0; i<_mesh->nodecount(); i++) _jnx[i] = _current_density_x[i];	
 	}
 
 	if (_current_density_y == nullptr){
-		for (auto i=0; i<_mesh->nodecount(); i++) _jny[i] = 0.0;
-	}
-	else{
-		for (auto i=0; i<_mesh->nodecount(); i++) _jny[i] = _current_density_y[i];
+		_default_current_density_y.assign(_mesh->nodecount(), 0.0);
+		_current_density_y = &_default_current_density_y.front();
+		//for (auto i=0; i<_mesh->nodecount(); i++) _jny[i] = 0.0;
+	//}
+	//else{
+		//for (auto i=0; i<_mesh->nodecount(); i++) _jny[i] = _current_density_y[i];
 	}
 
 	if (_current_density_z == nullptr){
-		for (auto i=0; i<_mesh->nodecount(); i++) _jnz[i] = 0.0;
-	}
-	else{
-		for (auto i=0; i<_mesh->nodecount(); i++) _jnz[i] = _current_density_z[i];	
+		_default_current_density_z.assign(_mesh->nodecount(), 0.0);
+		_current_density_z = &_default_current_density_z.front();
+		//for (auto i=0; i<_mesh->nodecount(); i++) _jnz[i] = 0.0;
+	//}
+	//else{
+		//for (auto i=0; i<_mesh->nodecount(); i++) _jnz[i] = _current_density_z[i];	
 	}
 
 

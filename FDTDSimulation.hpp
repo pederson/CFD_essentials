@@ -1,10 +1,10 @@
 #ifndef _FDTDSIMULATION_H
 #define _FDTDSIMULATION_H
 
-//#include "Simulation.hpp"
 #include "RegularMesh.hpp"
 #include "VisualixerSimulation.hpp"
 #include "SignalGenerator.hpp"
+#include "cvector.hpp"
 
 #include <vector>
 #include <string>
@@ -20,11 +20,13 @@ public:
 	~FDTDSimulation();
 
 	// inspectors
-	
 	const double & E_z() const {return _E_z[0];};
 	const double & H_y() const {return _H_y[0];};
 	const double & H_x() const {return _H_x[0];};
 	const double & E_z(double t) {return _simdata.get_data_at_time(t, "E_z");}; 
+	const double * E_z_ptr() const {return _E_z;};
+	const double * H_x_ptr() const {return _H_x;};
+	const double * H_y_ptr() const {return _H_y;};
 	
 
 	// mutators
@@ -35,19 +37,19 @@ public:
 	void add_sinusoidal_modulator(unsigned int signal_idx, double freq_Hz, double phase=0.0);
 	
 	void bind_mesh(const RegularMesh & mesh);
-	//void bind_metal(const double * metal_regions);
+	//void bind_metal_nodes(const double * metal_nodes);
 	void bind_rel_permittivity(const double * rel_permittivity);
+	void bind_rel_permittivity(const cvector & rel_permittivity_cv);
 	//void bind_rel_permeability(const double * rel_permeability);
 	void bind_current_density_x(const double * current_density_x);
-	//void bind_current_density_x(const double * velocity_x, const double * density_multiplier_x, const double cdxmult=1.0);
 	void bind_current_density_y(const double * current_density_y);
-	//void bind_current_density_y(const double * velocity_y, const double * density_multiplier_y, const double cdymult=1.0);
 	void bind_current_density_z(const double * current_density_z);
-	//void bind_current_density_z(const double * velocity_z, const double * density_multiplier_z, const double cdzmult=1.0);
-	
+
 	void set_num_iters(unsigned int num_iters) {_num_iters = num_iters;};
 	//void set_invariant_time(unsigned int timespan);
 	//void set_invariant_resolution(unsigned int res);
+
+
 	void view_results();
 	void output_HDF5(std::string outname="FDTD_output.h5");
 
@@ -71,11 +73,13 @@ private:
 	const double * _rel_permittivity;
 	const double * _rel_permeability;
 	const double * _current_density_x;
-	const double * _field_multiplier_x;
 	const double * _current_density_y;
-	const double * _field_multiplier_y;
 	const double * _current_density_z;
-	const double * _field_multiplier_z;
+	cvector _rel_permittivity_cv;
+	cvector _rel_permeability_cv;
+	cvector _current_density_x_cv;
+	cvector _current_density_y_cv;
+	cvector _current_density_z_cv;
 	std::vector<SignalGenerator> _signals;
 	std::vector<SignalGenerator> _modulators;
 
@@ -90,12 +94,12 @@ private:
 		double _nPML, _num_iters, _current_iter, _tcur;
 
 		
+		std::vector<double> _default_rel_permittivity;
+		std::vector<double> _default_rel_permeability;
 		std::vector<double> _default_current_density_x;
 		std::vector<double> _default_current_density_y;
 		std::vector<double> _default_current_density_z;
-		std::vector<double> _default_field_multiplier_x;
-		std::vector<double> _default_field_multiplier_y;
-		std::vector<double> _default_field_multiplier_z;
+
 
 		SignalGenerator _source_modulator; // modulates all sources with tanh
 		double _source_modulator_width; 	// how many time steps until it reaches max value
@@ -109,10 +113,10 @@ private:
 		double * _E_z;	// this is the real E field
 		double * _H_y;
 		double * _H_x;
-		double * _gaz;
-		double * _jnx; 
-		double * _jny;
-		double * _jnz;
+		//double * _gaz;
+		//double * _jnx; 
+		//double * _jny;
+		//double * _jnz;
 
 		// PML stuff only used internally
 		double * gi2;

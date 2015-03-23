@@ -1,5 +1,7 @@
 TODO:
 
+- incorporate cvector for use in other parts of the code (storing to simdata for example)
+
 - Should simdata be stored on heap instead of stack? Can be large sometimes
 
 - create an actual converter class (or decide if it is really worth it)
@@ -10,7 +12,7 @@ TODO:
 
 - fix the issue with the gaussian geometric object overwriting all other properties on the mesh
 
-- Make a standard Finite difference derivative operator class or function that accepts a regular mesh and a field variable, then takes the requested derivative
+- Make a standard Finite difference derivative operator class or function that accepts a regular mesh and a field variable, then takes the requested derivative (and uses the requested technique for dealing with the boundary)
 
 - Make a way to combine simulation data into one file if the mesh in each file matches
 
@@ -80,6 +82,7 @@ TODO:
 - Shading and Light source for mesh model viewer
 - Make a convention where there are expected to be Point, Line, Triangle, and Quad elements. The number of them are set by the user, but they are always in that order. Also, normals should be standard.
 - for simulation viz, instead of setting frequency, have a target framerate and set the simulation snapshot increment number
+- for sim viz, have option to show vector arrows if it's a flow
 
 
 

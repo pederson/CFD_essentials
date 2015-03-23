@@ -73,7 +73,7 @@ void PlasmaMomentumSimulation::view_results(){
 		simvis.set_color_ramp(CRamp::MATLAB_PARULA);
 		simvis.set_colorby_field("velocity_x");
 		simvis.set_color_interpolation(false);
-		simvis.set_frequency_Hz(30);
+		simvis.set_snapshot_increment(3);
 		simvis.run();
 }
 

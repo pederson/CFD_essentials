@@ -69,8 +69,14 @@ void simulation_visualixer::bind_simulation(const SimulationData & simdata){
 	num_vertex_points = 3;
 }
 
+/*
 void simulation_visualixer::set_frequency_Hz(unsigned int freq){
 	_freq_Hz = freq;
+}
+*/
+
+void simulation_visualixer::set_snapshot_increment(unsigned int inc){
+	_increment_val = inc;
 }
 
 void simulation_visualixer::set_colorby_field(std::string fieldname){

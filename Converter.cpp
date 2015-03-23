@@ -56,25 +56,23 @@ void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject2D & shape, cons
 		}
 
 	}
-	/*
 	else if (shape.get_object_name().compare("Circle") == 0){
 
-		const circle * circ = dynamic_cast<const circle *>(&shape);
-		double rad;
+		//const Circle * circ = dynamic_cast<const Circle *>(&shape);
+
 		const double * x, *y;
 		x = &mesh.x();
 		y = &mesh.y();
 
-		circ->print_summary();
+		map<string, double> params;
+		params = shape.get_parameters();
 
-		cout << "almost there" << endl;
-		rad = circ->radius();
-		cout << "almost there 1" << endl;
-		vertex_2d cen = circ->get_center();
-		cout << "almost there 2" << endl;
+
+		//rad = circ->radius();
+		double rad = params.at("Radius");
+		vertex_2d cen = shape.get_center();
 		vector<double> shapeprops = shape.get_phys_properties();
 
-		cout << "im HERE" << endl;
 
 		for (auto i=0; i<nnodes; i++){
 			if ((x[i]-cen.x)*(x[i]-cen.x) + (y[i]-cen.y)*(y[i]-cen.y) <= rad*rad){
@@ -85,7 +83,6 @@ void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject2D & shape, cons
 		}
 
 	}
-	*/
 	else{
 		Hull shull = approximate_parametric_shape_2d(shape, res);
 		MeshNode n;
