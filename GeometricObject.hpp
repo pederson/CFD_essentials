@@ -28,10 +28,10 @@ struct vertex_2d{
 };
 
 //********************************** 2D GEOMETRIES ***************************
-class geometric_object_2d{
+class GeometricObject2D{
 public:
-	geometric_object_2d();
-	//~geometric_object_2d();
+	GeometricObject2D();
+	//~GeometricObject2D();
 
 	// inspectors
 	virtual void print_summary() const;
@@ -42,7 +42,9 @@ public:
 	std::vector<vertex_2d> get_vertices() const {return vertices;};
 
 	// mutators
+	//void rotate(vertex_2d point, double deg);
 	//void translate(float delta_x, float delta_y);
+	//void mirror(LineSegment blah);
 	//void set_phys_property(std::string property_name, double value);
 
 protected:
@@ -51,6 +53,7 @@ protected:
 	std::string _object_name;
 	vertex_2d _center;
 	std::vector<double> phys_properties;
+	//double _xmax, _xmin, _ymax, _ymin;
 
 	// container for derived class specific data
 	std::vector<std::string> parameter_names;
@@ -60,10 +63,17 @@ protected:
 	std::vector<vertex_2d> vertices;
 };
 
-
-class gaussian_2d : public geometric_object_2d{
+class LineSegment : public GeometricObject2D{
 public:
-	gaussian_2d(double sigma_x, double sigma_y, double amplitude, double min_val, vertex_2d center_);
+
+private:
+
+};
+
+
+class Gaussian2D : public GeometricObject2D{
+public:
+	Gaussian2D(double sigma_x, double sigma_y, double amplitude, double min_val, vertex_2d center_);
 
 	double sigma_x() const {return _sigma_x;};
 	double sigma_y() const {return _sigma_y;};
@@ -72,55 +82,55 @@ public:
 
 	void print_summary() const;
 
-protected:
+private:
 	double _sigma_x, _sigma_y, _amplitude, _min_val;
 
 
 };
 
 
-class rectangle : public geometric_object_2d{
+class Rectangle : public GeometricObject2D{
 public:
-	//rectangle(double width_, double height_);
-	//rectangle(double width_, double height_, vertex_2d center_);
-	//rectangle(double width_, double height_, vertex_2d center_, Material mat);
-	rectangle(double width_, double height_, vertex_2d center_, std::vector<double> properties);
-	//~rectangle();
+	//Rectangle(double width_, double height_);
+	//Rectangle(double width_, double height_, vertex_2d center_);
+	//Rectangle(double width_, double height_, vertex_2d center_, Material mat);
+	Rectangle(double width_, double height_, vertex_2d center_, std::vector<double> properties);
+	//~Rectangle();
 
 	double width() const {return _width;};
 	double height() const {return _height;};
 
 	void print_summary() const;
 
-protected:
+private:
 	double _width, _height;
 
 };
 
-class circle : public geometric_object_2d{
+class Circle : public GeometricObject2D{
 public:
-	//circle(double radius_);
-	//circle(double radius_, vertex_2d center_);
-	//circle(double radius_, vertex_2d center_, Material mat);
-	circle(double radius_, vertex_2d center_, std::vector<double> properties);
-	//~circle();
+	//Circle(double radius_);
+	//Circle(double radius_, vertex_2d center_);
+	//Circle(double radius_, vertex_2d center_, Material mat);
+	Circle(double radius_, vertex_2d center_, std::vector<double> properties);
+	//~Circle();
 
 	double radius() const {return _radius;};
 
 	void print_summary() const;
 
-protected:
+private:
 	double _radius;
 
 };
 
-class ellipse : public geometric_object_2d{
+class Ellipse : public GeometricObject2D{
 public:
-	//ellipse(double axis_major, double axis_minor, double rot_angle=0.0);
-	//ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_);
-	//ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, Material mat);
-	ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, std::vector<double> properties);
-	//~ellipse();
+	//Ellipse(double axis_major, double axis_minor, double rot_angle=0.0);
+	//Ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_);
+	//Ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, Material mat);
+	Ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, std::vector<double> properties);
+	//~Ellipse();
 
 	double axis_major() const {return _axis_maj;};
 	double axis_minor() const {return _axis_min;};
@@ -128,52 +138,52 @@ public:
 
 	void print_summary() const;
 
-protected:
+private:
 	double _axis_maj, _axis_min, _rotation_angle;
 
 };
 
-class triangle : public geometric_object_2d{
+class Triangle : public GeometricObject2D{
 public:
-	//triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3);
-	//triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, Material mat);
-	triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, std::vector<double> properties);
-	//~triangle();
+	//Triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3);
+	//Triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, Material mat);
+	Triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, std::vector<double> properties);
+	//~Triangle();
 
 	void print_summary() const;
 
-protected:
+private:
 	vertex_2d v1, v2, v3;
 
 };
 
-class polygon : public geometric_object_2d{
+class Polygon : public GeometricObject2D{
 public:
-	//polygon(std::vector<vertex_2d> verts);
-	//polygon(std::vector<vertex_2d> verts, Material mat);
-	polygon(std::vector<vertex_2d> verts, std::vector<double> properties);
-	//~polygon();
+	//Polygon(std::vector<vertex_2d> verts);
+	//Polygon(std::vector<vertex_2d> verts, Material mat);
+	Polygon(std::vector<vertex_2d> verts, std::vector<double> properties);
+	//~Polygon();
 
 	void print_summary() const;
 
-protected:
+private:
 	std::vector<vertex_2d> vertices; // ordered Clockwise
 
 };
 
-class RegularPolygon : public geometric_object_2d{
+class RegularPolygon : public GeometricObject2D{
 public:
 
 
-protected:
+private:
 
 };
 
-class parametric_model_2d : public geometric_object_2d{
+class ParametricModel2D : public GeometricObject2D{
 public:
 
-	parametric_model_2d();
-	//~parametric_model_2d();
+	ParametricModel2D();
+	//~ParametricModel2D();
 
 	void print_summary() const;
 
@@ -182,13 +192,13 @@ public:
 	
 	void add_physical_property(std::string property_name);
 	void add_material(std::string material_name, std::vector<double> phys_props);
-	void add_object(geometric_object_2d * new_object);
+	void add_object(GeometricObject2D * new_object);
 
 	//std::vector<geometric_object_2d> get_object_tree(){return ordered_object_tree;};
 	std::vector<void *> get_object_tree() const {return ordered_object_tree;};
 	std::vector<std::string> get_phys_property_names() const {return phys_property_names;};
 
-protected:
+private:
 	std::string model_name;
 	//std::vector<geometric_object_2d> ordered_object_tree;
 	std::vector<void *> ordered_object_tree;
@@ -254,13 +264,13 @@ public:
 private:
 };
 
-class mesh_model : public GeometricObject3D{
+class TriangleMesh : public GeometricObject3D{
 public:
 
-	mesh_model();
-	~mesh_model();
+	TriangleMesh();
+	~TriangleMesh();
 
-	static mesh_model * read_STL(std::string filename, unsigned int byte_offset=0);
+	static TriangleMesh * read_STL(std::string filename, unsigned int byte_offset=0);
 
 
 	unsigned int * vertex_inds; // 3 inds per triangle

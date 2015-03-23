@@ -29,12 +29,12 @@ private:
 };
 
 // define the functions that build a mesh from a parametric model
-RegularMesh build_simple_mesh_2d(const parametric_model_2d & model,  double res, double xmin, double xmax, double ymin, double ymax, std::vector<double> bg_properties);
+RegularMesh build_simple_mesh_2d(const ParametricModel2D & model,  double res, double xmin, double xmax, double ymin, double ymax, std::vector<double> bg_properties);
 //Mesh * build_delaunay_mesh_2d(parametric_model_2d * model, double xmin, double xmax, double ymin, double ymax, double res);
 
 // helpers
-void add_shape_to_mesh(RegularMesh & mesh, const geometric_object_2d & shape, const parametric_model_2d & model, double res);
-Hull approximate_parametric_shape_2d(const geometric_object_2d & model, double res);
+void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject2D & shape, const ParametricModel2D & model, double res);
+Hull approximate_parametric_shape_2d(const GeometricObject2D & model, double res);
 
 
 #endif

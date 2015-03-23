@@ -15,12 +15,12 @@ int main(int argc, char * argv[]){
 
 	// dot of plasma model
 	
-	parametric_model_2d paramodel;
+	ParametricModel2D paramodel;
 	paramodel.set_model_name("PlasmaDot");
 	paramodel.add_physical_property("density");
 	paramodel.add_material("Vacuum", {0.0});
 	paramodel.add_material("Plasma", {plasma_dens});
-	circle c1 = circle(6.0e-5, {2.7e-3/2, 2.7e-3/2}, paramodel.get_material("Plasma"));
+	Circle c1 = Circle(6.0e-5, {2.7e-3/2, 2.7e-3/2}, paramodel.get_material("Plasma"));
 	paramodel.add_object(&c1);
 	//*/
 

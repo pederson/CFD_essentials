@@ -77,21 +77,21 @@ int main(int argc, char * argv[]){
 
 	// rod array model
 
-	parametric_model_2d paramodel;
+	ParametricModel2D paramodel;
 	paramodel.set_model_name("Rod Array");
 	paramodel.add_physical_property("eps_rel");
 	paramodel.add_physical_property("current_density_z");
 	paramodel.add_material("Vacuum", {1.0, 0.0});
 	paramodel.add_material("Dielectric", {6.0, 0.0});
 	paramodel.add_material("CurrentWire", {10.0, 1.0e+7});
-	circle c1 = circle(0.1e-6, {1.5e-6, 3.0e-6}, paramodel.get_material("CurrentWire"));
-	circle c2 = circle(0.5e-6, {3.5e-6, 4.0e-6}, paramodel.get_material("Dielectric"));
-	circle c3 = circle(0.5e-6, {5.5e-6, 4.0e-6}, paramodel.get_material("Dielectric"));
-	circle c4 = circle(0.5e-6, {7.5e-6, 4.0e-6}, paramodel.get_material("Dielectric"));
+	Circle c1 = Circle(0.1e-6, {1.5e-6, 3.0e-6}, paramodel.get_material("CurrentWire"));
+	Circle c2 = Circle(0.5e-6, {3.5e-6, 4.0e-6}, paramodel.get_material("Dielectric"));
+	Circle c3 = Circle(0.5e-6, {5.5e-6, 4.0e-6}, paramodel.get_material("Dielectric"));
+	Circle c4 = Circle(0.5e-6, {7.5e-6, 4.0e-6}, paramodel.get_material("Dielectric"));
 	//circle c5 = circle(0.5e-6, {1.5e-6, 2.0e-6}, paramodel.get_material("Dielectric"));
-	circle c6 = circle(0.5e-6, {3.5e-6, 2.0e-6}, paramodel.get_material("Dielectric"));
-	circle c7 = circle(0.5e-6, {5.5e-6, 2.0e-6}, paramodel.get_material("Dielectric"));
-	circle c8 = circle(0.5e-6, {7.5e-6, 2.0e-6}, paramodel.get_material("Dielectric"));
+	Circle c6 = Circle(0.5e-6, {3.5e-6, 2.0e-6}, paramodel.get_material("Dielectric"));
+	Circle c7 = Circle(0.5e-6, {5.5e-6, 2.0e-6}, paramodel.get_material("Dielectric"));
+	Circle c8 = Circle(0.5e-6, {7.5e-6, 2.0e-6}, paramodel.get_material("Dielectric"));
 	paramodel.add_object(&c1);
 	paramodel.add_object(&c2);
 	paramodel.add_object(&c3);

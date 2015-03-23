@@ -11,15 +11,15 @@ using namespace std;
 int main(int argc, char * argv[]){
 
 	// define the geometry model that will be used
-	parametric_model_2d my_param2;
+	ParametricModel2D my_param2;
 	my_param2.set_model_name("GaussianDistElectrons");
 	my_param2.add_physical_property("e_density");
 	my_param2.add_material("Air", {1.0e+10});
 	my_param2.add_material("Dielectric", {5.0e+13});
 	my_param2.add_material("Dielectric2", {9.0});
 	//gaussian_2d ga1 = gaussian_2d(0.3, 0.3, 1000.0, 1.0e+16, {0.0, 0.0}); // electron density in #/m^3
-	circle c1 = circle(0.03, {0.0, 0.04}, my_param2.get_material("Dielectric"));
-	circle c2 = circle(0.03, {0.0, -0.04}, my_param2.get_material("Dielectric"));
+	Circle c1 = Circle(0.03, {0.0, 0.04}, my_param2.get_material("Dielectric"));
+	Circle c2 = Circle(0.03, {0.0, -0.04}, my_param2.get_material("Dielectric"));
 	//my_param2.add_object(&ga1);
 	my_param2.add_object(&c1);
 	my_param2.add_object(&c2);

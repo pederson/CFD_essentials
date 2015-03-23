@@ -60,16 +60,16 @@ int main(int argc, char * argv[]){
 
 	// holey waveguide defect model
 	
-	parametric_model_2d paramodel;
+	ParametricModel2D paramodel;
 	paramodel.set_model_name("Holey Defect");
 	paramodel.add_physical_property("eps_rel");
 	paramodel.add_material("Vacuum", {1.0});
 	paramodel.add_material("Dielectric", {6.0});
-	rectangle r1 = rectangle(1.0, 0.2, {0.5, 0.5}, paramodel.get_material("Dielectric"));
-	circle c1 = circle(0.05, {0.11, 0.5}, paramodel.get_material("Vacuum"));
-	circle c2 = circle(0.05, {0.31, 0.5}, paramodel.get_material("Vacuum"));
-	circle c3 = circle(0.05, {0.59, 0.5}, paramodel.get_material("Vacuum"));
-	circle c4 = circle(0.05, {0.79, 0.5}, paramodel.get_material("Vacuum"));
+	Rectangle r1 = Rectangle(1.0, 0.2, {0.5, 0.5}, paramodel.get_material("Dielectric"));
+	Circle c1 = Circle(0.05, {0.11, 0.5}, paramodel.get_material("Vacuum"));
+	Circle c2 = Circle(0.05, {0.31, 0.5}, paramodel.get_material("Vacuum"));
+	Circle c3 = Circle(0.05, {0.59, 0.5}, paramodel.get_material("Vacuum"));
+	Circle c4 = Circle(0.05, {0.79, 0.5}, paramodel.get_material("Vacuum"));
 	paramodel.add_object(&r1);
 	paramodel.add_object(&c1);
 	paramodel.add_object(&c2);

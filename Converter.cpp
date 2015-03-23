@@ -5,7 +5,7 @@
 using namespace std;
 
 // define the functions that build a mesh from a parametric model
-RegularMesh build_simple_mesh_2d(const parametric_model_2d & model,  double res, double xmin, double xmax, double ymin, double ymax, vector<double> bg_properties){
+RegularMesh build_simple_mesh_2d(const ParametricModel2D & model,  double res, double xmin, double xmax, double ymin, double ymax, vector<double> bg_properties){
 
 	// first create a regular grid
 	RegularMesh outmesh = RegularMesh::create_regular_grid_b(res, xmin, xmax, ymin, ymax);
@@ -18,16 +18,16 @@ RegularMesh build_simple_mesh_2d(const parametric_model_2d & model,  double res,
 
 	vector<void *> shape_tree = model.get_object_tree();
 	// perform point-in-polygon queries for each part of the parametric model
-	geometric_object_2d obj;
+	GeometricObject2D obj;
 	for (auto i=0; i<shape_tree.size(); i++){
-		obj = *(geometric_object_2d *)shape_tree.at(i);
+		obj = *(GeometricObject2D *)shape_tree.at(i);
 		add_shape_to_mesh(outmesh, obj, model, res);
 	}
 
 	return outmesh;
 }
 
-void add_shape_to_mesh(RegularMesh & mesh, const geometric_object_2d & shape, const parametric_model_2d & model, double res){
+void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject2D & shape, const ParametricModel2D & model, double res){
 	// convert the shape to a hull
 	vector<string> propnames = model.get_phys_property_names();
 	//cout << "IMM HURR" << shape.get_object_name() << endl;
@@ -37,7 +37,7 @@ void add_shape_to_mesh(RegularMesh & mesh, const geometric_object_2d & shape, co
 	if (shape.get_object_name().compare("Gaussian_2D") == 0){
 
 		//gaussian_2d * gauss = dynamic_cast<gaussian_2d *>(shape);
-		const gaussian_2d * gauss = dynamic_cast<const gaussian_2d *>(&shape);
+		const Gaussian2D * gauss = dynamic_cast<const Gaussian2D *>(&shape);
 		double sx, sy, minval, amp;
 		const double * x, *y;
 		x = &mesh.x();
@@ -105,7 +105,7 @@ void add_shape_to_mesh(RegularMesh & mesh, const geometric_object_2d & shape, co
 
 //Mutable_Mesh * build_delaunay_mesh_2d(parametric_model_2d * model, double xmin, double xmax, double ymin, double ymax, double res);
 
-Hull approximate_parametric_shape_2d(const geometric_object_2d & shape, double res){
+Hull approximate_parametric_shape_2d(const GeometricObject2D & shape, double res){
 
 	vector<Point> pts_vec;
 	vertex_2d cent;

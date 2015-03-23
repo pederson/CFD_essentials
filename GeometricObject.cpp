@@ -3,11 +3,11 @@
 //#define _TEST_
 using namespace std;
 
-geometric_object_2d::geometric_object_2d(){
+GeometricObject2D::GeometricObject2D(){
 	_object_name = "GeometricObject2D";
 }
 
-void geometric_object_2d::print_summary() const{
+void GeometricObject2D::print_summary() const{
 	//cout << "printing summary" << flush;
 	cout << "\tShape: " << _object_name << "   Center: (" << _center.x << ", " << _center.y << ")" ;
 	cout << " base print summary" << endl;
@@ -15,8 +15,8 @@ void geometric_object_2d::print_summary() const{
 	cout << endl;
 }
 
-gaussian_2d::gaussian_2d(double sigma_x, double sigma_y, double amplitude, double min_val, vertex_2d center_){
-	_object_name = "Gaussian_2D";
+Gaussian2D::Gaussian2D(double sigma_x, double sigma_y, double amplitude, double min_val, vertex_2d center_){
+	_object_name = "Gaussian2D";
 	_center = center_;
 	//phys_properties = properties;
 
@@ -26,18 +26,18 @@ gaussian_2d::gaussian_2d(double sigma_x, double sigma_y, double amplitude, doubl
 	_min_val = min_val;
 }
 
-void gaussian_2d::print_summary() const{
+void Gaussian2D::print_summary() const{
 	cout << "\tShape: " << _object_name << " sigma_x: " << _sigma_x << " sigma_y: " << _sigma_y << " amplitude: " << _amplitude << " center: " << _center.x << ", " << _center.y << endl;
 
 }
 
-rectangle::rectangle(double width_, double height_, vertex_2d center_, std::vector<double> properties){
+Rectangle::Rectangle(double width_, double height_, vertex_2d center_, std::vector<double> properties){
 	// common parameters
 	_object_name = "Rectangle";
 	_center = center_;
 	phys_properties = properties;
 
-	// rectangle specific parameters
+	// Rectangle specific parameters
 	parameter_names.push_back("Width");
 	parameters["Width"] = width_;
 	parameter_names.push_back("Height");
@@ -48,11 +48,11 @@ rectangle::rectangle(double width_, double height_, vertex_2d center_, std::vect
 	
 }
 
-void rectangle::print_summary() const{
+void Rectangle::print_summary() const{
 	cout << "\tShape: " << _object_name << " width: " << _width << " height: " << _height << " center: " << _center.x << ", " << _center.y << endl;
 }
 
-circle::circle(double radius_, vertex_2d center_, std::vector<double> properties){
+Circle::Circle(double radius_, vertex_2d center_, std::vector<double> properties){
 	_radius = radius_;
 
 	// common parameters
@@ -60,22 +60,22 @@ circle::circle(double radius_, vertex_2d center_, std::vector<double> properties
 	_center = center_;
 	phys_properties = properties;
 
-	// circle specific parameters
+	// Circle specific parameters
 	parameter_names.push_back("Radius");
 	parameters["Radius"] = radius_;
 }
 
-void circle::print_summary() const{
+void Circle::print_summary() const{
 	cout << "\tShape: " << _object_name << " radius: " << _radius << " center: " << _center.x << ", " << _center.y << endl;
 }
 
-ellipse::ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, std::vector<double> properties){
+Ellipse::Ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, std::vector<double> properties){
 	// common parameters
 	_object_name = "Ellipse";
 	_center = center_;
 	phys_properties = properties;
 
-	// ellipse specific parameters
+	// Ellipse specific parameters
 	parameter_names.push_back("Axis_Major");
 	parameters["Axis_Major"] = axis_major;
 	parameter_names.push_back("Axis_Minor");
@@ -87,11 +87,11 @@ ellipse::ellipse(double axis_major, double axis_minor, double rot_angle, vertex_
 	_rotation_angle = rot_angle;
 }
 
-void ellipse::print_summary() const{
+void Ellipse::print_summary() const{
 	cout << "\tShape: " << _object_name << " major axis: " << _axis_maj << " minor axis: " << _axis_min << " rotation angle: " << _rotation_angle << " center: " << _center.x << ", " << _center.y << endl;
 }
 
-triangle::triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, std::vector<double> properties){
+Triangle::Triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, std::vector<double> properties){
 	// common parameters
 	_object_name = "Triangle";
 	phys_properties = properties;
@@ -108,15 +108,15 @@ triangle::triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, std::vecto
 	_center.y = (vert1.y + vert2.y + vert3.y)/3.0;
 }
 
-void triangle::print_summary() const{
+void Triangle::print_summary() const{
 	cout << "\tShape: " << _object_name << " vertex1: " << v1.x << ", " << v1.y << " vertex2: " << v2.x << ", " << v2.y << " vertex3: " << v3.x << ", " << v3.y << " center: " << _center.x << ", " << _center.y << endl;
 }
 
-polygon::polygon(std::vector<vertex_2d> verts, std::vector<double> properties){
+Polygon::Polygon(std::vector<vertex_2d> verts, std::vector<double> properties){
 	// common parameters
 	_object_name = "Polygon";
 
-	// polygon specific parameters
+	// Polygon specific parameters
 	vertices = verts;
 
 	_center.x = 0.0;
@@ -131,15 +131,15 @@ polygon::polygon(std::vector<vertex_2d> verts, std::vector<double> properties){
 	phys_properties = properties;
 }
 
-void polygon::print_summary() const{
+void Polygon::print_summary() const{
 	cout << "\tShape: " << _object_name << " # vertices: " << vertices.size() << endl;
 }
 
-parametric_model_2d::parametric_model_2d(){
+ParametricModel2D::ParametricModel2D(){
 	model_name = "DefaultModelName";
 }
 
-void parametric_model_2d::print_summary() const{
+void ParametricModel2D::print_summary() const{
 	cout << " " << endl;
 	cout << "********* Parametric Model Summary **********" << endl;
 	cout << "Model Name: " << model_name << endl;
@@ -149,24 +149,24 @@ void parametric_model_2d::print_summary() const{
 			//geometric_object_2d * geobj = static_cast<geometric_object_2d *>(ordered_object_tree.at(i));
 			//rectangle * obj = dynamic_cast<rectangle *>(geobj);
 			//obj->print_summary();
-			((rectangle *)ordered_object_tree.at(i))->print_summary();
+			((Rectangle *)ordered_object_tree.at(i))->print_summary();
 		}
 		else if(object_tree_names.at(i).compare("Circle") == 0){
 			//circle * circ = (circle *) ordered_object_tree.at(i);
 			//circ->print_summary();
-			((circle *)ordered_object_tree.at(i))->print_summary();
+			((Circle *)ordered_object_tree.at(i))->print_summary();
 		}
 		else if(object_tree_names.at(i).compare("Ellipse") == 0){
-			((ellipse *)ordered_object_tree.at(i))->print_summary();
+			((Ellipse *)ordered_object_tree.at(i))->print_summary();
 		}
 		else if(object_tree_names.at(i).compare("Triangle") == 0){
-			((triangle *)ordered_object_tree.at(i))->print_summary();
+			((Triangle *)ordered_object_tree.at(i))->print_summary();
 		}
 		else if(object_tree_names.at(i).compare("Polygon") == 0){
-			((polygon *) ordered_object_tree.at(i))->print_summary();
+			((Polygon *) ordered_object_tree.at(i))->print_summary();
 		}
 		else {
-			((geometric_object_2d *) ordered_object_tree.at(i))->print_summary();
+			((GeometricObject2D *) ordered_object_tree.at(i))->print_summary();
 		}
 		//if (ordered_object_tree.at(i).get_object_name.compare("Circle")){
 		//	cout << "Circle radius: " << endl;//<< ordered_object_tree.at(i).radius << endl;
@@ -177,42 +177,42 @@ void parametric_model_2d::print_summary() const{
 	return;
 }
 
-void parametric_model_2d::set_model_name(std::string mname){
+void ParametricModel2D::set_model_name(std::string mname){
 	model_name = mname;
 	return;
 }
 
-std::vector<double> parametric_model_2d::get_material(std::string material_name) const{
+std::vector<double> ParametricModel2D::get_material(std::string material_name) const{
 	return materials.at(material_name);
 }
 
-void parametric_model_2d::add_physical_property(std::string property_name){
+void ParametricModel2D::add_physical_property(std::string property_name){
 	phys_property_names.push_back(property_name);
 }
 
-void parametric_model_2d::add_material(std::string material_name, std::vector<double> phys_props){
+void ParametricModel2D::add_material(std::string material_name, std::vector<double> phys_props){
 	materials[material_name] = phys_props;
 }
 
-void parametric_model_2d::add_object(geometric_object_2d * new_object){
+void ParametricModel2D::add_object(GeometricObject2D * new_object){
 	if (new_object->get_object_name().compare("Rectangle") == 0){
-		rectangle * obj = dynamic_cast<rectangle *> (new_object);
+		Rectangle * obj = dynamic_cast<Rectangle *> (new_object);
 		add_object((void *)(obj), "Rectangle");
 	}
 	else if(new_object->get_object_name().compare("Circle") == 0){
-		circle * obj = dynamic_cast<circle *> (new_object);
+		Circle * obj = dynamic_cast<Circle *> (new_object);
 		add_object((void *)obj, "Circle");
 	}
 	else if(new_object->get_object_name().compare("Ellipse") == 0){
-		ellipse * obj = dynamic_cast<ellipse *> (new_object);
+		Ellipse * obj = dynamic_cast<Ellipse *> (new_object);
 		add_object((void *)obj, "Ellipse");
 	}
 	else if(new_object->get_object_name().compare("Triangle") == 0){
-		triangle * obj = dynamic_cast<triangle *> (new_object);
+		Triangle * obj = dynamic_cast<Triangle *> (new_object);
 		add_object((void *)obj, "Triangle");
 	}
 	else if(new_object->get_object_name().compare("Polygon") == 0){
-		polygon * obj = dynamic_cast<polygon *> (new_object);
+		Polygon * obj = dynamic_cast<Polygon *> (new_object);
 		add_object((void *)obj, "Polygon");
 	}
 	else {
@@ -221,7 +221,7 @@ void parametric_model_2d::add_object(geometric_object_2d * new_object){
 	
 }
 
-void parametric_model_2d::add_object(void * new_object, string object_name){
+void ParametricModel2D::add_object(void * new_object, string object_name){
 	object_tree_names.push_back(object_name);
 	ordered_object_tree.push_back(new_object);
 	
@@ -229,21 +229,21 @@ void parametric_model_2d::add_object(void * new_object, string object_name){
 
 
 //************************************************************************
-mesh_model::mesh_model(){
+TriangleMesh::TriangleMesh(){
 	vertices = NULL;
 	normals = NULL;
 	vertex_inds = NULL;
 }
 
-mesh_model::~mesh_model(){
+TriangleMesh::~TriangleMesh(){
 	if(vertices != NULL) delete[] vertices;
 	if(normals != NULL) delete[] normals;
 	if(vertex_inds != NULL) delete[] vertex_inds;
 }
 
-mesh_model * mesh_model::read_STL(string filename, unsigned int byte_offset){
+TriangleMesh * TriangleMesh::read_STL(string filename, unsigned int byte_offset){
 	// declare vars
-	mesh_model * outmesh;
+	TriangleMesh * outmesh;
 	int fd;
 	unsigned int tricount;
 	char * stlmap;
@@ -273,7 +273,7 @@ mesh_model * mesh_model::read_STL(string filename, unsigned int byte_offset){
 	memcpy(triangles, &stlmap[84], sizeof(stl_tri)*tricount);
 
 	// copy the structure data into the member data
-	outmesh = new mesh_model();
+	outmesh = new TriangleMesh();
 	outmesh->triangle_count = tricount;
   outmesh->vertex_count = 3*tricount;
 	outmesh->vertices = new float[tricount*3*3];
@@ -331,7 +331,7 @@ int main(int argc, char * argv[]){
 	// declare vars
 
 	// test 2D parametric builder
-	parametric_model_2d my_param2;
+	ParametricModel2D my_param2;
 	my_param2.set_model_name("Dylan Test Model");
 	my_param2.add_physical_property("Epsilon_rel");
 	my_param2.add_physical_property("Mu_rel");
@@ -341,22 +341,22 @@ int main(int argc, char * argv[]){
 
 	// test rectangle
 	cout << "Testing rectangle..." ;
-	rectangle newrect = rectangle(1.0, 2.0, vertex_2d(0.0, 0.0), my_param2.get_material("Air"));
+	Rectangle newrect = Rectangle(1.0, 2.0, vertex_2d(0.0, 0.0), my_param2.get_material("Air"));
 	my_param2.add_object(&newrect);
 	cout << "Success!" << endl;
 	// test circle
 	cout << "Testing circle..." ;
-	circle newcirc = circle(0.75, vertex_2d(0.5, 1.0), my_param2.get_material("Dielectric"));
+	Circle newcirc = Circle(0.75, vertex_2d(0.5, 1.0), my_param2.get_material("Dielectric"));
 	my_param2.add_object(&newcirc);
 	cout << "Success!" << endl;
 	// test ellipse
 	cout << "Testing ellipse..." ;
-	ellipse newell = ellipse(0.3, 0.2, 0.0, vertex_2d(-1.0, -1.0), my_param2.get_material("Dielectric"));
+	Ellipse newell = Ellipse(0.3, 0.2, 0.0, vertex_2d(-1.0, -1.0), my_param2.get_material("Dielectric"));
 	my_param2.add_object(&newell);
 	cout << "Success!" << endl;
 	// test triangle
 	cout << "Testing triangle..." ;
-	triangle newtri = triangle(vertex_2d(3.0, 1.0), vertex_2d(4.0, 0.0), vertex_2d(2.0, 0.0), my_param2.get_material("Air"));
+	Triangle newtri = Triangle(vertex_2d(3.0, 1.0), vertex_2d(4.0, 0.0), vertex_2d(2.0, 0.0), my_param2.get_material("Air"));
 	my_param2.add_object(&newtri);
 	cout << "Success!" << endl;
 
@@ -366,7 +366,7 @@ int main(int argc, char * argv[]){
 
 
 	// test stl reader
-	mesh_model * mytri = mesh_model::read_STL("./testfiles/brain-gear.stl");
+	TriangleMesh * mytri = TriangleMesh::read_STL("./testfiles/brain-gear.stl");
 	delete mytri;
 
 }
