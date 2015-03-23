@@ -1,0 +1,48 @@
+# you can compile this with the following command:
+# cmake .. -DPETSC_DIR=/home/dmp942/GitProjects/petsc/ -DPETSC_ARCH=arch-linux2-c-debug
+
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+PROJECT(plasma_wave)
+
+SET(CMAKE_CXX_COMPILER "${PETSC_DIR}/${PETSC_ARCH}/bin/mpicxx")
+SET(CMAKE_CXX_FLAGS "-std=c++11 -w -Wall -Werror -fopenmp")
+#SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+MESSAGE(STATUS "  *************** ")
+FOREACH(item ${CMAKE_MODULE_PATH})
+    MESSAGE(STATUS "  path: " ${item})
+ENDFOREACH()
+MESSAGE(STATUS "  *************** ")
+
+# PETSc
+FIND_PACKAGE(PETSc REQUIRED)
+INCLUDE_DIRECTORIES(${PETSC_INCLUDES})
+ADD_DEFINITIONS(${PETSC_DEFINITIONS})
+SET(ALL_LIBRARIES ${ALL_LIBRARIES} ${PETSC_LIBRARIES})
+
+# package config
+FIND_PACKAGE( PkgConfig REQUIRED )
+
+# GLFW
+PKG_SEARCH_MODULE( GLFW3 REQUIRED glfw3 )
+INCLUDE_DIRECTORIES(${GLFW3_INCLUDE_DIR} )
+SET(ALL_LIBRARIES ${ALL_LIBRARIES} ${GLFW3_STATIC_LIBRARIES})
+
+# ZLib (required for HDF5)
+FIND_PACKAGE(ZLIB REQUIRED)
+SET(ALL_LIBRARIES ${ALL_LIBRARIES} ${ZLIB_LIBRARIES})
+
+# HDF5
+FIND_PACKAGE(HDF5 NAMES hdf5)
+SET(ALL_LIBRARIES ${ALL_LIBRARIES} ${HDF5_LIBRARIES})
+
+# OpenGL
+SET(ALL_LIBRARIES ${ALL_LIBRARIES} ${OPENGL_gl_LIBRARY})
+
+ADD_EXECUTABLE( plasma_wave plasma_wave.cpp ../Visualixer.cpp ../VisualixerMesh.cpp ../VisualixerSimulation.cpp ../Mesh.cpp ../RegularMesh.cpp ../ColorRamp.cpp ../SimulationData.cpp ../GeometricObject.cpp ../Converter.cpp ../Hull.cpp ../FDTDSimulation.cpp ../SignalGenerator.cpp ../PlasmaDriftDiffusionSimulation.cpp ../PlasmaMomentumSimulation.cpp)
+
+FOREACH(item ${ALL_LIBRARIES})
+    MESSAGE(STATUS "  using lib: " ${item})
+ENDFOREACH()
+
+TARGET_LINK_LIBRARIES( plasma_wave GLEW glfw3 ${ALL_LIBRARIES})
