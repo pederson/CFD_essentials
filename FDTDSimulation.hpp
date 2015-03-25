@@ -40,6 +40,8 @@ public:
 	//void bind_metal_nodes(const double * metal_nodes);
 	void bind_rel_permittivity(const double * rel_permittivity);
 	void bind_rel_permittivity(const cvector & rel_permittivity_cv);
+	void bind_conductivity(const double * conductivity);
+	void bind_single_pole(const double * numerator, const double * frequency_pole);
 	//void bind_rel_permeability(const double * rel_permeability);
 	void bind_current_density_x(const double * current_density_x);
 	void bind_current_density_y(const double * current_density_y);
@@ -72,6 +74,9 @@ private:
 	// user defined data
 	const double * _rel_permittivity;
 	const double * _rel_permeability;
+	const double * _conductivity;
+	const double * _permittivity_single_pole_freq;
+	const double * _permittivity_single_pole_numerator;
 	const double * _current_density_x;
 	const double * _current_density_y;
 	const double * _current_density_z;
@@ -95,6 +100,9 @@ private:
 
 		
 		std::vector<double> _default_rel_permittivity;
+		std::vector<double> _default_conductivity;
+		std::vector<double> _default_permittivity_single_pole_freq;
+		std::vector<double> _default_permittivity_single_pole_numerator;
 		std::vector<double> _default_rel_permeability;
 		std::vector<double> _default_current_density_x;
 		std::vector<double> _default_current_density_y;
@@ -113,10 +121,9 @@ private:
 		double * _E_z;	// this is the real E field
 		double * _H_y;
 		double * _H_x;
-		//double * _gaz;
-		//double * _jnx; 
-		//double * _jny;
-		//double * _jnz;
+		double * _I_Ez;	// non-zero for non-zero conductivity
+		double * _S_n;	// non-zero for non-zero single pole permittivity
+		double * _S_nm1;// non-zero for non-zero single pole permittivity
 
 		// PML stuff only used internally
 		double * gi2;

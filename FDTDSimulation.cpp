@@ -10,10 +10,9 @@ FDTDSimulation::FDTDSimulation(){
 	_E_z = nullptr;
 	_H_y = nullptr;
 	_H_x = nullptr;
-	//_gaz = nullptr;
-	//_jnx = nullptr; 
-	//_jny = nullptr;
-	//_jnz = nullptr;
+	_I_Ez = nullptr;
+	_S_n = nullptr;
+	_S_nm1 = nullptr;
 
 	gi2 = nullptr;
 	gi3 = nullptr;
@@ -28,6 +27,9 @@ FDTDSimulation::FDTDSimulation(){
 
 	_rel_permittivity = nullptr;
 	_rel_permeability = nullptr;
+	_conductivity = nullptr;
+	_permittivity_single_pole_freq = nullptr;
+	_permittivity_single_pole_numerator = nullptr;
 	_current_density_x = nullptr;
 	_current_density_y = nullptr;
 	_current_density_z = nullptr;
@@ -57,6 +59,9 @@ FDTDSimulation::~FDTDSimulation(){
 	if (_E_z != nullptr) delete[] _E_z;
 	if (_H_y != nullptr) delete[] _H_y;
 	if (_H_x != nullptr) delete[] _H_x;
+	if (_I_Ez != nullptr) delete[] _I_Ez;
+	if (_S_n != nullptr) delete[] _S_n;
+	if (_S_nm1 != nullptr) delete[] _S_nm1;
 
 	if (gi2 != nullptr) delete[] gi2;
 	if (gi3 != nullptr) delete[] gi3;
@@ -115,6 +120,15 @@ void FDTDSimulation::bind_mesh(const RegularMesh & mesh) {
 
 void FDTDSimulation::bind_rel_permittivity(const double * rel_permittivity){
 	_rel_permittivity = rel_permittivity;
+}
+
+void FDTDSimulation::bind_conductivity(const double * conductivity){
+	_conductivity = conductivity;
+}
+
+void FDTDSimulation::bind_single_pole(const double * numerator, const double * freq_pole){
+	_permittivity_single_pole_freq = freq_pole;
+	_permittivity_single_pole_numerator = numerator;
 }
 
 void FDTDSimulation::bind_rel_permittivity(const cvector & rel_permittivity_cv){
@@ -248,10 +262,18 @@ void FDTDSimulation::run_2D(int num_iters){
 			for (auto j=0; j<_mesh->reg_num_nodes_y(); j++){
 				cind = _mesh->reg_inds_to_glob_ind(i, j);
 
-				// with pml
-				//_En_z[cind] = _gaz[cind] * _Dn_z[cind];
-				_En_z[cind] = _Dn_z[cind]/_rel_permittivity_cv.at(cind);
+				// with pml, conductivity, and single pole
+				//_En_z[cind] = _Dn_z[cind]/_rel_permittivity_cv.at(cind);
+				_En_z[cind] = (_Dn_z[cind] - _I_Ez[cind] - exp(-_dt*_permittivity_single_pole_freq[cind])*_S_nm1[cind])/
+							  (_rel_permittivity[cind] + _conductivity[cind]*_dt/_eps0 + _permittivity_single_pole_numerator[cind]*_dt);
+
+				
+				_I_Ez[cind] = _I_Ez[cind] + _conductivity[cind]*_dt/_eps0*_En_z[cind];
+				_S_n[cind] = exp(-_permittivity_single_pole_freq[cind]*_dt)*_S_nm1[cind] + _permittivity_single_pole_numerator[cind]*_dt*_En_z[cind];
+				_S_nm1[cind] = _S_n[cind];
+
 				_E_z[cind] = _En_z[cind] * sqrt(_mu0/_eps0); // this can be made faster
+			
 			}
 		}
 
@@ -339,11 +361,9 @@ void FDTDSimulation::allocate_fields(){
 	_E_z = new double[_mesh->nodecount()];
 	_H_y = new double[_mesh->nodecount()];
 	_H_x = new double[_mesh->nodecount()];
-	//_gaz = new double[_mesh->nodecount()];
-	//_jnx = new double[_mesh->nodecount()];
-	//_jny = new double[_mesh->nodecount()];
-	//_jnz = new double[_mesh->nodecount()];
-	//gbz = new double[_mesh.nodecount()];
+	_I_Ez = new double[_mesh->nodecount()];
+	_S_n = new double[_mesh->nodecount()];
+	_S_nm1 = new double[_mesh->nodecount()];
 
 
 	for (auto i=0; i<_mesh->nodecount(); i++){
@@ -354,7 +374,9 @@ void FDTDSimulation::allocate_fields(){
 		_H_y[i] = 0.0;
 		_En_z[i] = 0.0;
 		_E_z[i] = 0.0;
-		//gbz[i] = 0.0;		// gbz = sigma*dt/eps0;
+		_I_Ez[i] = 0.0;
+		_S_n[i] = 0.0;
+		_S_nm1[i] = 0.0;
 	}
 
 	// deal with relative permittivity
@@ -367,11 +389,25 @@ void FDTDSimulation::allocate_fields(){
 
 		}
 		_rel_permittivity_cv.multiply(_rel_permittivity);
-		cout << "RUH ROH" << endl;
 	}
 	//else{
 		//for (auto i=0; i<_mesh->nodecount(); i++) _gaz[i] = 1.0/_rel_permittivity[i];
 	//}
+
+	if (_conductivity == nullptr){
+		_default_conductivity.assign(_mesh->nodecount(), 0.0);
+		_conductivity = &_default_conductivity.front();
+	}
+
+	if (_permittivity_single_pole_freq == nullptr){
+		_default_permittivity_single_pole_freq.assign(_mesh->nodecount(), 0.0);
+		_permittivity_single_pole_freq = &_default_permittivity_single_pole_freq.front();
+	}
+
+	if (_permittivity_single_pole_numerator == nullptr){
+		_default_permittivity_single_pole_numerator.assign(_mesh->nodecount(), 0.0);
+		_permittivity_single_pole_numerator = &_default_permittivity_single_pole_numerator.front();
+	}
 
 	// deal with relative permeability
 	if (_rel_permeability == nullptr){

@@ -9,7 +9,8 @@ using namespace std;
 
 int main(int argc, char * argv[]){
 	// constants
-	double dx = 5.0e-4;
+	double dx = 5.0e-4, srcfreq = 15.0e+13;
+	double srclocx = 1.5e-6, srclocy = 5.0e-6;
 	
 	//double dt = 0.5*dx/c0;
 
@@ -84,20 +85,20 @@ int main(int argc, char * argv[]){
 	//*/
 
 	// rod array model
-	
+	/*
 	ParametricModel2D paramodel;
 	paramodel.set_model_name("Rod Array");
 	paramodel.add_physical_property("eps_rel");
 	paramodel.add_material("Vacuum", {1.0});
 	paramodel.add_material("Dielectric", {6.0});
-	Circle c1 = Circle(0.5e-6, {9.5e-6, 1.5e-6}, paramodel.get_material("Dielectric"));
+	Circle c1 = Circle(0.5e-6, {9.5e-6, 1.0e-6}, paramodel.get_material("Dielectric"));
 	paramodel.create_lattice(&c1, {2.0e-6, 0}, {0, 2.0e-6}, 5, 5);
 	paramodel.print_summary();
 	// convert the model into a mesh
 	cout << "about to make mesh" << endl;
 	dx = 0.5e-7;
 	RegularMesh paramesh;
-	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 2.0e-5, 0.0, 1.0e-5, paramodel.get_material("Vacuum"));
+	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 3.0e-5, 0.0, 1.0e-5, paramodel.get_material("Vacuum"));
 	paramesh.print_summary();
 	//*/
 
@@ -139,7 +140,48 @@ int main(int argc, char * argv[]){
 	paramesh.print_summary();
 	//*/
 
+	// conductive slab model
+	/*
+	srclocx = 1.5e-6, srclocy = 5.0e-6;
+	ParametricModel2D paramodel;
+	paramodel.set_model_name("ConductiveSlab");
+	paramodel.add_physical_property("eps_rel");
+	paramodel.add_physical_property("conductivity");
+	paramodel.add_material("Vacuum", {1.0, 0.0});
+	paramodel.add_material("Dielectric", {1.5, 10000.5});
+	Rectangle r1 = Rectangle(1.5e-5, 1.0e-5, {1.0e-5, 5.0e-6}, paramodel.get_material("Dielectric"));
+	paramodel.add_object(&r1);
+	paramodel.print_summary();
+	// convert the model into a mesh
+	dx = 0.5e-7;
+	RegularMesh paramesh;
+	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 2.0e-5, 0.0, 1.0e-5, paramodel.get_material("Vacuum"));
+	paramesh.print_summary();
+	//*/
+
+	// frequency dependent slab model
 	
+	dx = 1.0e-7;
+	//srcfreq = 6.0e+13;	// should be reflected
+	srcfreq = 6.0e+14;	// should pass right through
+	srclocx = 10*dx;
+	srclocy = 50*dx;
+	ParametricModel2D paramodel;
+	paramodel.set_model_name("FrequencyDepenedentSlab");
+	paramodel.add_physical_property("eps_rel");
+	paramodel.add_physical_property("conductivity");
+	paramodel.add_physical_property("polenumerator");
+	paramodel.add_physical_property("polefreq");
+	paramodel.add_material("Vacuum", {1.0, 0.0, 0.0, 0.0});
+	paramodel.add_material("Dielectric", {1.5, 3.14159*6.0e+16, -3.14159*6.0e+16, 3.0e+12});
+	Rectangle r1 = Rectangle(200*dx, 100*dx, {200*dx, 50*dx}, paramodel.get_material("Dielectric"));
+	paramodel.add_object(&r1);
+	paramodel.print_summary();
+	// convert the model into a mesh
+	RegularMesh paramesh;
+	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 500*dx, 0.0, 100*dx, paramodel.get_material("Vacuum"));
+	paramesh.print_summary();
+	//*/
 
 
 	
@@ -156,10 +198,14 @@ int main(int argc, char * argv[]){
 	FDTDSimulation fsim;
 	fsim.bind_mesh(paramesh);
 	fsim.bind_rel_permittivity(&paramesh.data("eps_rel"));
+	fsim.bind_conductivity(&paramesh.data("conductivity"));
+	fsim.bind_single_pole(&paramesh.data("polenumerator"), &paramesh.data("polefreq"));
 	//fsim.bind_current_density_z(&paramesh.data("current_density"));
-	fsim.add_sinusoidal_source(5.0e+13, 0.0, 1.5e-6, 5.0e-6);
+	fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy);
+	//fsim.add_sinusoidal_source(15.0e+13, 0.0, 1.5e-6, 7.5e-6);
+	//fsim.add_sinusoidal_source(15.0e+13, 0.0, 1.5e-6, 2.5e-6);
 	//fsim.add_gaussian_source(10.0, 10.0, 4.5e-6, 4.0e-6);
-	fsim.set_num_iters(800);
+	fsim.set_num_iters(1000);
 	fsim.run();
 	fsim.view_results();
 	//fsim.output_HDF5();
