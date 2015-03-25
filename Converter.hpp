@@ -33,8 +33,8 @@ RegularMesh build_simple_mesh_2d(const ParametricModel2D & model,  double res, d
 //Mesh * build_delaunay_mesh_2d(parametric_model_2d * model, double xmin, double xmax, double ymin, double ymax, double res);
 
 // helpers
-void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject2D & shape, const ParametricModel2D & model, double res);
-Hull approximate_parametric_shape_2d(const GeometricObject2D & model, double res);
+void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject2D * shape, const ParametricModel2D & model, double res);
+Hull approximate_parametric_shape_2d(const GeometricObject2D * model, double res);
 
 
 #endif

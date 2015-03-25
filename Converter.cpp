@@ -18,26 +18,26 @@ RegularMesh build_simple_mesh_2d(const ParametricModel2D & model,  double res, d
 
 	vector<void *> shape_tree = model.get_object_tree();
 	// perform point-in-polygon queries for each part of the parametric model
-	GeometricObject2D obj;
+	GeometricObject2D * obj;
 	for (auto i=0; i<shape_tree.size(); i++){
-		obj = *(GeometricObject2D *)shape_tree.at(i);
+		obj = (GeometricObject2D *)shape_tree.at(i);
 		add_shape_to_mesh(outmesh, obj, model, res);
 	}
 
 	return outmesh;
 }
 
-void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject2D & shape, const ParametricModel2D & model, double res){
+void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject2D * shape, const ParametricModel2D & model, double res){
 	// convert the shape to a hull
 	vector<string> propnames = model.get_phys_property_names();
 	//cout << "IMM HURR" << shape.get_object_name() << endl;
 	
 	// do a point in polygon search for each mesh point
 	unsigned int nnodes = mesh.nodecount();
-	if (shape.get_object_name().compare("Gaussian_2D") == 0){
+	if (shape->get_object_name().compare("Gaussian2D") == 0){
 
 		//gaussian_2d * gauss = dynamic_cast<gaussian_2d *>(shape);
-		const Gaussian2D * gauss = dynamic_cast<const Gaussian2D *>(&shape);
+		const Gaussian2D * gauss = dynamic_cast<const Gaussian2D *>(shape);
 		double sx, sy, minval, amp;
 		const double * x, *y;
 		x = &mesh.x();
@@ -56,7 +56,7 @@ void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject2D & shape, cons
 		}
 
 	}
-	else if (shape.get_object_name().compare("Circle") == 0){
+	else if (shape->get_object_name().compare("Circle") == 0){
 
 		//const Circle * circ = dynamic_cast<const Circle *>(&shape);
 
@@ -65,13 +65,13 @@ void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject2D & shape, cons
 		y = &mesh.y();
 
 		map<string, double> params;
-		params = shape.get_parameters();
+		params = shape->get_parameters();
 
 
 		//rad = circ->radius();
 		double rad = params.at("Radius");
-		vertex_2d cen = shape.get_center();
-		vector<double> shapeprops = shape.get_phys_properties();
+		vertex_2d cen = shape->get_center();
+		vector<double> shapeprops = shape->get_phys_properties();
 
 
 		for (auto i=0; i<nnodes; i++){
@@ -86,7 +86,7 @@ void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject2D & shape, cons
 	else{
 		Hull shull = approximate_parametric_shape_2d(shape, res);
 		MeshNode n;
-		vector<double> shapeprops = shape.get_phys_properties();
+		vector<double> shapeprops = shape->get_phys_properties();
 		for (auto i=0; i<nnodes; i++){
 			n = mesh.node(i);		// add the shape properties if it returns true
 			if (shull.contains_point({n.x(), n.y()})){
@@ -102,17 +102,17 @@ void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject2D & shape, cons
 
 //Mutable_Mesh * build_delaunay_mesh_2d(parametric_model_2d * model, double xmin, double xmax, double ymin, double ymax, double res);
 
-Hull approximate_parametric_shape_2d(const GeometricObject2D & shape, double res){
+Hull approximate_parametric_shape_2d(const GeometricObject2D * shape, double res){
 
 	vector<Point> pts_vec;
 	vertex_2d cent;
 	map<string, double> params;
 	unsigned int numpts;
 
-	cent = shape.get_center();
-	params = shape.get_parameters();
+	cent = shape->get_center();
+	params = shape->get_parameters();
 
-	if (shape.get_object_name().compare("Rectangle") == 0){
+	if (shape->get_object_name().compare("Rectangle") == 0){
 
 			// bottom left
 			pts_vec.push_back({cent.x - params.at("Width")/2.0, cent.y - params.at("Height")/2.0});
@@ -123,7 +123,7 @@ Hull approximate_parametric_shape_2d(const GeometricObject2D & shape, double res
 			// top left
 			pts_vec.push_back({cent.x - params.at("Width")/2.0, cent.y + params.at("Height")/2.0});
 	}
-	else if (shape.get_object_name().compare("Circle") == 0){
+	else if (shape->get_object_name().compare("Circle") == 0){
 
 			double rad = params.at("Radius");
 			numpts = (unsigned int) (3.14159*2*rad/res);
@@ -133,25 +133,25 @@ Hull approximate_parametric_shape_2d(const GeometricObject2D & shape, double res
 				pts_vec.push_back({cent.x + rad*cos(3.14159*2.0*(float(i)/numpts)), cent.y + rad*sin(3.14159*2.0*(float(i)/numpts))});
 			}
 	}
-	else if(shape.get_object_name().compare("Ellipse") == 0){
+	else if(shape->get_object_name().compare("Ellipse") == 0){
 
 			cout << "ERROR: Ellipse is not yet implemented" << endl;
 			throw -1;
 
 	}
-	else if (shape.get_object_name().compare("Triangle") == 0){
+	else if (shape->get_object_name().compare("Triangle") == 0){
 
 			vector<vertex_2d> polyverts;
-			polyverts = shape.get_vertices();
+			polyverts = shape->get_vertices();
 
 			for (auto i=0; i< polyverts.size(); i++){
 				pts_vec.push_back({polyverts.at(i).x, polyverts.at(i).y});
 			}
 	}
-	else if (shape.get_object_name().compare("Polygon") == 0){
+	else if (shape->get_object_name().compare("Polygon") == 0){
 
 			vector<vertex_2d> polyverts;
-			polyverts = shape.get_vertices();
+			polyverts = shape->get_vertices();
 
 			for (auto i=0; i< polyverts.size(); i++){
 				pts_vec.push_back({polyverts.at(i).x, polyverts.at(i).y});
