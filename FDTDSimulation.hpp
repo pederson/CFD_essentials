@@ -4,7 +4,6 @@
 #include "RegularMesh.hpp"
 #include "VisualixerSimulation.hpp"
 #include "SignalGenerator.hpp"
-#include "cvector.hpp"
 
 #include <vector>
 #include <string>
@@ -39,7 +38,6 @@ public:
 	void bind_mesh(const RegularMesh & mesh);
 	//void bind_metal_nodes(const double * metal_nodes);
 	void bind_rel_permittivity(const double * rel_permittivity);
-	void bind_rel_permittivity(const cvector & rel_permittivity_cv);
 	void bind_conductivity(const double * conductivity);
 	void bind_single_pole(const double * numerator, const double * frequency_pole);
 	//void bind_rel_permeability(const double * rel_permeability);
@@ -80,11 +78,7 @@ private:
 	const double * _current_density_x;
 	const double * _current_density_y;
 	const double * _current_density_z;
-	cvector _rel_permittivity_cv;
-	cvector _rel_permeability_cv;
-	cvector _current_density_x_cv;
-	cvector _current_density_y_cv;
-	cvector _current_density_z_cv;
+
 	std::vector<SignalGenerator> _signals;
 	std::vector<SignalGenerator> _modulators;
 

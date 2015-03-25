@@ -131,11 +131,6 @@ void FDTDSimulation::bind_single_pole(const double * numerator, const double * f
 	_permittivity_single_pole_numerator = numerator;
 }
 
-void FDTDSimulation::bind_rel_permittivity(const cvector & rel_permittivity_cv){
-	_rel_permittivity_cv = rel_permittivity_cv;
-	//if (!rel_permittivity_cv.isempty()) cout << "eps rel is populated internally" << endl;
-}
-
 void FDTDSimulation::bind_current_density_x(const double * current_density_x){
 	_current_density_x = current_density_x;
 }
@@ -380,30 +375,27 @@ void FDTDSimulation::allocate_fields(){
 	}
 
 	// deal with relative permittivity
-	if (_rel_permittivity_cv.isempty()){
-		if (_rel_permittivity == nullptr){
-			_default_rel_permittivity.assign(_mesh->nodecount(), 1.0);
-			_rel_permittivity = &_default_rel_permittivity.front();
-			//cout << "set default permittivity" << endl;
-			//for (auto i=0; i<_mesh->nodecount(); i++) _gaz[i] = 1.0;
+	if (_rel_permittivity == nullptr){
+		_default_rel_permittivity.assign(_mesh->nodecount(), 1.0);
+		_rel_permittivity = &_default_rel_permittivity.front();
+		//cout << "set default permittivity" << endl;
+		//for (auto i=0; i<_mesh->nodecount(); i++) _gaz[i] = 1.0;
 
-		}
-		_rel_permittivity_cv.multiply(_rel_permittivity);
 	}
-	//else{
-		//for (auto i=0; i<_mesh->nodecount(); i++) _gaz[i] = 1.0/_rel_permittivity[i];
-	//}
-
+	
+	// conductivity
 	if (_conductivity == nullptr){
 		_default_conductivity.assign(_mesh->nodecount(), 0.0);
 		_conductivity = &_default_conductivity.front();
 	}
 
+	// single pole material frequency (Hz)
 	if (_permittivity_single_pole_freq == nullptr){
 		_default_permittivity_single_pole_freq.assign(_mesh->nodecount(), 0.0);
 		_permittivity_single_pole_freq = &_default_permittivity_single_pole_freq.front();
 	}
 
+	// single pole material numerator
 	if (_permittivity_single_pole_numerator == nullptr){
 		_default_permittivity_single_pole_numerator.assign(_mesh->nodecount(), 0.0);
 		_permittivity_single_pole_numerator = &_default_permittivity_single_pole_numerator.front();
@@ -418,28 +410,16 @@ void FDTDSimulation::allocate_fields(){
 	if (_current_density_x == nullptr){
 		_default_current_density_x.assign(_mesh->nodecount(), 0.0);
 		_current_density_x = &_default_current_density_x.front();
-		//for (auto i=0; i<_mesh->nodecount(); i++) _jnx[i] = 0.0;
-	//}
-	//else{
-		//for (auto i=0; i<_mesh->nodecount(); i++) _jnx[i] = _current_density_x[i];	
 	}
 
 	if (_current_density_y == nullptr){
 		_default_current_density_y.assign(_mesh->nodecount(), 0.0);
 		_current_density_y = &_default_current_density_y.front();
-		//for (auto i=0; i<_mesh->nodecount(); i++) _jny[i] = 0.0;
-	//}
-	//else{
-		//for (auto i=0; i<_mesh->nodecount(); i++) _jny[i] = _current_density_y[i];
 	}
 
 	if (_current_density_z == nullptr){
 		_default_current_density_z.assign(_mesh->nodecount(), 0.0);
 		_current_density_z = &_default_current_density_z.front();
-		//for (auto i=0; i<_mesh->nodecount(); i++) _jnz[i] = 0.0;
-	//}
-	//else{
-		//for (auto i=0; i<_mesh->nodecount(); i++) _jnz[i] = _current_density_z[i];	
 	}
 
 
