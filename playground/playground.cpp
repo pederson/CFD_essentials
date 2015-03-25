@@ -161,9 +161,9 @@ int main(int argc, char * argv[]){
 
 	// frequency dependent slab model
 	
-	dx = 1.0e-7;
-	//srcfreq = 6.0e+13;	// should be reflected
-	srcfreq = 6.0e+14;	// should pass right through
+	dx = 1.0e-6;
+	srcfreq = 3.0e+12;	// should be reflected
+	//srcfreq = 3.0e+13;	// should pass right through
 	srclocx = 10*dx;
 	srclocy = 50*dx;
 	ParametricModel2D paramodel;
@@ -173,7 +173,7 @@ int main(int argc, char * argv[]){
 	paramodel.add_physical_property("polenumerator");
 	paramodel.add_physical_property("polefreq");
 	paramodel.add_material("Vacuum", {1.0, 0.0, 0.0, 0.0});
-	paramodel.add_material("Dielectric", {1.5, 3.14159*6.0e+16, -3.14159*6.0e+16, 3.0e+12});
+	paramodel.add_material("Dielectric", {1.0, 349.5e+3, -39.47e+15, 1.0e+11});
 	Rectangle r1 = Rectangle(200*dx, 100*dx, {200*dx, 50*dx}, paramodel.get_material("Dielectric"));
 	paramodel.add_object(&r1);
 	paramodel.print_summary();
