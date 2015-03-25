@@ -378,10 +378,10 @@ void FDTDSimulation::allocate_fields(){
 	if (_rel_permittivity == nullptr){
 		_default_rel_permittivity.assign(_mesh->nodecount(), 1.0);
 		_rel_permittivity = &_default_rel_permittivity.front();
-		//cout << "set default permittivity" << endl;
-		//for (auto i=0; i<_mesh->nodecount(); i++) _gaz[i] = 1.0;
-
 	}
+	_rel_permittivity_holder.bind_array(_rel_permittivity);
+	//_rel_permittivity_fn = _rel_permittivity_holder.at;
+
 	
 	// conductivity
 	if (_conductivity == nullptr){

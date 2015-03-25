@@ -12,6 +12,20 @@
 enum BoundaryLocation{BOUNDARY_RIGHT, BOUNDARY_LEFT, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_FRONT, BOUNDARY_BACK};
 enum BoundaryCondition{BOUNDARY_PML, BOUNDARY_PERIODIC, BOUNDARY_PEC, BOUNDARY_PMC};
 
+// dummy holder for an array
+class Holder{
+public:
+	Holder(){_array = nullptr;};
+
+	double at(unsigned int i) {return _array[i];};
+	void bind_array(const double * array){_array = array;};
+
+private:
+
+	const double * _array;
+};
+
+
 class FDTDSimulation{
 public:
 
@@ -102,6 +116,9 @@ private:
 		std::vector<double> _default_current_density_y;
 		std::vector<double> _default_current_density_z;
 
+		double (*_rel_permittivity_fn) (unsigned int);
+
+		Holder _rel_permittivity_holder;
 
 		SignalGenerator _source_modulator; // modulates all sources with tanh
 		double _source_modulator_width; 	// how many time steps until it reaches max value
@@ -135,4 +152,9 @@ private:
 
 };
 
+
+
+
+
 #endif
+
