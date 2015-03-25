@@ -43,7 +43,7 @@ public:
 
 	// mutators
 	//void rotate(vertex_2d point, double deg);
-	//void translate(float delta_x, float delta_y);
+	virtual void translate(float delta_x, float delta_y);
 	//void mirror(LineSegment blah);
 	//void set_phys_property(std::string property_name, double value);
 
@@ -150,6 +150,11 @@ public:
 	Triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, std::vector<double> properties);
 	//~Triangle();
 
+	vertex_2d vertex1() const {return v1;};
+	vertex_2d vertex2() const {return v2;};
+	vertex_2d vertex3() const {return v3;};
+
+
 	void print_summary() const;
 
 private:
@@ -163,6 +168,8 @@ public:
 	//Polygon(std::vector<vertex_2d> verts, Material mat);
 	Polygon(std::vector<vertex_2d> verts, std::vector<double> properties);
 	//~Polygon();
+
+	std::vector<vertex_2d> get_vertices(){return vertices;};
 
 	void print_summary() const;
 
@@ -193,6 +200,8 @@ public:
 	void add_physical_property(std::string property_name);
 	void add_material(std::string material_name, std::vector<double> phys_props);
 	void add_object(GeometricObject2D * new_object);
+
+	void create_lattice(GeometricObject2D * new_object, vertex_2d x_basis, vertex_2d y_basis, unsigned int xcount, unsigned int ycount);
 
 	//std::vector<geometric_object_2d> get_object_tree(){return ordered_object_tree;};
 	std::vector<void *> get_object_tree() const {return ordered_object_tree;};

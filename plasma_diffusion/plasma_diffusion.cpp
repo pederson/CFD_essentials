@@ -20,7 +20,8 @@ int main(int argc, char * argv[]){
 	paramodel.add_physical_property("density");
 	paramodel.add_material("Vacuum", {0.0});
 	paramodel.add_material("Plasma", {plasma_dens});
-	Circle c1 = Circle(6.0e-5, {2.7e-3/2, 2.7e-3/2}, paramodel.get_material("Plasma"));
+	Gaussian2D c1 = Gaussian2D(6.0e-5, 3.0e-5, plasma_dens, 0, {2.7e-3/2, 2.7e-3/2});
+	//Circle c1 = Circle(6.0e-5, {2.7e-3/2, 2.7e-3/2}, paramodel.get_material("Plasma"));
 	paramodel.add_object(&c1);
 	//*/
 

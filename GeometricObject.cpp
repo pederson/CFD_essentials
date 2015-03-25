@@ -15,6 +15,11 @@ void GeometricObject2D::print_summary() const{
 	cout << endl;
 }
 
+void GeometricObject2D::translate(float delta_x, float delta_y){
+	_center.x += delta_x;
+	_center.y += delta_y;
+}
+
 Gaussian2D::Gaussian2D(double sigma_x, double sigma_y, double amplitude, double min_val, vertex_2d center_){
 	_object_name = "Gaussian2D";
 	_center = center_;
@@ -225,6 +230,83 @@ void ParametricModel2D::add_object(void * new_object, string object_name){
 	object_tree_names.push_back(object_name);
 	ordered_object_tree.push_back(new_object);
 	
+}
+
+// this leaks memory... but it's not a lot. And the current solution is an easy one that was hastily implemented
+void ParametricModel2D::create_lattice(GeometricObject2D * new_object, vertex_2d basis1, vertex_2d basis2, unsigned int xcount, unsigned int ycount){
+	if (new_object->get_object_name().compare("Rectangle") == 0){
+		Rectangle * obj = dynamic_cast<Rectangle *> (new_object);
+		Rectangle * rep;
+		vertex_2d cent = obj->get_center();
+
+		for (auto i=0; i<xcount; i++){
+			for (auto j=0; j<ycount; j++){
+
+				rep = new Rectangle(obj->width(), obj->height(), {cent.x + i*basis1.x + j*basis2.x, cent.y + i*basis1.y + j*basis2.y}, obj->get_phys_properties());
+				add_object((void *) rep, "Rectangle");
+			}
+		}
+		
+	}
+	else if(new_object->get_object_name().compare("Circle") == 0){
+		Circle * obj = dynamic_cast<Circle *> (new_object);
+		Circle * rep;
+		vertex_2d cent = obj->get_center();
+
+		for (auto i=0; i<xcount; i++){
+			for (auto j=0; j<ycount; j++){
+
+				rep = new Circle(obj->radius(), {cent.x + i*basis1.x + j*basis2.x, cent.y + i*basis1.y + j*basis2.y}, obj->get_phys_properties());
+				add_object((void *) rep, "Circle");
+			}
+		}
+		
+	}
+	else if(new_object->get_object_name().compare("Ellipse") == 0){
+		Ellipse * obj = dynamic_cast<Ellipse *> (new_object);
+		Ellipse * rep;
+		vertex_2d cent = obj->get_center();
+
+		for (auto i=0; i<xcount; i++){
+			for (auto j=0; j<ycount; j++){
+
+				rep = new Ellipse(obj->axis_major(), obj->axis_minor(), obj->rotation_angle(), {cent.x + i*basis1.x + j*basis2.x, cent.y + i*basis1.y + j*basis2.y}, obj->get_phys_properties());
+				add_object((void *) rep, "Ellipse");
+			}
+		}
+		
+	}
+	else if(new_object->get_object_name().compare("Triangle") == 0){
+		Triangle * obj = dynamic_cast<Triangle *> (new_object);
+		Triangle * rep;
+		vertex_2d cent = obj->get_center();
+
+		for (auto i=0; i<xcount; i++){
+			for (auto j=0; j<ycount; j++){
+
+				rep = new Triangle(obj->vertex1(), obj->vertex2(), obj->vertex3(), obj->get_phys_properties());
+				add_object((void *) rep, "Triangle");
+			}
+		}
+		
+	}
+	else if(new_object->get_object_name().compare("Polygon") == 0){
+		Polygon * obj = dynamic_cast<Polygon *> (new_object);
+		Polygon * rep;
+		vertex_2d cent = obj->get_center();
+
+		for (auto i=0; i<xcount; i++){
+			for (auto j=0; j<ycount; j++){
+
+				rep = new Polygon(obj->get_vertices(), obj->get_phys_properties());
+				add_object((void *) rep, "Polygon");
+			}
+		}
+		
+	}
+	else {
+		
+	}
 }
 
 

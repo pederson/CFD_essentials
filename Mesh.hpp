@@ -79,7 +79,7 @@ public:
   void add_phys_property(std::string proprety_name, double init_val);
   void reset_property(std::string property_name, double reset_val=0.0);
   void set_phys_property(std::string property_name, unsigned int i, double val){_phys_properties.at(property_name).at(i) = val;};
-
+  void increment_phys_property(std::string property_name, unsigned int i, double val){_phys_properties.at(property_name).at(i) += val;};
 
   // grid generation and refinement
   //static Mesh create_unstructured_tri_simple();
