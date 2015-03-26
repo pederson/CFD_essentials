@@ -8,10 +8,13 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <functional>
 
 enum BoundaryLocation{BOUNDARY_RIGHT, BOUNDARY_LEFT, BOUNDARY_TOP, BOUNDARY_BOTTOM, BOUNDARY_FRONT, BOUNDARY_BACK};
 enum BoundaryCondition{BOUNDARY_PML, BOUNDARY_PERIODIC, BOUNDARY_PEC, BOUNDARY_PMC};
 
+
+/*
 // dummy holder for an array
 class Holder{
 public:
@@ -24,6 +27,8 @@ private:
 
 	const double * _array;
 };
+*/
+
 
 
 class FDTDSimulation{
@@ -116,9 +121,14 @@ private:
 		std::vector<double> _default_current_density_y;
 		std::vector<double> _default_current_density_z;
 
-		double (*_rel_permittivity_fn) (unsigned int);
-
-		Holder _rel_permittivity_holder;
+		std::function<double(unsigned int)> _rel_permittivity_fn;
+		std::function<double(unsigned int)> _conductivity_fn;
+		std::function<double(unsigned int)> _permittivity_single_pole_freq_fn;
+		std::function<double(unsigned int)> _permittivity_single_pole_numerator_fn;
+		std::function<double(unsigned int)> _rel_permeability_fn;
+		std::function<double(unsigned int)> _current_density_x_fn;
+		std::function<double(unsigned int)> _current_density_y_fn;
+		std::function<double(unsigned int)> _current_density_z_fn;
 
 		SignalGenerator _source_modulator; // modulates all sources with tanh
 		double _source_modulator_width; 	// how many time steps until it reaches max value
