@@ -2,6 +2,8 @@ TODO:
 
 - incorporate cvector for use in other parts of the code (storing to simdata for example)
 
+- incorporate std::function and lambdas for anything that could use it (all simulations and the SimulationData and SimulationVisualixer)
+
 - Should simdata be stored on heap instead of stack? Can be large sometimes
 
 - create an actual converter class (or decide if it is really worth it)
@@ -20,8 +22,6 @@ TODO:
 
 - migrate some things to BitBucket or GitLab
 
-- Do time analysis on cvector. Does it significantly affect performance? TIME ANALYSIS DONE.. it does affect performance a lot... maybe I can scale the scope of it back to do only 1 or 2 vectors, 1 multiplicative constant, and 1 additive constant. 
-
 - lxcat for cross section and coefficient data
 
 - Start using (and learn how to use) a time profiler. lcov/gcov? gprof? Valgrind? Or https://code.google.com/p/high-performance-cplusplus-profiler/ 
@@ -36,7 +36,7 @@ TODO:
 
 - Geometric Objects need to have an options to do a repeating pattern (either rectangular or circular)
 
-- Explore using Boost library (what can it do for me?)
+- Explore using Boost library (what can it do for me?)... probably not a lot that c++11 and c++14 doesn't already have
 
 - Make Simulation class that handles the setup and execution of a simulation
 	- Need to finish the equation class and boundary conditions class to do this
@@ -81,7 +81,6 @@ TODO:
 - adding a colorby or alpha before adding an object (mesh, pointcloud) doesn't work b/c the number of points is still unknown... is there a workaround for this?
 - Shading and Light source for mesh model viewer
 - Make a convention where there are expected to be Point, Line, Triangle, and Quad elements. The number of them are set by the user, but they are always in that order. Also, normals should be standard.
-- for simulation viz, instead of setting frequency, have a target framerate and set the simulation snapshot increment number
 - for sim viz, have option to show vector arrows if it's a flow
 
 

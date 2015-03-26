@@ -152,6 +152,30 @@ void FDTDSimulation::bind_current_density_z(const double * current_density_z){
 	_current_density_z = current_density_z;
 }
 
+void FDTDSimulation::bind_rel_permittivity(function<double(unsigned int)> rel_permittivity_fn){
+	_rel_permittivity_fn = rel_permittivity_fn;
+}
+
+void FDTDSimulation::bind_conductivity(function<double(unsigned int)> conductivity_fn){
+	_conductivity_fn = conductivity_fn;
+}
+
+void FDTDSimulation::bind_single_pole(function<double(unsigned int)> numerator_fn, function<double(unsigned int)> frequency_pole_fn){
+	_permittivity_single_pole_numerator_fn = numerator_fn;
+	_permittivity_single_pole_freq_fn = frequency_pole_fn;
+}
+
+void FDTDSimulation::bind_current_density_x(function<double(unsigned int)> current_density_x_fn){
+	_current_density_x_fn = current_density_x_fn;
+}
+
+void FDTDSimulation::bind_current_density_y(function<double(unsigned int)> current_density_y_fn){
+	_current_density_y_fn = current_density_y_fn;
+}
+
+void FDTDSimulation::bind_current_density_z(function<double(unsigned int)> current_density_z_fn){
+	_current_density_z_fn = current_density_z_fn;
+}
 
 
 void FDTDSimulation::view_results(){
@@ -190,10 +214,6 @@ void FDTDSimulation::run(int num_iters){
 
 		cout << "starting the run " << _mesh->num_dims() << "D" << endl;
 	}
-	//if (_is_allocated && _time_variable_coefficients) recalcCoeffs();
-
-	
-
 
 	if (_mesh->num_dims() == 1){
 		cout << "1D FDTD is not yet plugged in!" << endl;
@@ -210,8 +230,8 @@ void FDTDSimulation::run(int num_iters){
 void FDTDSimulation::run_2D(int num_iters){
 
 	
-	double pulse;//, t0=10.0, spread = 12.0, srcfreq=3.0e+14/6.0;
-	double _srcx, _srcy;// = 0.5e-6, _srcy = 3.0e-6;
+	double pulse;
+	double _srcx, _srcy;
 
 	unsigned int end_iter;
 	if (num_iters==-1) end_iter = _num_iters;
@@ -250,16 +270,13 @@ void FDTDSimulation::run_2D(int num_iters){
 
 		//cout << "about to impose source" << endl;
 		// impose sources
-		//pulse = exp(-0.5*(t0-n)*(t0-n)/spread/spread);
-		//pulse = sin(2*VX_PI*srcfreq*_tcur); // oscillatory source
-		//D_z[_mesh->nearest_node(_srcx, _srcy)] = pulse;
 		for (auto i=0; i<_signals.size(); i++){
 			pulse = _signals.at(i).value(_tcur)*_modulators.at(i).value(_tcur) * sourcemodval;
 			_srcx = _signals.at(i).xloc();
 			_srcy = _signals.at(i).yloc();
 			_Dn_z[_mesh->nearest_node(_srcx, _srcy)] = pulse;
 		}
-		//cout << "impose source" << endl;
+		//cout << "imposed source" << endl;
 		
 		// calculate Ez field
 		for (auto i=0; i<_mesh->reg_num_nodes_x(); i++){ // cols
@@ -340,15 +357,6 @@ void FDTDSimulation::run_2D(int num_iters){
 
 
 void FDTDSimulation::preRunCheck(){
-
-	/*
-	if (_current_density_x == nullptr && _current_density_y == nullptr && _current_density_z == nullptr){
-		_include_current_density = false;
-	}
-	else {
-		_include_current_density = true;		
-	}
-	*/
 	
 }
 
@@ -386,38 +394,26 @@ void FDTDSimulation::allocate_fields(){
 
 	// deal with relative permittivity
 	if (_rel_permittivity_fn == nullptr){
-		if (_rel_permittivity == nullptr){
-			_default_rel_permittivity.assign(_mesh->nodecount(), 1.0);
-			_rel_permittivity = &_default_rel_permittivity.front();
-		}
-		_rel_permittivity_fn = [this](unsigned int i)->double{return this->_rel_permittivity[i];};
+		if (_rel_permittivity == nullptr) _rel_permittivity_fn = [](unsigned int i)->double{return 1.0;};
+		else _rel_permittivity_fn = [this](unsigned int i)->double{return this->_rel_permittivity[i];};
 	}
 	
 	// conductivity
 	if (_conductivity_fn == nullptr){
-		if (_conductivity == nullptr){
-			_default_conductivity.assign(_mesh->nodecount(), 0.0);
-			_conductivity = &_default_conductivity.front();
-		}
-		_conductivity_fn = [this](unsigned int i)->double{return this->_conductivity[i];};
+		if (_conductivity == nullptr) _conductivity_fn = [](unsigned int i)->double{return 0.0;};
+		else _conductivity_fn = [this](unsigned int i)->double{return this->_conductivity[i];};
 	}
 
 	// single pole material frequency (Hz)
 	if (_permittivity_single_pole_freq_fn == nullptr){
-		if (_permittivity_single_pole_freq == nullptr){
-			_default_permittivity_single_pole_freq.assign(_mesh->nodecount(), 0.0);
-			_permittivity_single_pole_freq = &_default_permittivity_single_pole_freq.front();
-		}
-		_permittivity_single_pole_freq_fn = [this](unsigned int i)->double{return this->_permittivity_single_pole_freq[i];};
+		if (_permittivity_single_pole_freq == nullptr) _permittivity_single_pole_freq_fn = [](unsigned int i)->double{return 0.0;};
+		else _permittivity_single_pole_freq_fn = [this](unsigned int i)->double{return this->_permittivity_single_pole_freq[i];};
 	}
 
 	// single pole material numerator
 	if (_permittivity_single_pole_numerator_fn == nullptr){
-		if (_permittivity_single_pole_numerator == nullptr){
-			_default_permittivity_single_pole_numerator.assign(_mesh->nodecount(), 0.0);
-			_permittivity_single_pole_numerator = &_default_permittivity_single_pole_numerator.front();
-		}
-		_permittivity_single_pole_numerator_fn = [this](unsigned int i)->double{return this->_permittivity_single_pole_numerator[i];};
+		if (_permittivity_single_pole_numerator == nullptr) _permittivity_single_pole_numerator_fn = [](unsigned int i)->double{return 0.0;};
+		else _permittivity_single_pole_numerator_fn = [this](unsigned int i)->double{return this->_permittivity_single_pole_numerator[i];};
 	}
 
 	// deal with relative permeability
@@ -429,27 +425,18 @@ void FDTDSimulation::allocate_fields(){
 
 	// deal with current density
 	if (_current_density_x_fn == nullptr){
-		if (_current_density_x == nullptr){
-			_default_current_density_x.assign(_mesh->nodecount(), 0.0);
-			_current_density_x = &_default_current_density_x.front();
-		}
-		_current_density_x_fn = [this](unsigned int i)->double{return this->_current_density_x[i];};
+		if (_current_density_x == nullptr) _current_density_x_fn = [](unsigned int i)->double{return 0.0;};
+		else _current_density_x_fn = [this](unsigned int i)->double{return this->_current_density_x[i];};
 	}
 
 	if (_current_density_y_fn == nullptr){
-		if (_current_density_y == nullptr){
-			_default_current_density_y.assign(_mesh->nodecount(), 0.0);
-			_current_density_y = &_default_current_density_y.front();
-		}
-		_current_density_y_fn = [this](unsigned int i)->double{return this->_current_density_y[i];};
+		if (_current_density_y == nullptr) _current_density_y_fn = [](unsigned int i)->double{return 0.0;};
+		else _current_density_y_fn = [this](unsigned int i)->double{return this->_current_density_y[i];};
 	}
 
 	if (_current_density_z_fn == nullptr){
-		if (_current_density_z == nullptr){
-			_default_current_density_z.assign(_mesh->nodecount(), 0.0);
-			_current_density_z = &_default_current_density_z.front();
-		}
-		_current_density_z_fn = [this](unsigned int i)->double{return this->_current_density_z[i];};
+		if (_current_density_z == nullptr) _current_density_z_fn = [](unsigned int i)->double{return 0.0;};
+		else _current_density_z_fn = [this](unsigned int i)->double{return this->_current_density_z[i];};
 	}
 
 

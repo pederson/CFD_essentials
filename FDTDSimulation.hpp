@@ -14,23 +14,6 @@ enum BoundaryLocation{BOUNDARY_RIGHT, BOUNDARY_LEFT, BOUNDARY_TOP, BOUNDARY_BOTT
 enum BoundaryCondition{BOUNDARY_PML, BOUNDARY_PERIODIC, BOUNDARY_PEC, BOUNDARY_PMC};
 
 
-/*
-// dummy holder for an array
-class Holder{
-public:
-	Holder(){_array = nullptr;};
-
-	double at(unsigned int i) {return _array[i];};
-	void bind_array(const double * array){_array = array;};
-
-private:
-
-	const double * _array;
-};
-*/
-
-
-
 class FDTDSimulation{
 public:
 
@@ -53,7 +36,6 @@ public:
 	void add_sinusoidal_source(double freq_Hz, double phase, double xloc, double yloc=0, double zloc=0);
 	void add_gaussian_modulator(unsigned int signal_idx, double t0, double spread);
 	void add_sinusoidal_modulator(unsigned int signal_idx, double freq_Hz, double phase=0.0);
-	
 	void bind_mesh(const RegularMesh & mesh);
 	//void bind_metal_nodes(const double * metal_nodes);
 	void bind_rel_permittivity(const double * rel_permittivity);
@@ -63,6 +45,14 @@ public:
 	void bind_current_density_x(const double * current_density_x);
 	void bind_current_density_y(const double * current_density_y);
 	void bind_current_density_z(const double * current_density_z);
+	//void bind_metal_nodes(std::function<double(unsigned int) metal_nodes_fn);
+	void bind_rel_permittivity(std::function<double(unsigned int)> rel_permittivity_fn);
+	void bind_conductivity(std::function<double(unsigned int)> conductivity_fn);
+	void bind_single_pole(std::function<double(unsigned int)> numerator_fn, std::function<double(unsigned int)> frequency_pole_fn);
+	//void bind_rel_permeability(std::function<double(unsigned int) rel_permeability_fn);
+	void bind_current_density_x(std::function<double(unsigned int)> current_density_x_fn);
+	void bind_current_density_y(std::function<double(unsigned int)> current_density_y_fn);
+	void bind_current_density_z(std::function<double(unsigned int)> current_density_z_fn);
 
 	void set_num_iters(unsigned int num_iters) {_num_iters = num_iters;};
 	//void set_invariant_time(unsigned int timespan);
@@ -111,16 +101,7 @@ private:
 		double _dx, _dt, _CourantFactor;
 		double _nPML, _num_iters, _current_iter, _tcur;
 
-		
-		std::vector<double> _default_rel_permittivity;
-		std::vector<double> _default_conductivity;
-		std::vector<double> _default_permittivity_single_pole_freq;
-		std::vector<double> _default_permittivity_single_pole_numerator;
-		std::vector<double> _default_rel_permeability;
-		std::vector<double> _default_current_density_x;
-		std::vector<double> _default_current_density_y;
-		std::vector<double> _default_current_density_z;
-
+		// functions used for defining properties
 		std::function<double(unsigned int)> _rel_permittivity_fn;
 		std::function<double(unsigned int)> _conductivity_fn;
 		std::function<double(unsigned int)> _permittivity_single_pole_freq_fn;
