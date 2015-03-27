@@ -125,6 +125,7 @@ void FDTDSimulation::add_sinusoidal_modulator(unsigned int signal_idx, double fr
 void FDTDSimulation::bind_mesh(const RegularMesh & mesh) {
 	_mesh = &mesh;
 	_dx = _mesh->res();
+	_dt = _CourantFactor*_dx/_c0;
 }
 
 void FDTDSimulation::bind_rel_permittivity(const double * rel_permittivity){
@@ -198,8 +199,6 @@ void FDTDSimulation::output_HDF5(std::string outname){
 }
 
 void FDTDSimulation::run(int num_iters){
-	_dt = _CourantFactor*_dx/_c0;
-
 
 	if (!_is_allocated) {
 		preRunCheck();
@@ -207,6 +206,8 @@ void FDTDSimulation::run(int num_iters){
 		allocate_PML();
 		allocate_simdata();
 		_is_allocated = true;
+
+		_dt = _CourantFactor*_dx/_c0;
 
 		cout << "dx: " << _dx << endl;
 		cout << "Courant Factor: " << _CourantFactor << endl;
@@ -284,8 +285,6 @@ void FDTDSimulation::run_2D(int num_iters){
 				cind = _mesh->reg_inds_to_glob_ind(i, j);
 
 				// with pml, conductivity, and single pole
-				//_En_z[cind] = (_Dn_z[cind] - _I_Ez[cind] - exp(-_dt*_permittivity_single_pole_freq[cind])*_S_nm1[cind])/
-				//			  (_rel_permittivity[cind] + _conductivity[cind]*_dt/_eps0 + _permittivity_single_pole_numerator[cind]*_dt);
 				_En_z[cind] = (_Dn_z[cind] - _I_Ez[cind] - exp(-_dt*_permittivity_single_pole_freq_fn(cind))*_S_nm1[cind])/
 							  (_rel_permittivity_fn(cind) + _conductivity_fn(cind)*_dt/_eps0 + _permittivity_single_pole_numerator_fn(cind)*_dt);
 

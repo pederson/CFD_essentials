@@ -21,6 +21,7 @@ public:
 	//const double & diffusion_coeff() const {return _diffusion_coeff[0];};
 	//const double & gain_term() const {return _gain_term[0];};
 	//const double & loss_term() const {return _loss_term[0];};
+	const SimulationData & simdata() const {return _simdata;};
 
 	// mutators
 	//void set_boundary(BoundaryLocation loc, BoundaryCondition type, unsigned int num_layers=1);

@@ -249,6 +249,85 @@ void SimulationData::write_HDF5(std::string outname) const{
 
 }
 
+SimulationData SimulationData::combine(vector<const SimulationData *> datavec){
+	SimulationData combo;
+	const Mesh * meshptr;
+	double tstart, dt, tstop;
+	vector<string> combofields;
+
+	// check that they share the same mesh
+	meshptr = datavec.at(0)->_mesh;
+	for (auto i=1; i<datavec.size(); i++){
+		if (datavec.at(i)->_mesh != meshptr){
+			cout << "The input simulations do not share a common mesh!" << endl;
+			throw -1;
+		}
+	}
+
+	// check that the start time is the same
+	tstart = datavec.at(0)->_tstart;
+	for (auto i=1; i<datavec.size(); i++){
+		if (datavec.at(i)->_tstart != tstart){
+			cout << "The input simulations do not share a common start time!" << endl;
+			throw -1;
+		}
+	}
+
+	// find the smallest dt and the longest tstop
+	dt = datavec.at(0)->_dt;
+	tstop = datavec.at(0)->_tstop;
+	for (auto i=1; i<datavec.size(); i++){
+		if (datavec.at(i)->_dt < dt) dt = datavec.at(i)->_dt;
+		if (datavec.at(i)->_tstop > tstop) tstop = datavec.at(i)->_tstop;
+	}
+
+
+	// checking is done... bind stuff
+	combo.bind_mesh(*meshptr);
+	combo.set_time_span(tstart, dt, tstop);
+
+	// find unique fieldnames
+	for (auto i=0; i<datavec.size(); i++){
+		combofields.insert(combofields.end(), datavec.at(i)->_fieldnames.begin(), datavec.at(i)->_fieldnames.end());
+	}
+	sort(combofields.begin(), combofields.end());
+	combofields.erase(unique(combofields.begin(), combofields.end()), combofields.end());
+
+	for (auto i=0; i<combofields.size(); i++) combo.add_field(combofields.at(i));
+
+	// populate the fields for each fieldname
+	double tcur = tstart;
+	unsigned int tcur_ind = 0;
+	for (auto i=0; i<combofields.size(); i++){
+		cout << "on field: " << combofields.at(i) << endl;
+		for (auto j=0; j<datavec.size(); j++){
+			if (!datavec.at(j)->field_present(combofields.at(i))) continue;
+
+			cout << "field is present for datavec #" << j << endl;
+			// if the field is present, copy it for each time slot
+			// some could have different time steps though, so check for that
+			for (auto k=0; k<combo._time.size(); k++){
+				combo.add_data_at_index(k, combofields.at(i), datavec.at(j)->get_data_at_time(tcur, combofields.at(i)));
+				if (datavec.at(j)->_dt == dt) tcur_ind++;
+				else if (tcur + datavec.at(j)->_dt >= tstart + (k+1)*dt) cout << "inc+" << tcur_ind++; 
+				if (tcur_ind > datavec.at(j)->_time.size()-1) tcur_ind--;
+				cout << "filled in k: " << k << "/" << combo._time.size() << "\r" << flush;
+				tcur = datavec.at(j)->_time.at(tcur_ind);
+			}
+			cout << endl;
+			cout << "finished copying field" << endl;
+			cout << endl;
+
+			// once the field is copied, move on to the next one
+			break;
+		}
+	}
+
+	combo.print_summary();
+	return combo;
+}
+
+
 
 // run this when a new field has been added
 void SimulationData::allocate_snapshots_field(string fieldname){

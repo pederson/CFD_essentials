@@ -7,6 +7,7 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include <algorithm>
 
 #include <H5Cpp.h>
 //#include <H5File.h>
@@ -54,9 +55,9 @@ public:
 	void add_data_at_index(unsigned int t_index, std::string fieldname, const double & values);
 
 	void write_HDF5(std::string outname) const;
-	//static read_HDF5(std::string filename);
+	//static SimulationData read_HDF5(std::string filename);
 
-	//static combine(std::vector<const SimulationData &> datavec);
+	static SimulationData combine(std::vector<const SimulationData *> datavec);
 
 private:
 	void allocate_snapshots_mesh();

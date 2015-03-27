@@ -26,6 +26,7 @@ simulation_visualixer::simulation_visualixer(){
 
 	_freq_Hz = 30;
 	_colorby_field = "";
+	_alpha_field = "";
 	_cur_time_step = 0;
 	_increment_val = 1;
 	set_color_ramp(CRamp::DIVERGENT_9);
@@ -91,6 +92,7 @@ void simulation_visualixer::increment_time_step(){
 	//_increment_val = 10;
 	_cur_time_step = (_cur_time_step+_increment_val)%_simdata->num_time_steps();
 	set_colorby(&(_simdata->get_data_at_index(_cur_time_step, _colorby_field)), false);
+	if (_alpha_field.compare("") != 0) set_color_alpha(&(_simdata->get_data_at_index(_cur_time_step, _alpha_field)), false);
 	onColors();
 	onRefresh();
 }

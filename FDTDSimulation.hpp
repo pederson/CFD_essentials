@@ -28,7 +28,8 @@ public:
 	const double * E_z_ptr() const {return _E_z;};
 	const double * H_x_ptr() const {return _H_x;};
 	const double * H_y_ptr() const {return _H_y;};
-	
+	const SimulationData & simdata() const {return _simdata;};
+	const double dt() const {return _dt;};
 
 	// mutators
 	void set_boundary(BoundaryLocation loc, BoundaryCondition type, unsigned int num_layers=1);
