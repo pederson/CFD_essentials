@@ -54,6 +54,22 @@ void PlasmaMomentumSimulation::bind_E_z(const double * E_z){
 	_E_z = E_z;
 }
 
+void PlasmaMomentumSimulation::bind_collision_rate(function<double(unsigned int)> collision_rate_fn){
+	_collision_rate_fn = collision_rate_fn;
+}
+
+void PlasmaMomentumSimulation::bind_E_x(function<double(unsigned int)> E_x_fn){
+	_E_x_fn = E_x_fn;
+}
+
+void PlasmaMomentumSimulation::bind_E_y(function<double(unsigned int)> E_y_fn){
+	_E_y_fn = E_y_fn;
+}
+
+void PlasmaMomentumSimulation::bind_E_z(function<double(unsigned int)> E_z_fn){
+	_E_z_fn = E_z_fn;
+}
+
 void PlasmaMomentumSimulation::bind_E_x_prev(const double * E_x_prev){
 	_E_x_prev = E_x_prev;
 }
@@ -132,10 +148,10 @@ void PlasmaMomentumSimulation::run_2D(int num_iters){
 
 				cind = _mesh->reg_inds_to_glob_ind(i, j);
 
-				_velocity_x[cind] = _velocity_x[cind]*(1-_CourantFactor*_dt*_collision_rate[cind])/(1+_CourantFactor*_dt*_collision_rate[cind]) 
+				_velocity_x[cind] = _velocity_x[cind]*(1-_CourantFactor*_dt*_collision_rate_fn(cind))/(1+_CourantFactor*_dt*_collision_rate[cind]) 
 									- (_E_x[cind] + _E_x_prev[cind])*0.5*(_q_e*_dt)/(_m_e*(1+_CourantFactor*_dt*_collision_rate[cind]));
 
-				_velocity_y[cind] = _velocity_y[cind]*(1-_CourantFactor*_dt*_collision_rate[cind])/(1+_CourantFactor*_dt*_collision_rate[cind]) 
+				_velocity_y[cind] = _velocity_y[cind]*(1-_CourantFactor*_dt*_collision_rate_fn(cind))/(1+_CourantFactor*_dt*_collision_rate[cind]) 
 									- (_E_y[cind] + _E_y_prev[cind])*0.5*(_q_e*_dt)/(_m_e*(1+_CourantFactor*_dt*_collision_rate[cind]));
 
 			}
@@ -171,10 +187,11 @@ void PlasmaMomentumSimulation::allocate_fields(){
 	}
 
 	// collision rate
-	if (_collision_rate == nullptr){
-		_default_collision_rate.assign(_mesh->nodecount(), 0); 
-		_collision_rate = &_default_collision_rate.front();
-	}
+	if (_collision_rate_fn == nullptr){
+		//_default_collision_rate.assign(_mesh->nodecount(), 0); 
+		//_collision_rate = &_default_collision_rate.front();
+		if (_collision_rate == nullptr) _collision_rate_fn = [](unsigned int i)->double{return 1.0;};
+	}	else _collision_rate_fn = [this](unsigned int i)->double{return this->_collision_rate[i];};
 
 	// x Efield
 	if (_E_x == nullptr){

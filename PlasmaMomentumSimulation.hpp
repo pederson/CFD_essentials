@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <functional>
 
 class PlasmaMomentumSimulation{
 public:
@@ -22,10 +23,6 @@ public:
 	const double * velocity_x_ptr() const {return &_velocity_x.front();};
 	const double * velocity_y_ptr() const {return &_velocity_y.front();};
 	const double * velocity_z_ptr() const {return &_velocity_z.front();};
-	//const double & collision_rate() const {return _collision_rate[0];};
-	//const double & E_x() const {return _E_x[0];};
-	//const double & E_y() const {return _E_y[0];};
-	//const double & E_z() const {return _E_z[0];};
 
 	// mutators
 	//void set_boundary(BoundaryLocation loc, BoundaryCondition type, unsigned int num_layers=1);
@@ -38,6 +35,12 @@ public:
 	void bind_E_x(const double * E_x);
 	void bind_E_y(const double * E_y);
 	void bind_E_z(const double * E_z);
+	void bind_collision_rate(std::function<double(unsigned int)> collision_rate_fn);
+	void bind_E_x(std::function<double(unsigned int)> E_x_fn);
+	void bind_E_y(std::function<double(unsigned int)> E_y_fn);
+	void bind_E_z(std::function<double(unsigned int)> E_z_fn);
+
+	// can these be held internally instead? probably better that way
 	void bind_E_x_prev(const double * E_x_prev);
 	void bind_E_y_prev(const double * E_y_prev);
 	void bind_E_z_prev(const double * E_z_prev);
@@ -65,7 +68,6 @@ private:
 	const double * _E_x, * _E_x_prev;
 	const double * _E_y, * _E_y_prev;
 	const double * _E_z, * _E_z_prev;
-	//const cvector _collision_rate_cv;
 
 	const double * _init_vel_x;
 	const double * _init_vel_y;
@@ -86,10 +88,15 @@ private:
 		double _dx, _dt, _CourantFactor;
 		double _num_iters, _current_iter, _tcur;
 
-		// density field
+		// velocity field
 		std::vector<double> _velocity_x;
 		std::vector<double> _velocity_y;
 		std::vector<double> _velocity_z;
+
+		std::function<double(unsigned int)> _collision_rate_fn;
+		std::function<double(unsigned int)> _E_x_fn;
+		std::function<double(unsigned int)> _E_y_fn;
+		std::function<double(unsigned int)> _E_z_fn;
 
 		// defaults
 		std::vector<double> _default_collision_rate;
