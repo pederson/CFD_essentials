@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <functional>
 
 class PlasmaDriftDiffusionSimulation{
 public:
@@ -18,9 +19,6 @@ public:
 	// inspectors
 	const double & density() const {return _density.front();};
 	const double * density_ptr() const {return &_density.front();};
-	//const double & diffusion_coeff() const {return _diffusion_coeff[0];};
-	//const double & gain_term() const {return _gain_term[0];};
-	//const double & loss_term() const {return _loss_term[0];};
 	const SimulationData & simdata() const {return _simdata;};
 
 	// mutators
@@ -31,6 +29,9 @@ public:
 	void bind_diffusion_coeff(const double * diffusion_coeff);
 	void bind_gain_term(const double * gain_term);
 	void bind_loss_term(const double * loss_term);
+	void bind_diffusion_coeff(std::function<double(unsigned int)> diffusion_coeff_fn);
+	void bind_gain_term(std::function<double(unsigned int)> gain_term_fn);
+	void bind_loss_term(std::function<double(unsigned int)> loss_term_fn);
 	void set_num_iters(unsigned int num_iters) {_num_iters = num_iters;};
 	
 	// other
@@ -55,8 +56,6 @@ private:
 	const double * _gain_term;
 	const double * _loss_term;
 	const double * _init_density;
-	//const cvector _diffusion_coeff_cv, _gain_term_cv, _loss_term_cv;
-
 
 	// internal simulation variables
 		bool _is_allocated;
@@ -72,17 +71,13 @@ private:
 		double _dx, _dt, _CourantFactor;
 		double _num_iters, _current_iter, _tcur;
 
-		
-		SignalGenerator _source_modulator; // modulates all sources with tanh
-		double _source_modulator_width; 	// how many time steps until it reaches max value
-		
+
+		std::function<double(unsigned int)> _diffusion_coeff_fn;
+		std::function<double(unsigned int)> _gain_term_fn;
+		std::function<double(unsigned int)> _loss_term_fn;
+
 		// density field
 		std::vector<double> _density, _density_old;	
-
-		// defaults
-		std::vector<double> _default_diffusion_coeff;
-		std::vector<double> _default_gain_term;
-		std::vector<double> _default_loss_term;
 
 };
 

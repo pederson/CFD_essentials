@@ -58,7 +58,7 @@ int main(int argc, char * argv[]){
 	fdtdsim.bind_rel_permittivity([](unsigned int i)->double{return 1.0;});
 	fdtdsim.bind_conductivity([density](unsigned int i)->double{return density[i]*(1.6e-19)*(1.6e-19)/(8.854e-12*4.4e+12*9.11e-31);});
 	//fdtdsim.bind_single_pole();
-	fdtdsim.add_sinusoidal_source(3.0e+12/6.0, 0.0, 1.0e-3, 1.0e-3);
+	fdtdsim.add_sinusoidal_source(3.0e+13/6.0, 0.0, 1.0e-3, 1.0e-3);
 	fdtdsim.set_num_iters(numiters);
 
 	// Momentum Simulation

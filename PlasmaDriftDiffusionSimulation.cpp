@@ -10,6 +10,10 @@ PlasmaDriftDiffusionSimulation::PlasmaDriftDiffusionSimulation(){
 	_loss_term = nullptr;
 	_init_density = nullptr;
 
+	_diffusion_coeff_fn = nullptr;
+	_gain_term_fn = nullptr;
+	_loss_term_fn = nullptr;
+
 	_mesh = nullptr;
 
 	_dx = 0.0;
@@ -42,6 +46,19 @@ void PlasmaDriftDiffusionSimulation::bind_gain_term(const double * gain_term){
 void PlasmaDriftDiffusionSimulation::bind_loss_term(const double * loss_term){
 	_loss_term = loss_term;
 }
+
+void PlasmaDriftDiffusionSimulation::bind_diffusion_coeff(function<double(unsigned int)> diffusion_coeff_fn){
+	_diffusion_coeff_fn = diffusion_coeff_fn;
+}
+
+void PlasmaDriftDiffusionSimulation::bind_gain_term(function<double(unsigned int)> gain_term_fn){
+	_gain_term_fn = gain_term_fn;
+}
+
+void PlasmaDriftDiffusionSimulation::bind_loss_term(function<double(unsigned int)> loss_term_fn){
+	_loss_term_fn = loss_term_fn;
+}
+
 
 void PlasmaDriftDiffusionSimulation::set_initial_density(const double * init_density){
 	_init_density = init_density;
@@ -129,9 +146,9 @@ void PlasmaDriftDiffusionSimulation::run_2D(int num_iters){
 				uind = _mesh->reg_inds_to_glob_ind(i, j+1);
 				dind = _mesh->reg_inds_to_glob_ind(i, j-1);
 
-				_density[cind] = _density_old[cind] + _dt*(_gain_term[cind]
-												- _loss_term[cind]
-												+ _diffusion_coeff[cind]/_dx/_dx*(_density_old[lind] + _density_old[rind]
+				_density[cind] = _density_old[cind] + _dt*(_gain_term_fn(cind)
+												- _loss_term_fn(cind)
+												+ _diffusion_coeff_fn(cind)/_dx/_dx*(_density_old[lind] + _density_old[rind]
 													+ _density_old[uind] + _density_old[dind] - 4*_density_old[cind]));
 
 			}
@@ -173,21 +190,21 @@ void PlasmaDriftDiffusionSimulation::allocate_fields(){
 	}
 
 	// diffusion coefficient
-	if (_diffusion_coeff == nullptr){
-		_default_diffusion_coeff.assign(_mesh->nodecount(), (_k_b*2)/(_m_e*4.4e+12)); // (_k_b*3.20435313e-19)/(_m_e*4.4e+12)
-		_diffusion_coeff = &_default_diffusion_coeff.front();
+	if (_diffusion_coeff_fn == nullptr){
+		if (_diffusion_coeff == nullptr) _diffusion_coeff_fn = [](unsigned int i)->double{return (1.3806488e-23*2)/(9.10938291e-31*4.4e+12);};
+		else _diffusion_coeff_fn = [this](unsigned int i)->double{return this->_diffusion_coeff[i];};
 	}
 
 	// gain term
-	if (_gain_term == nullptr){
-		_default_gain_term.assign(_mesh->nodecount(), 0.0);
-		_gain_term = &_default_gain_term.front();
+	if (_gain_term_fn == nullptr){
+		if (_gain_term == nullptr) _gain_term_fn = [](unsigned int i)->double{return 0.0;};
+		else _gain_term_fn = [this](unsigned int i)->double{return this->_gain_term[i];};
 	}
 
 	// loss term
-	if (_loss_term == nullptr){
-		_default_loss_term.assign(_mesh->nodecount(), 0.0);
-		_loss_term = &_default_loss_term.front();
+	if (_loss_term_fn == nullptr){
+		if (_loss_term == nullptr) _loss_term_fn = [](unsigned int i)->double{return 0.0;};
+		else _loss_term_fn = [this](unsigned int i)->double{return this->_loss_term[i];};
 	}
 }
 
