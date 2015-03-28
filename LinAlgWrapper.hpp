@@ -20,6 +20,9 @@ void clearLinAlg(){
 }
 */
 
+// use a global object count to keep track of how many linear algebra objects
+// are in use. when the count reaches 0, call clearLinAlg()
+
 
 class LinVector{
 public:

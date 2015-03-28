@@ -41,14 +41,12 @@ int main(int argc, char * argv[]){
 	// construct the right side using the density field
 	double q_electron = -1.6e-19, eps0 = 8.854e-12, m_electron = 9.11e-31;
 
-	cvector rightside;
-	rightside.multiply(&paramesh.data("e_density"));
-	rightside.multiply(q_electron);
-	rightside.divide(eps0*dx*dx);
+	const double * density = &paramesh.data("e_density");
+
 
 	PoissonSimulation poissim;
 	poissim.bind_mesh(paramesh);
-	poissim.bind_rhs(rightside);
+	poissim.bind_rhs([q_electron, eps0, density](unsigned int i)->double{return density[i]*q_electron/eps0;});
 	poissim.run();
 	poissim.view_results();
 

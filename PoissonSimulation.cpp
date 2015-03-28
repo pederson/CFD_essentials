@@ -6,6 +6,9 @@ using namespace std;
 PoissonSimulation::PoissonSimulation(){
 	_mesh = nullptr;
 	_rhs = nullptr;
+
+	_rhs_fn = nullptr;
+
 	_dx = 0.0;
 	_is_allocated = false;
 }
@@ -14,19 +17,19 @@ PoissonSimulation::~PoissonSimulation(){
 
 }
 
-
-// mutators
-//void set_boundary(BoundaryLocation loc, BoundaryCondition type, unsigned int num_layers=1);
 void PoissonSimulation::bind_mesh(const RegularMesh & mesh){
 	_mesh = &mesh;
 	_dx = mesh.res();
 }
 
-void PoissonSimulation::bind_rhs(const cvector & rhs){
-	_rhs = &rhs;
+void PoissonSimulation::bind_rhs(const double * rhs){
+	_rhs = rhs;
 }
 
-// other
+void PoissonSimulation::bind_rhs(function<double(unsigned int)> rhs_fn){
+	_rhs_fn = rhs_fn;
+}
+
 void PoissonSimulation::view_results(){
 
 	mesh_visualixer mvis;
@@ -66,9 +69,13 @@ void PoissonSimulation::allocate_fields(){
 
 	_potential.assign(_mesh->nodecount(), 0.0);
 
-	if (_rhs == nullptr){
-		_default_rhs.multiply(0.0);
-		_rhs = &_default_rhs;
+	if (_rhs_fn == nullptr){
+		if (_rhs == nullptr){
+			//_default_rhs.multiply(0.0);
+			//_rhs = &_default_rhs;_
+			_rhs_fn = [](unsigned int i)->double{return 0.0;};
+		}
+		else _rhs_fn = [this](unsigned int i)->double{return this->_rhs[i];};
 	}
 
 }
@@ -113,7 +120,7 @@ void PoissonSimulation::run_2D(){
 
 	double rhv;
 	for(auto i=0; i<_mesh->nodecount(); i++){
-		rhv = _rhs->at(i);
+		rhv = _rhs_fn(i);
 		_rhsv.insert_values(1,&rhv, &i);
 	}
     //cout << "assembled rhs" << endl;

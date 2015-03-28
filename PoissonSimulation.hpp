@@ -3,12 +3,12 @@
 
 #include "RegularMesh.hpp"
 #include "VisualixerMesh.hpp"
-#include "cvector.hpp"
 #include "LinAlgWrapper.hpp"
 
 #include <vector>
 #include <string>
 #include <iostream>
+#include <functional>
 
 class PoissonSimulation{
 public:
@@ -18,12 +18,12 @@ public:
 
 	// inspectors
 	const double & potential() const {return _potential.front();};
-	const cvector & rhs() const {return *_rhs;};
 
 
 	// mutators
 	void bind_mesh(const RegularMesh & mesh);
-	void bind_rhs(const cvector & rhs);
+	void bind_rhs(const double * rhs);
+	void bind_rhs(std::function<double(unsigned int)> rhs_fn);
 
 	// other
 	void view_results();
@@ -40,7 +40,7 @@ private:
 	const RegularMesh * _mesh;
 
 	// user defined data
-	const cvector * _rhs;
+	const double * _rhs;
 
 
 	// internal simulation variables
@@ -50,8 +50,7 @@ private:
 		// potential field
 		std::vector<double> _potential;	
 
-		// defaults
-		cvector _default_rhs;
+		std::function<double(unsigned int)> _rhs_fn;
 
 };
 

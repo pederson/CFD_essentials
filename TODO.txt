@@ -1,12 +1,12 @@
 TODO:
 
+- do time analysis for std::function vs. raw arrays
+
+- combine simdata without doubling the memory requirement
+
 - change prefix for member variables. It has come to my attention that an underscore as a prefix may be a bad idea. possibly use "m_"... instead
 
-- incorporate cvector for use in other parts of the code (storing to simdata for example)
-
 - incorporate std::function and lambdas for anything that could use it (all simulations and the SimulationData and SimulationVisualixer)
-
-- Should simdata be stored on heap instead of stack? Can be large sometimes
 
 - create an actual converter class (or decide if it is really worth it)
 
@@ -14,11 +14,7 @@ TODO:
 
 - Allow the SimulationData class to store data even if the full data has not been allocated. Figure out how to add time data to a file that already exists
 
-- fix the issue with the gaussian geometric object overwriting all other properties on the mesh
-
 - Make a standard Finite difference derivative operator class or function that accepts a regular mesh and a field variable, then takes the requested derivative (and uses the requested technique for dealing with the boundary)
-
-- Make a way to combine simulation data into one file if the mesh in each file matches
 
 - Make a way to get the "previous" value for time stepping simulations
 
@@ -36,15 +32,11 @@ TODO:
 
 - Problem writing holey_waveguide_defect geometry simulation to HDF5... only on school computer though... and only happens sometimes...
 
-- Geometric Objects need to have an options to do a repeating pattern (either rectangular or circular)
+- Geometric Objects need to have an options to do a repeating circular pattern
 
 - Explore using Boost library (what can it do for me?)... probably not a lot that c++11 and c++14 doesn't already have
 
-- Make Simulation class that handles the setup and execution of a simulation
-	- Need to finish the equation class and boundary conditions class to do this
-	- Make this a base class maybe. Derived classes of FESimulation, FVSimulation, FDSimulation, FDTDSimulation, etc... can be made
-	- This should allow the user to run the simulation incrementally (n steps at a time) and access fields in the middle of the simulation
-	- Is it possibly better to NOT have a base simulation class?
+- Keep a standard interface for Simulation classes. There doesn't seem to be a need for inheritance at this point
 
 - start using iterators when possible
 
@@ -57,8 +49,6 @@ TODO:
 - support boundary properties (with conditions that v=0, etc...)
 
 - support initial conditions in a general manner
-
-- Increase encapsulation with getters and setters
 
 - support for cylindrical and polar coordinates (maybe not necessary)
 
@@ -82,8 +72,9 @@ TODO:
 - Gimbal lock is still happening during manual rotation
 - adding a colorby or alpha before adding an object (mesh, pointcloud) doesn't work b/c the number of points is still unknown... is there a workaround for this?
 - Shading and Light source for mesh model viewer
-- Make a convention where there are expected to be Point, Line, Triangle, and Quad elements. The number of them are set by the user, but they are always in that order. Also, normals should be standard.
+- Make Normals an option in the base class. Then make point size adjustments and normals 
 - for sim viz, have option to show vector arrows if it's a flow
+- for small vertex values, there is a problem... The view matrix cuts off at values below 1e-9... which is common for my simulations of plasmas
 
 
 
