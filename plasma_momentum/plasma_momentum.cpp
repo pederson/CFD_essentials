@@ -46,7 +46,6 @@ int main(int argc, char * argv[]){
 	psim.set_initial_velocity_y(&paramesh.data("init_vel"));
 	psim.bind_E_x(&paramesh.data("E_x"));
 	psim.bind_collision_rate(&paramesh.data("density"));
-	//psim.bind_collision_rate();
 	//psim.set_time_step(dt);
 	psim.set_num_iters(200);
 	psim.run();

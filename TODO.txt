@@ -1,5 +1,7 @@
 TODO:
 
+- split up simulation allocation function into field assignment and coefficient assignment
+
 - do time analysis for std::function vs. raw arrays
 
 - combine simdata without doubling the memory requirement

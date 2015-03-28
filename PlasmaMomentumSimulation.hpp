@@ -39,11 +39,6 @@ public:
 	void bind_E_x(std::function<double(unsigned int)> E_x_fn);
 	void bind_E_y(std::function<double(unsigned int)> E_y_fn);
 	void bind_E_z(std::function<double(unsigned int)> E_z_fn);
-
-	// can these be held internally instead? probably better that way
-	void bind_E_x_prev(const double * E_x_prev);
-	void bind_E_y_prev(const double * E_y_prev);
-	void bind_E_z_prev(const double * E_z_prev);
 	void set_num_iters(unsigned int num_iters) {_num_iters = num_iters;};
 	
 	// other
@@ -65,9 +60,9 @@ private:
 
 	// user defined data
 	const double * _collision_rate;	// if it varies over the field
-	const double * _E_x, * _E_x_prev;
-	const double * _E_y, * _E_y_prev;
-	const double * _E_z, * _E_z_prev;
+	const double * _E_x;
+	const double * _E_y;
+	const double * _E_z;
 
 	const double * _init_vel_x;
 	const double * _init_vel_y;
@@ -98,11 +93,9 @@ private:
 		std::function<double(unsigned int)> _E_y_fn;
 		std::function<double(unsigned int)> _E_z_fn;
 
-		// defaults
-		std::vector<double> _default_collision_rate;
-		std::vector<double> _default_E_x;
-		std::vector<double> _default_E_y;
-		std::vector<double> _default_E_z;
+		std::vector<double> _E_x_prev;
+		std::vector<double> _E_y_prev;
+		std::vector<double> _E_z_prev;
 
 };
 

@@ -9,9 +9,6 @@ PlasmaMomentumSimulation::PlasmaMomentumSimulation(){
 	_E_x = nullptr;
 	_E_y = nullptr;
 	_E_z = nullptr;
-	_E_x_prev = nullptr;
-	_E_y_prev = nullptr;
-	_E_z_prev = nullptr;
 
 	_init_vel_x = nullptr;
 	_init_vel_y = nullptr;
@@ -68,18 +65,6 @@ void PlasmaMomentumSimulation::bind_E_y(function<double(unsigned int)> E_y_fn){
 
 void PlasmaMomentumSimulation::bind_E_z(function<double(unsigned int)> E_z_fn){
 	_E_z_fn = E_z_fn;
-}
-
-void PlasmaMomentumSimulation::bind_E_x_prev(const double * E_x_prev){
-	_E_x_prev = E_x_prev;
-}
-
-void PlasmaMomentumSimulation::bind_E_y_prev(const double * E_y_prev){
-	_E_y_prev = E_y_prev;
-}
-
-void PlasmaMomentumSimulation::bind_E_z_prev(const double * E_z_prev){
-	_E_z_prev = E_z_prev;
 }
 
 void PlasmaMomentumSimulation::view_results(){
@@ -148,11 +133,11 @@ void PlasmaMomentumSimulation::run_2D(int num_iters){
 
 				cind = _mesh->reg_inds_to_glob_ind(i, j);
 
-				_velocity_x[cind] = _velocity_x[cind]*(1-_CourantFactor*_dt*_collision_rate_fn(cind))/(1+_CourantFactor*_dt*_collision_rate[cind]) 
-									- (_E_x[cind] + _E_x_prev[cind])*0.5*(_q_e*_dt)/(_m_e*(1+_CourantFactor*_dt*_collision_rate[cind]));
+				_velocity_x[cind] = _velocity_x[cind]*(1-_CourantFactor*_dt*_collision_rate_fn(cind))/(1+_CourantFactor*_dt*_collision_rate_fn(cind)) 
+									- (_E_x_fn(cind) + _E_x_prev[cind])*0.5*(_q_e*_dt)/(_m_e*(1+_CourantFactor*_dt*_collision_rate_fn(cind)));
 
-				_velocity_y[cind] = _velocity_y[cind]*(1-_CourantFactor*_dt*_collision_rate_fn(cind))/(1+_CourantFactor*_dt*_collision_rate[cind]) 
-									- (_E_y[cind] + _E_y_prev[cind])*0.5*(_q_e*_dt)/(_m_e*(1+_CourantFactor*_dt*_collision_rate[cind]));
+				_velocity_y[cind] = _velocity_y[cind]*(1-_CourantFactor*_dt*_collision_rate_fn(cind))/(1+_CourantFactor*_dt*_collision_rate_fn(cind)) 
+									- (_E_y_fn(cind) + _E_y_prev[cind])*0.5*(_q_e*_dt)/(_m_e*(1+_CourantFactor*_dt*_collision_rate_fn(cind)));
 
 			}
 		}
@@ -162,6 +147,12 @@ void PlasmaMomentumSimulation::run_2D(int num_iters){
 		// fill in the simdata for this time step
 		_simdata.add_data_at_index(n, "velocity_x", _velocity_x.front());
 		_simdata.add_data_at_index(n, "velocity_y", _velocity_y.front());
+
+		// update the fields
+		for (auto i=0; i<_mesh->nodecount(); i++) {
+			_E_x_prev[i] = _E_x_fn(i);
+			_E_y_prev[i] = _E_y_fn(i);
+		}
 
 		// update iteration count
 		_current_iter++;
@@ -188,20 +179,19 @@ void PlasmaMomentumSimulation::allocate_fields(){
 
 	// collision rate
 	if (_collision_rate_fn == nullptr){
-		//_default_collision_rate.assign(_mesh->nodecount(), 0); 
-		//_collision_rate = &_default_collision_rate.front();
 		if (_collision_rate == nullptr) _collision_rate_fn = [](unsigned int i)->double{return 1.0;};
-	}	else _collision_rate_fn = [this](unsigned int i)->double{return this->_collision_rate[i];};
+		else _collision_rate_fn = [this](unsigned int i)->double{return this->_collision_rate[i];};
+	}
 
 	// x Efield
-	if (_E_x == nullptr){
-		_default_E_x.assign(_mesh->nodecount(), 0.0);
-		_E_x = &_default_E_x.front();
+	if (_E_x_fn == nullptr){
+		if (_E_x == nullptr) _E_x_fn = [](unsigned int i)->double{return 0.0;};
+		else _E_x_fn = [this](unsigned int i)->double{return this->_E_x[i];};
 	}
 
 	// x Efield previous
-	if (_E_x_prev == nullptr){
-		_E_x_prev = _E_x;
+	if (_E_x_prev.size() == 0){
+		_E_x_prev.assign(_mesh->nodecount(), 0.0);
 	}
 
 	if (_mesh->num_dims() > 1){
@@ -213,15 +203,14 @@ void PlasmaMomentumSimulation::allocate_fields(){
 			}
 		}
 
-		// y Efield
-		if (_E_y == nullptr){
-			_default_E_y.assign(_mesh->nodecount(), 0.0);
-			_E_y = &_default_E_y.front();
+		if (_E_y_fn == nullptr){
+			if (_E_y == nullptr) _E_y_fn = [](unsigned int i)->double{return 0.0;};
+			else _E_y_fn = [this](unsigned int i)->double{return this->_E_y[i];};
 		}
 
 		// y Efield previous
-		if (_E_y_prev == nullptr){
-			_E_y_prev = _E_y;
+		if (_E_y_prev.size() == 0){
+			_E_y_prev.assign(_mesh->nodecount(), 0.0);
 		}
 	}
 
@@ -235,14 +224,14 @@ void PlasmaMomentumSimulation::allocate_fields(){
 		}
 
 		// z Efield
-		if (_E_z == nullptr){
-			_default_E_z.assign(_mesh->nodecount(), 0.0);
-			_E_z = &_default_E_z.front();
+		if (_E_z_fn == nullptr){
+			if (_E_z == nullptr) _E_z_fn = [](unsigned int i)->double{return 0.0;};
+			else _E_z_fn = [this](unsigned int i)->double{return this->_E_z[i];};
 		}
 
 		// z Efield previous
-		if (_E_z_prev == nullptr){
-			_E_z_prev = _E_z;
+		if (_E_z_prev.size() == 0){
+			_E_z_prev.assign(_mesh->nodecount(), 0.0);
 		}
 	}
 
