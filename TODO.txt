@@ -1,6 +1,6 @@
 TODO:
 
-- Visualixer fails if mesh elementcount is 0. It shouldn't fail
+- writing HDF5 with ~1000 time steps is excruciatingly slow... why? It's just fine for 500 time steps
 
 - split up simulation allocation function into field assignment and coefficient assignment
 

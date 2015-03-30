@@ -46,6 +46,7 @@ public:
 	const double & get_data_at_index(unsigned int t_index, std::string fieldname) const {return _datasnapshots.at(t_index).field(fieldname);};
 	const DataSnapshot & snapshot(unsigned int t_index) const {return _datasnapshots.at(t_index);};
 	const Mesh * mesh() const {return _mesh;};
+	std::vector<std::string> fieldnames() const {return _fieldnames;};
 	
 	// mutators
 	void set_time_span(double tstart, double dt, double tstop);

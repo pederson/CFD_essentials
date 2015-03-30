@@ -126,6 +126,8 @@ void SimulationData::add_data_at_index(unsigned int t_index, std::string fieldna
 
 void SimulationData::write_HDF5(std::string outname) const{
 	//#ifdef _HDF5_H
+
+	cout << "Writing SimulationData into HDF5 file: " << outname << " ..... this could take a while. grab some coffee" << endl;
 	// create an empty HDF5 file
 	H5::H5File outfile(outname, H5F_ACC_TRUNC);
 
@@ -220,6 +222,7 @@ void SimulationData::write_HDF5(std::string outname) const{
 			field_set = fields_group.createDataSet(_fieldnames.at(i), H5::PredType::NATIVE_DOUBLE, fieldspace);
 			//cout << "created dataset" << endl;
 			for (auto j=0; j<ntime; j++){
+				cout << "writing time step " << j << "/" << ntime << "\r" << flush;
 				offset[1] = j;
 				fieldspace.selectHyperslab(H5S_SELECT_SET, count, offset, stride, block);
 
@@ -284,6 +287,8 @@ SimulationData SimulationData::read_HDF5(std::string filename){
 
 std::vector<std::string> HDF5FieldNames;
 void SimulationData::read_HDF5_internal(std::string filename){
+	cout << "Reading HDF5 file: " << filename << endl;
+
 	// open the file for reading
 	H5::H5File file(filename, H5F_ACC_RDONLY);
 
@@ -394,6 +399,7 @@ void SimulationData::read_HDF5_internal(std::string filename){
 
 			// fill in the data
 			for (auto j=0; j<ntime; j++){
+				cout << "reading time snapshot " << j << "/" << ntime << "\r" << flush;
 				offset[1] = j;
 				field_space.selectHyperslab(H5S_SELECT_SET, count, offset, stride, block);
 				field_set.read(fieldbuf, H5::PredType::NATIVE_DOUBLE, memspace, field_space);

@@ -16,26 +16,44 @@ int main(int argc, char * argv[]){
 
 	// empty space model
 	/*
-	parametric_model_2d paramodel;
+	srcfreq = 1.0e+9;
+	srclocx = 0.5; 
+	srclocy = 0.5;
+	ParametricModel2D paramodel;
 	paramodel.set_model_name("EmptySpace");
 	paramodel.add_physical_property("eps_rel");
 	paramodel.add_material("Vacuum", {1.0});
-	paramodel.add_material("Dielectric", {6.0});
-	circle c1 = circle(0.1, {0.5, 0.5}, paramodel.get_material("Vacuum"));
+	paramodel.add_material("Dielectric", {1.0});
+	Circle c1 = Circle(0.1, {0.5, 0.5}, paramodel.get_material("Vacuum"));
 	paramodel.add_object(&c1);
+	// convert the model into a mesh
+	cout << "about to make mesh" << endl;
+	dx = 0.005;
+	RegularMesh paramesh;
+	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, paramodel.get_material("Vacuum"));
+	paramesh.print_summary();
 	//*/
 
 	// ring model
 	/*
-	parametric_model_2d paramodel;
+	srcfreq = 1.0e+9;
+	srclocx = 0.1; 
+	srclocy = 0.5;
+	ParametricModel2D paramodel;
 	paramodel.set_model_name("Ring");
 	paramodel.add_physical_property("eps_rel");
 	paramodel.add_material("Vacuum", {1.0});
 	paramodel.add_material("Dielectric", {6.0});
-	circle c1 = circle(0.1, {0.5, 0.5}, paramodel.get_material("Dielectric"));
-	circle c2 = circle(0.06, {0.5, 0.5}, paramodel.get_material("Vacuum"));
+	Circle c1 = Circle(0.1, {0.5, 0.5}, paramodel.get_material("Dielectric"));
+	Circle c2 = Circle(0.06, {0.5, 0.5}, paramodel.get_material("Vacuum"));
 	paramodel.add_object(&c1);
 	paramodel.add_object(&c2);
+	// convert the model into a mesh
+	cout << "about to make mesh" << endl;
+	dx = 0.005;
+	RegularMesh paramesh;
+	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, paramodel.get_material("Vacuum"));
+	paramesh.print_summary();
 	//*/
 	
 
@@ -60,7 +78,7 @@ int main(int argc, char * argv[]){
 
 
 	// holey waveguide defect model
-	/*
+	
 	ParametricModel2D paramodel;
 	paramodel.set_model_name("Holey Defect");
 	paramodel.add_physical_property("eps_rel");
@@ -79,8 +97,11 @@ int main(int argc, char * argv[]){
 	// convert the model into a mesh
 	cout << "about to make mesh" << endl;
 	dx = 0.005;
+	srcfreq = 1.0e+9;
+	srclocx = 0.03;
+	srclocy = 0.5;
 	RegularMesh paramesh;
-	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, paramodel.get_material("Vacuum"));
+	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.2, 0.8, paramodel.get_material("Vacuum"));
 	paramesh.print_summary();
 	//*/
 
@@ -124,14 +145,17 @@ int main(int argc, char * argv[]){
 
 	// metal aperture model
 	/*
-	parametric_model_2d paramodel;
+	srcfreq = 1.0e+10;
+	srclocx = 0.01; 
+	srclocy = 0.05;
+	ParametricModel2D paramodel;
 	paramodel.set_model_name("Aperture");
 	paramodel.add_physical_property("eps_rel");
 	paramodel.add_physical_property("current_density");
 	paramodel.add_material("Vacuum", {1.0, 0.0});
 	paramodel.add_material("Dielectric", {1000.0, 0.0});
-	rectangle r1 = rectangle(0.3/40, 0.2, {0.05, 0.05}, paramodel.get_material("Dielectric"));
-	rectangle r2 = rectangle(0.3/40, 0.03, {0.05, 0.05}, paramodel.get_material("Vacuum"));
+	Rectangle r1 = Rectangle(0.3/40, 0.2, {0.05, 0.05}, paramodel.get_material("Dielectric"));
+	Rectangle r2 = Rectangle(0.3/40, 0.03, {0.05, 0.05}, paramodel.get_material("Vacuum"));
 	paramodel.add_object(&r1);
 	paramodel.add_object(&r2);
 	// convert the model into a mesh
@@ -160,7 +184,7 @@ int main(int argc, char * argv[]){
 	//*/
 
 	// frequency dependent slab model
-	
+	/*
 	dx = 1.0e-6;
 	srcfreq = 3.0e+12;	// should be reflected
 	//srcfreq = 3.0e+13;	// should pass right through
@@ -198,24 +222,25 @@ int main(int argc, char * argv[]){
 	FDTDSimulation fsim;
 	fsim.bind_mesh(paramesh);
 	fsim.bind_rel_permittivity(&paramesh.data("eps_rel"));
-	fsim.bind_conductivity(&paramesh.data("conductivity"));
-	fsim.bind_single_pole(&paramesh.data("polenumerator"), &paramesh.data("polefreq"));
+	//fsim.bind_conductivity(&paramesh.data("conductivity"));
+	//fsim.bind_single_pole(&paramesh.data("polenumerator"), &paramesh.data("polefreq"));
 	//fsim.bind_current_density_z(&paramesh.data("current_density"));
 	fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy);
 	//fsim.add_sinusoidal_source(15.0e+13, 0.0, 1.5e-6, 7.5e-6);
 	//fsim.add_sinusoidal_source(15.0e+13, 0.0, 1.5e-6, 2.5e-6);
 	//fsim.add_gaussian_source(10.0, 10.0, 4.5e-6, 4.0e-6);
-	fsim.set_num_iters(50);
+	fsim.set_num_iters(600);
 	fsim.run();
-	//fsim.view_results();
-	//fsim.output_HDF5("plasmaslab.h5");
+	fsim.view_results();
+	fsim.output_HDF5("plasmaslab.h5");
 
-
+	/*
 	SimulationData fsimdat = SimulationData::read_HDF5("../../testfiles/plasmaslab.h5");
 	simulation_visualixer vsim;
 	vsim.bind_simulation(fsimdat);
 	vsim.set_colorby_field("E_z");
 	vsim.run();
+	*/
 
 	return 0;
 }
