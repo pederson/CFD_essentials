@@ -187,15 +187,30 @@ void SimulationData::write_HDF5(std::string outname) const{
 		hsize_t fielddim[2];
 		fielddim[0] = nnodes;
 		fielddim[1] = ntime;
+		hsize_t fielddims[2];
+		fielddims[0] = nnodes;
+		fielddims[1] = 1;
 
 		H5::DataSpace fieldspace(2, fielddim);
 		H5::DataSet field_set;
+		H5::DataSpace memspace = H5::DataSpace(2, fielddims);
 
 		//cout << "CREATED FIELD DATASETS" << endl;
 		
-		// double fieldbuf[nnodes][ntime];
-		double ** fieldbuf = new double*[nnodes];
-		for (auto i=0; i<nnodes; i++) fieldbuf[i] = new double[ntime];
+		//double ** fieldbuf = new double*[nnodes];
+		//for (auto i=0; i<nnodes; i++) fieldbuf[i] = new double[ntime];
+		const double * fieldbuf;
+		hsize_t offset[2], count[2], stride[2], block[2];
+		offset[0] = 0;
+
+		count[0]  = nnodes;
+		count[1]  = 1;
+
+		stride[0] = 1;
+		stride[1] = 1;
+
+		block[0] = 1;
+		block[1] = 1;
 
 		string cfieldname;
 		for (auto i=0; i<_fieldnames.size(); i++){
@@ -205,18 +220,27 @@ void SimulationData::write_HDF5(std::string outname) const{
 			field_set = fields_group.createDataSet(_fieldnames.at(i), H5::PredType::NATIVE_DOUBLE, fieldspace);
 			//cout << "created dataset" << endl;
 			for (auto j=0; j<ntime; j++){
+				offset[1] = j;
+				fieldspace.selectHyperslab(H5S_SELECT_SET, count, offset, stride, block);
+
+
+				fieldbuf = &_datasnapshots.at(j)._datafields.at(cfieldname).front();
+				field_set.write(fieldbuf, H5::PredType::NATIVE_DOUBLE, memspace, fieldspace);
+				/*
 				for (auto k=0; k<nnodes; k++){
 					fieldbuf[k][j] = _datasnapshots.at(j)._datafields.at(cfieldname).at(k);
-					if (j==1) cout << "j: " << j << " k: " << k << " fieldbuf: " << fieldbuf[k][j] << endl;// "\r" << flush;
+					//if (j==1) cout << "j: " << j << " k: " << k << " fieldbuf: " << fieldbuf[k][j] << endl;// "\r" << flush;
 				}
+				*/
+
 			}
 			//cout << "wrote to buffer: " << fieldbuf[0][0] << endl;
-			field_set.write(fieldbuf, H5::PredType::NATIVE_DOUBLE);
+			//field_set.write(fieldbuf, H5::PredType::NATIVE_DOUBLE);
 			//cout << "wrote to file" << endl;
 			field_set.close();
 		}
-		for (auto i=0; i<nnodes; i++) delete[] fieldbuf[i];
-		delete[] fieldbuf;
+		//for (auto i=0; i<nnodes; i++) delete[] fieldbuf[i];
+		//delete[] fieldbuf;
 
 		// fields cleanup
 		fieldspace.close();
@@ -383,7 +407,7 @@ void SimulationData::read_HDF5_internal(std::string filename){
 				field_set.read(fieldbuf, H5::PredType::NATIVE_DOUBLE, memspace, field_space);
 
 				for (auto k=0; k<nodecount; k++){
-					if (j==1) cout << "j: " << j << " k: " << k << " fieldbuf: " << fieldbuf[k] << endl;// "\r" << flush;
+					//if (j==1) cout << "j: " << j << " k: " << k << " fieldbuf: " << fieldbuf[k] << endl;// "\r" << flush;
 
 					//cout << "about to write to screen" << endl;
 					//cout << "j: " << j << " k: " << k << " fieldbuf: " << fieldbuf[k] << endl;// "\r" << flush;
