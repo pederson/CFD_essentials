@@ -59,22 +59,9 @@ public:
   const unsigned int & num_connections();
   const double & data(std::string fieldname) const;
 
-  /*
-  // specialty stuff for regular grids
-  MeshNode & regular_node(unsigned int i, unsigned int j=0, unsigned int k=0);
-  unsigned int reg_num_nodes_x() const {return _num_nodes_x;};
-  unsigned int reg_num_nodes_y() const {return _num_nodes_y;};
-  unsigned int reg_num_nodes_z() const {return _num_nodes_z;};
-  //unsigned int & reg_nodes_boundary(BoundaryLocation loc);
-  std::vector<unsigned int> reg_left_inds();
-  std::vector<unsigned int> reg_right_inds();
-  std::vector<unsigned int> reg_top_inds();
-  std::vector<unsigned int> reg_bottom_inds();
-  std::vector<unsigned int> reg_front_inds();
-  std::vector<unsigned int> reg_back_inds();
-  unsigned int reg_inds_to_glob_ind(unsigned int i, unsigned int j=0, unsigned int k=0);
-  */
 
+  void set_nodecount(unsigned int count);
+  void set_elementcount(unsigned int count);
   void add_phys_property(std::string property_name, const double * property_vals);
   void add_phys_property(std::string proprety_name, double init_val);
   void reset_property(std::string property_name, double reset_val=0.0);
@@ -99,11 +86,6 @@ protected:
   MeshType _mesh_type;
   unsigned int _num_dims;
   double _xmin, _xmax, _ymin, _ymax, _zmin, _zmax;
-
-  
-  // metadata for regular mesh
-  //unsigned int _num_nodes_x, _num_nodes_y, _num_nodes_z;
-  //double _res;
   
 
   // nodes and elements

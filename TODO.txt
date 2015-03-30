@@ -1,5 +1,7 @@
 TODO:
 
+- need a way to read in a mesh via HDF5. Either add a method to the Mesh class, or add methods in the Mesh class to build a mesh with x, y, z, etc... arrays. 
+
 - split up simulation allocation function into field assignment and coefficient assignment
 
 - do time analysis for std::function vs. raw arrays
@@ -74,7 +76,7 @@ TODO:
 - Gimbal lock is still happening during manual rotation
 - adding a colorby or alpha before adding an object (mesh, pointcloud) doesn't work b/c the number of points is still unknown... is there a workaround for this?
 - Shading and Light source for mesh model viewer
-- Make Normals an option in the base class. Then make point size adjustments and normals 
+- Make Normals a standard option in the base class. Then make point size adjustments and normals 
 - for sim viz, have option to show vector arrows if it's a flow
 - for small vertex values, there is a problem... The view matrix cuts off at values below 1e-9... which is common for my simulations of plasmas
 

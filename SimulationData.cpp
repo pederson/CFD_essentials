@@ -249,6 +249,112 @@ void SimulationData::write_HDF5(std::string outname) const{
 
 }
 
+SimulationData SimulationData::read_HDF5(std::string filename){
+	
+	SimulationData simdat;
+	simdat.read_HDF5_internal(filename);
+	return simdat;
+
+}
+
+void SimulationData::read_HDF5_internal(std::string filename){
+	// open the file for reading
+	H5::H5File file(filename, H5F_ACC_RDONLY);
+
+	// Mesh reading
+	H5::Group mesh_group = file.openGroup("Mesh");
+
+		_mesh = &_internalmesh;
+		_mesh_set = true;
+
+		H5::Group nodes_group = mesh_group.openGroup("Nodes");
+		H5::Group elements_group = mesh_group.openGroup("Elements");
+		H5::Group nodedata_group = mesh_group.openGroup("NodeData");
+		H5::Group elementdata_group = mesh_group.openGroup("ElementData");
+
+		H5::DataSet nodesx_set = nodes_group.openDataSet("NodesX");
+		H5::DataSpace nodes_space = nodesx_set.getSpace();
+
+		hsize_t nodecount;
+		nodecount = nodes_space.getSimpleExtentNpoints();
+		double * nodebuf = new double[nodecount];
+
+		_internalmesh.set_nodecount(nodecount);
+
+		nodesx_set.read(nodebuf, H5::PredType::NATIVE_DOUBLE);
+		for (auto i=0; i<nodecount; i++) _internalmesh.node(i).set_x(nodebuf[i]);
+
+
+		try {
+			H5::DataSet nodesy_set = nodes_group.openDataSet("NodesY");
+			nodesy_set.read(nodebuf, H5::PredType::NATIVE_DOUBLE);
+			for (auto i=0; i<nodecount; i++) _internalmesh.node(i).set_y(nodebuf[i]);
+		}
+		catch( H5::GroupIException not_found_error ) {
+			cout << " NodesY not found." << endl;
+		}
+
+		try {
+			H5::DataSet nodesz_set = nodes_group.openDataSet("NodesZ");
+			nodesz_set.read(nodebuf, H5::PredType::NATIVE_DOUBLE);
+			for (auto i=0; i<nodecount; i++) _internalmesh.node(i).set_z(nodebuf[i]);
+		}
+		catch( H5::GroupIException not_found_error ) {
+			cout << " NodesZ not found." << endl;
+		}
+		
+		delete[] nodebuf;
+
+		print_summary();
+
+
+	// Time reading
+	H5::Group time_group = file.openGroup("Time");
+
+		H5::DataSet time_set = time_group.openDataSet("Time");
+		H5::DataSpace time_space = time_set.getSpace();
+		hsize_t ntime;
+		ntime = time_space.getSimpleExtentNpoints();
+		_time.resize(ntime);
+		
+		double timebuf[ntime];
+		time_set.read(timebuf, H5::PredType::NATIVE_DOUBLE);
+		for (auto i=0; i<ntime; i++) _time[i] = timebuf[i];
+		_tstart = timebuf[0]; _tstop = timebuf[ntime-1];
+		_dt = timebuf[1] - timebuf[0];
+		_time_set = true;
+
+
+	print_summary();
+
+
+	// Fields reading
+	H5::Group fields_group = file.openGroup("Fields");
+
+		hsize_t numfields = fields_group.getNumObjs();
+		cout << "there are " << numfields << " fields present in the H5 file" << endl;
+		// determine the names of all the datasets in the group
+		
+		
+		/*
+		try { // to determine if the dataset exists in the group
+			dataset = new DataSet( group->openDataSet( "Compressed_Data" ));
+		}
+		catch( GroupIException not_found_error ) {
+			cout << " Dataset is not found." << endl;
+		}
+		*/
+
+
+		print_summary();
+
+
+
+
+	// close the file
+	file.close();
+}
+
 SimulationData SimulationData::combine(vector<const SimulationData *> datavec){
 	SimulationData combo;
 	const Mesh * meshptr;

@@ -194,11 +194,7 @@ void Mesh::print_summary() const{
 void Mesh::print_detailed() const{
 
 }
-/*
-MeshNode & Mesh::regular_node(unsigned int i, unsigned int j, unsigned int k){
-  return _nodes.at(reg_inds_to_glob_ind(i,j,k));
-}
-*/
+
 
 const double & Mesh::x() {
   if (_x.size() != _nodes.size()){
@@ -277,6 +273,26 @@ const double & Mesh::data(std::string fieldname) const{
   }
 
   return _phys_properties.at(fieldname).front();
+}
+
+void Mesh::set_nodecount(unsigned int count){
+  if (_nodes.size() > 0){
+    cout << "cannot expand mesh if it is already allocated!" << endl;
+    throw -1;
+  }
+
+  _nodes.resize(count);
+
+}
+
+void Mesh::set_elementcount(unsigned int count){
+  if (_nodes.size() > 0){
+    cout << "cannot expand mesh if it is already allocated!" << endl;
+    throw -1;
+  }
+
+  _nodes.resize(count);
+
 }
 
 void Mesh::add_phys_property(std::string property_name, const double * property_vals){

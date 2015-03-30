@@ -55,7 +55,7 @@ public:
 	void add_data_at_index(unsigned int t_index, std::string fieldname, const double & values);
 
 	void write_HDF5(std::string outname) const;
-	//static SimulationData read_HDF5(std::string filename);
+	static SimulationData read_HDF5(std::string filename);
 
 	static SimulationData combine(std::vector<const SimulationData *> datavec);
 
@@ -75,6 +75,11 @@ private:
 
 	// time info
 	std::vector<double> _time;
+
+	// used only for HDF5 reading
+	Mesh _internalmesh;
+
+	void read_HDF5_internal(std::string filename);
 };
 
 
