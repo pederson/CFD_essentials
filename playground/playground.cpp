@@ -208,18 +208,14 @@ int main(int argc, char * argv[]){
 	fsim.set_num_iters(50);
 	fsim.run();
 	//fsim.view_results();
-	fsim.output_HDF5("plasmaslab.h5");
-	cout << "wrote to H5 file" << endl;
+	//fsim.output_HDF5("plasmaslab.h5");
 
 
-	SimulationData fsimdat = SimulationData::read_HDF5("plasmaslab.h5");
+	SimulationData fsimdat = SimulationData::read_HDF5("../../testfiles/plasmaslab.h5");
 	simulation_visualixer vsim;
 	vsim.bind_simulation(fsimdat);
 	vsim.set_colorby_field("E_z");
 	vsim.run();
-	//paravis.bind_mesh(*fsimdat.mesh());
-	//paravis.set_color_ramp(CRamp::DIVERGENT_9);
-	//paravis.run();
 
 	return 0;
 }

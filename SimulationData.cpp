@@ -298,41 +298,35 @@ void SimulationData::read_HDF5_internal(std::string filename){
 		H5::Group nodedata_group = mesh_group.openGroup("NodeData");
 		H5::Group elementdata_group = mesh_group.openGroup("ElementData");
 
-		H5::DataSet nodesx_set = nodes_group.openDataSet("NodesX");
-		H5::DataSpace nodes_space = nodesx_set.getSpace();
+		H5::DataSet nodes_set = nodes_group.openDataSet("NodesX");
+		H5::DataSpace nodes_space = nodes_set.getSpace();
 
 		hsize_t nodecount;
 		nodecount = nodes_space.getSimpleExtentNpoints();
-		double * nodebuf = new double[nodecount];
-
 		_internalmesh.set_nodecount(nodecount);
-
-		nodesx_set.read(nodebuf, H5::PredType::NATIVE_DOUBLE);
+		double * nodebuf = new double[nodecount];
+		nodes_set.read(nodebuf, H5::PredType::NATIVE_DOUBLE);
 		for (auto i=0; i<nodecount; i++) _internalmesh.node(i).set_x(nodebuf[i]);
 
 
-		try {
-			H5::DataSet nodesy_set = nodes_group.openDataSet("NodesY");
-			nodesy_set.read(nodebuf, H5::PredType::NATIVE_DOUBLE);
-			for (auto i=0; i<nodecount; i++) _internalmesh.node(i).set_y(nodebuf[i]);
-		}
-		catch( H5::GroupIException not_found_error ) {
-			cout << " NodesY not found." << endl;
-		}
-
-		try {
-			H5::DataSet nodesz_set = nodes_group.openDataSet("NodesZ");
-			nodesz_set.read(nodebuf, H5::PredType::NATIVE_DOUBLE);
-			for (auto i=0; i<nodecount; i++) _internalmesh.node(i).set_z(nodebuf[i]);
-		}
-		catch( H5::GroupIException not_found_error ) {
-			cout << " NodesZ not found." << endl;
+		HDF5FieldNames.clear();
+		H5Literate(nodes_group.getId(), H5_INDEX_NAME, H5_ITER_INC, NULL, get_dataset_names_H5, NULL);
+		
+		for (auto i=0; i<HDF5FieldNames.size(); i++){
+			if (HDF5FieldNames.at(i).compare("NodesY") == 0){
+				nodes_set = nodes_group.openDataSet("NodesY");
+				nodes_set.read(nodebuf, H5::PredType::NATIVE_DOUBLE);
+				for (auto i=0; i<nodecount; i++) _internalmesh.node(i).set_y(nodebuf[i]);
+			}
+			else if(HDF5FieldNames.at(i).compare("NodesZ") == 0){
+				nodes_set = nodes_group.openDataSet("NodesZ");
+				nodes_set.read(nodebuf, H5::PredType::NATIVE_DOUBLE);
+				for (auto i=0; i<nodecount; i++) _internalmesh.node(i).set_z(nodebuf[i]);
+			}
 		}
 		
 		_internalmesh.calc_extents();
 		delete[] nodebuf;
-
-		//print_summary();
 
 
 	// Time reading
@@ -351,9 +345,6 @@ void SimulationData::read_HDF5_internal(std::string filename){
 		_dt = timebuf[1] - timebuf[0];
 		set_time_span(_tstart, _dt, _tstop);
 		//cout << "snapshot size" << _datasnapshots.size() << endl;
-
-
-	//print_summary();
 
 
 	// Fields reading
@@ -379,7 +370,7 @@ void SimulationData::read_HDF5_internal(std::string filename){
 		hsize_t offset[2], count[2], stride[2], block[2];
 		for (auto i=0; i<HDF5FieldNames.size(); i++){
 			add_field(HDF5FieldNames.at(i));
-			//print_summary();
+
 			//cout << "working on field: " << HDF5FieldNames.at(i) << endl;
 			//cout << "allocated space: " << _datasnapshots.at(0)._datafields.at(HDF5FieldNames.at(i)).size() << endl;
 
@@ -408,11 +399,7 @@ void SimulationData::read_HDF5_internal(std::string filename){
 				field_set.read(fieldbuf, H5::PredType::NATIVE_DOUBLE, memspace, field_space);
 
 				for (auto k=0; k<nodecount; k++){
-					//if (j==1) cout << "j: " << j << " k: " << k << " fieldbuf: " << fieldbuf[k] << endl;// "\r" << flush;
-
-					//cout << "about to write to screen" << endl;
 					//cout << "j: " << j << " k: " << k << " fieldbuf: " << fieldbuf[k] << endl;// "\r" << flush;
-					//cout << "wrote to screen" << endl;
 					_datasnapshots.at(j)._datafields.at(HDF5FieldNames.at(i)).at(k) = fieldbuf[k];
 				}
 			}
@@ -422,39 +409,19 @@ void SimulationData::read_HDF5_internal(std::string filename){
 		delete[] fieldbuf;
 		HDF5FieldNames.clear();
 
-		print_summary();
-
-
-
-
 	// close the file
 	file.close();
 }
- /*
-H5::H5G_iterate_t get_dataset_names_H5(H5::hid_t loc_id, const char * name, const H5::H5L_info_t *linfo, void *opdata){
-	H5::hid_t dataset;
 
-	dataset = H5Gopen2(loc_id, name, H5P_DEFAULT);
-
-	HDF5FieldNames.push_back(name);
-	cout << "Name : " << name << endl;
-	H5Gclose(dataset);
-	return 0;
-}
-*/
-
-
+// Have to use the C API for this part, because it isn't yet implemented in the C++ API
 herr_t get_dataset_names_H5(hid_t loc_id, const char * name, const H5L_info_t *linfo, void *opdata){
 	hid_t obj;
 	herr_t err;
 	H5L_info_t * linkinfo;
 
-	//err = H5Lget_info(loc_id, name, linkinfo, obj);
-	//err = H5Lget_info_by_idx(loc_id, name, H5_INDEX_NAME, H5_ITER_INC, 0, linkinfo, obj);
 	obj = H5Dopen2(loc_id, name, H5P_DEFAULT);
 
 	HDF5FieldNames.push_back(name);
-	//cout << "Name : " << name << endl;
 	H5Dclose(obj);
 	return 0;
 }
