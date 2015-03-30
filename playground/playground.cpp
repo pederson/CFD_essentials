@@ -191,7 +191,7 @@ int main(int argc, char * argv[]){
 	paravis.bind_mesh(paramesh);
 	paravis.set_color_ramp(CRamp::DIVERGENT_9);
 	paravis.set_colorby(&paramesh.data("eps_rel"));
-	paravis.run();
+	//paravis.run();
 
 
 	// initialize the simulation
@@ -207,12 +207,15 @@ int main(int argc, char * argv[]){
 	//fsim.add_gaussian_source(10.0, 10.0, 4.5e-6, 4.0e-6);
 	fsim.set_num_iters(50);
 	fsim.run();
-	fsim.view_results();
-	//fsim.output_HDF5("plasmaslab.h5");
+	//fsim.view_results();
+	fsim.output_HDF5("plasmaslab.h5");
 
 
-	SimulationData fsimdat = SimulationData::read_HDF5("../../testfiles/plasmaslab.h5");
-
+	SimulationData fsimdat = SimulationData::read_HDF5("plasmaslab.h5");
+	simulation_visualixer vsim;
+	vsim.bind_simulation(fsimdat);
+	vsim.set_colorby_field("E_z");
+	//vsim.run();
 
 	return 0;
 }

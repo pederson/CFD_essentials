@@ -80,7 +80,12 @@ private:
 	Mesh _internalmesh;
 
 	void read_HDF5_internal(std::string filename);
+	
 };
+
+
+//H5::H5G_iterate_t get_dataset_names_H5(H5::hid_t loc_id, const char * name, const H5::H5L_info_t *linfo, void *opdata);
+herr_t get_dataset_names_H5(hid_t loc_id, const char * name, const H5L_info_t *linfo, void *opdata);
 
 
 #endif

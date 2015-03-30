@@ -207,6 +207,7 @@ void SimulationData::write_HDF5(std::string outname) const{
 			for (auto j=0; j<ntime; j++){
 				for (auto k=0; k<nnodes; k++){
 					fieldbuf[k][j] = _datasnapshots.at(j)._datafields.at(cfieldname).at(k);
+					if (j==1) cout << "j: " << j << " k: " << k << " fieldbuf: " << fieldbuf[k][j] << endl;// "\r" << flush;
 				}
 			}
 			//cout << "wrote to buffer: " << fieldbuf[0][0] << endl;
@@ -257,6 +258,7 @@ SimulationData SimulationData::read_HDF5(std::string filename){
 
 }
 
+std::vector<std::string> HDF5FieldNames;
 void SimulationData::read_HDF5_internal(std::string filename){
 	// open the file for reading
 	H5::H5File file(filename, H5F_ACC_RDONLY);
@@ -305,7 +307,7 @@ void SimulationData::read_HDF5_internal(std::string filename){
 		
 		delete[] nodebuf;
 
-		print_summary();
+		//print_summary();
 
 
 	// Time reading
@@ -322,29 +324,78 @@ void SimulationData::read_HDF5_internal(std::string filename){
 		for (auto i=0; i<ntime; i++) _time[i] = timebuf[i];
 		_tstart = timebuf[0]; _tstop = timebuf[ntime-1];
 		_dt = timebuf[1] - timebuf[0];
-		_time_set = true;
+		set_time_span(_tstart, _dt, _tstop);
+		//cout << "snapshot size" << _datasnapshots.size() << endl;
 
 
-	print_summary();
+	//print_summary();
 
 
 	// Fields reading
 	H5::Group fields_group = file.openGroup("Fields");
 
 		hsize_t numfields = fields_group.getNumObjs();
-		cout << "there are " << numfields << " fields present in the H5 file" << endl;
+		//cout << "there are " << numfields << " fields present in the H5 file" << endl;
 		// determine the names of all the datasets in the group
+		HDF5FieldNames.clear();
+		H5Literate(fields_group.getId(), H5_INDEX_NAME, H5_ITER_INC, NULL, get_dataset_names_H5, NULL);
 		
-		
-		/*
-		try { // to determine if the dataset exists in the group
-			dataset = new DataSet( group->openDataSet( "Compressed_Data" ));
-		}
-		catch( GroupIException not_found_error ) {
-			cout << " Dataset is not found." << endl;
-		}
-		*/
+		// copy data for each dataset
+		//double ** fieldbuf = new double*[nodecount];
+		//for (auto i=0; i<nodecount; i++) fieldbuf[i] = new double[ntime];
+		double * fieldbuf = new double[nodecount];
+		hsize_t fielddims[2];
+		fielddims[0] = nodecount;
+		fielddims[1] = 1;
 
+		H5::DataSet field_set;
+		H5::DataSpace field_space, memspace;
+		memspace = H5::DataSpace(2, fielddims);
+		hsize_t offset[2], count[2], stride[2], block[2];
+		for (auto i=0; i<HDF5FieldNames.size(); i++){
+			add_field(HDF5FieldNames.at(i));
+			//print_summary();
+			//cout << "working on field: " << HDF5FieldNames.at(i) << endl;
+			//cout << "allocated space: " << _datasnapshots.at(0)._datafields.at(HDF5FieldNames.at(i)).size() << endl;
+
+			// open the dataset
+			field_set = fields_group.openDataSet(HDF5FieldNames.at(i));
+			field_space = field_set.getSpace();
+
+			offset[0] = 0;
+			
+
+			count[0]  = nodecount;
+			count[1]  = 1;
+
+			stride[0] = 1;
+			stride[1] = 1;
+
+			block[0] = 1;
+			block[1] = 1;
+
+			//cout << "read field to buffer: " << HDF5FieldNames.at(i) << endl;
+
+			// fill in the data
+			for (auto j=0; j<ntime; j++){
+				offset[1] = j;
+				field_space.selectHyperslab(H5S_SELECT_SET, count, offset, stride, block);
+				field_set.read(fieldbuf, H5::PredType::NATIVE_DOUBLE, memspace, field_space);
+
+				for (auto k=0; k<nodecount; k++){
+					if (j==1) cout << "j: " << j << " k: " << k << " fieldbuf: " << fieldbuf[k] << endl;// "\r" << flush;
+
+					//cout << "about to write to screen" << endl;
+					//cout << "j: " << j << " k: " << k << " fieldbuf: " << fieldbuf[k] << endl;// "\r" << flush;
+					//cout << "wrote to screen" << endl;
+					_datasnapshots.at(j)._datafields.at(HDF5FieldNames.at(i)).at(k) = fieldbuf[k];
+				}
+			}
+
+		}
+
+		delete[] fieldbuf;
+		HDF5FieldNames.clear();
 
 		print_summary();
 
@@ -354,6 +405,35 @@ void SimulationData::read_HDF5_internal(std::string filename){
 	// close the file
 	file.close();
 }
+ /*
+H5::H5G_iterate_t get_dataset_names_H5(H5::hid_t loc_id, const char * name, const H5::H5L_info_t *linfo, void *opdata){
+	H5::hid_t dataset;
+
+	dataset = H5Gopen2(loc_id, name, H5P_DEFAULT);
+
+	HDF5FieldNames.push_back(name);
+	cout << "Name : " << name << endl;
+	H5Gclose(dataset);
+	return 0;
+}
+*/
+
+
+herr_t get_dataset_names_H5(hid_t loc_id, const char * name, const H5L_info_t *linfo, void *opdata){
+	hid_t obj;
+	herr_t err;
+	H5L_info_t * linkinfo;
+
+	//err = H5Lget_info(loc_id, name, linkinfo, obj);
+	//err = H5Lget_info_by_idx(loc_id, name, H5_INDEX_NAME, H5_ITER_INC, 0, linkinfo, obj);
+	obj = H5Dopen2(loc_id, name, H5P_DEFAULT);
+
+	HDF5FieldNames.push_back(name);
+	//cout << "Name : " << name << endl;
+	H5Dclose(obj);
+	return 0;
+}
+
 
 SimulationData SimulationData::combine(vector<const SimulationData *> datavec){
 	SimulationData combo;
