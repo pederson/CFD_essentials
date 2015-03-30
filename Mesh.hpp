@@ -80,6 +80,8 @@ public:
   void write_NEU(std::string filename) const;
   void write_CAS(std::string filename) const;
 
+  void calc_extents();
+
 //private:
 protected:
   // metadata
@@ -104,7 +106,7 @@ protected:
   std::vector<double> _x, _y, _z;
   std::vector<unsigned int> _core_group, _num_connections;
 
-  void calc_extents();
+  
 
 };
 

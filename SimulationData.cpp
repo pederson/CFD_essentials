@@ -329,6 +329,7 @@ void SimulationData::read_HDF5_internal(std::string filename){
 			cout << " NodesZ not found." << endl;
 		}
 		
+		_internalmesh.calc_extents();
 		delete[] nodebuf;
 
 		//print_summary();

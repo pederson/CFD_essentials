@@ -1,6 +1,6 @@
 TODO:
 
-- need a way to read in a mesh via HDF5. Either add a method to the Mesh class, or add methods in the Mesh class to build a mesh with x, y, z, etc... arrays. 
+- Visualixer fails if mesh elementcount is 0. It shouldn't fail
 
 - split up simulation allocation function into field assignment and coefficient assignment
 

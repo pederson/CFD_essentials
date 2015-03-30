@@ -216,10 +216,10 @@ int main(int argc, char * argv[]){
 	simulation_visualixer vsim;
 	vsim.bind_simulation(fsimdat);
 	vsim.set_colorby_field("E_z");
-	//vsim.run();
-	paravis.bind_mesh(*fsimdat.mesh());
+	vsim.run();
+	//paravis.bind_mesh(*fsimdat.mesh());
 	//paravis.set_color_ramp(CRamp::DIVERGENT_9);
-	paravis.run();
+	//paravis.run();
 
 	return 0;
 }
