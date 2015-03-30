@@ -205,7 +205,7 @@ int main(int argc, char * argv[]){
 	//fsim.add_sinusoidal_source(15.0e+13, 0.0, 1.5e-6, 7.5e-6);
 	//fsim.add_sinusoidal_source(15.0e+13, 0.0, 1.5e-6, 2.5e-6);
 	//fsim.add_gaussian_source(10.0, 10.0, 4.5e-6, 4.0e-6);
-	fsim.set_num_iters(10);
+	fsim.set_num_iters(50);
 	fsim.run();
 	fsim.view_results();
 	//fsim.output_HDF5("plasmaslab.h5");
