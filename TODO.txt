@@ -1,5 +1,7 @@
 TODO:
 
+- make gaussian pulse specified by central frequency, frequency spread, and t0
+
 - support more general frequency dependent materials with multiple possible resonances... will be important for multi-component plasmas. http://ab-initio.mit.edu/wiki/index.php/Dielectric_materials_in_Meep
 
 - writing HDF5 with ~1000 time steps is excruciatingly slow... why? It's just fine for 500 time steps
