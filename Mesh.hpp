@@ -106,6 +106,8 @@ protected:
   std::vector<double> _x, _y, _z;
   std::vector<unsigned int> _core_group, _num_connections;
 
+  void read_MSH_internal(std::string filename, unsigned int byte_offset=0);
+
   
 
 };
