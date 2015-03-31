@@ -1,5 +1,6 @@
 #include "cvector.hpp"
 #include <time.h>
+#include <functional>
 
 using namespace std;
 
@@ -43,7 +44,7 @@ int main(int argc, char * argv[]){
 	time_t tstart, tstop;
 	clock_t cstart, cstop;
 	double ttot;
-	unsigned int nlots = 200000;
+	unsigned int nlots = 20000000;
 	double * numbers = new double[nlots];
 	double * results = new double[nlots];
 	cvector mycvec;
@@ -75,6 +76,41 @@ int main(int argc, char * argv[]){
 	ttot = (double) (cstop-cstart) / CLOCKS_PER_SEC * 1000.0;
 
 	cout << "raw multiplication took " << ttot << " milliseconds. That's " << nlots/ttot << " operations per second" << endl;
+
+	function<double(unsigned int)> evalfn;
+	evalfn = [numbers](unsigned int i)->double{return 1+numbers[i]*numbers[i]*numbers[i]*10/numbers[i];};
+	cstart = clock();
+	for (auto i=0; i<nlots; i++){
+		results[i] = evalfn(i);
+		//cout << i << endl;
+	}
+	cstop = clock();
+	ttot = (double) (cstop-cstart) / CLOCKS_PER_SEC * 1000.0;
+
+	cout << "functional multiplication took " << ttot << " milliseconds. That's " << nlots/ttot << " operations per second" << endl;
+
+
+	cstart = clock();
+	for (auto i=0; i<nlots; i++){
+		results[i] = 1+numbers[i];
+		//cout << i << endl;
+	}
+	cstop = clock();
+	ttot = (double) (cstop-cstart) / CLOCKS_PER_SEC * 1000.0;
+
+	cout << "SIMPLE ARRAY: raw multiplication took " << ttot << " milliseconds. That's " << nlots/ttot << " operations per second" << endl;
+
+	function<double(unsigned int)> evalfn2;
+	evalfn2 = [numbers](unsigned int i)->double{return 1+numbers[i];};
+	cstart = clock();
+	for (auto i=0; i<nlots; i++){
+		results[i] = evalfn2(i);
+		//cout << i << endl;
+	}
+	cstop = clock();
+	ttot = (double) (cstop-cstart) / CLOCKS_PER_SEC * 1000.0;
+
+	cout << "SIMPLE ARRAY: functional multiplication took " << ttot << " milliseconds. That's " << nlots/ttot << " operations per second" << endl;
 
 	
 	delete[] numbers;

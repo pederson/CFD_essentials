@@ -4,7 +4,7 @@ TODO:
 
 - split up simulation allocation function into field assignment and coefficient assignment
 
-- do time analysis for std::function vs. raw arrays
+- do time analysis for std::function vs. raw arrays. DONE: std::function is 5-10 times slower than raw arrays in terms of the pure call. 
 
 - combine simdata without doubling the memory requirement
 
@@ -45,8 +45,6 @@ TODO:
 - start using iterators when possible
 
 - Fix Mesh class and SimulationData class to have storage fields for both NodeData and ElementData (where data is associated per node or element, respectively)
-
-- Make a read_HDF5() method for SimulationData. Then make a script to quickly view simulation files or write to gif, jpg, etc.
 
 - fix all class accessors to have both const and non-const options... this is important
 
