@@ -1,8 +1,10 @@
 TODO:
 
+- support more general frequency dependent materials with multiple possible resonances... will be important for multi-component plasmas. http://ab-initio.mit.edu/wiki/index.php/Dielectric_materials_in_Meep
+
 - writing HDF5 with ~1000 time steps is excruciatingly slow... why? It's just fine for 500 time steps
 
-- split up simulation allocation function into field assignment and coefficient assignment
+- split up simulation allocation function into field assignment and coefficient assignment. field assignment can be done once the mesh is bound. coefficient assignment should be done before run
 
 - do time analysis for std::function vs. raw arrays. DONE: std::function is 5-10 times slower than raw arrays in terms of the pure call. 
 
