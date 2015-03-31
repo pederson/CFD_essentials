@@ -208,7 +208,7 @@ void FDTDSimulation::view_results(){
 		simvis.bind_simulation(_simdata);
 		simvis.set_color_ramp(CRamp::MATLAB_PARULA);
 		simvis.set_colorby_field("E_z");
-		//simvis.set_colorby_field("H_y");
+		simvis.set_colorby_field("H_y");
 		simvis.set_color_alpha(_rel_permittivity);
 		simvis.set_color_interpolation(false);
 		simvis.set_snapshot_increment(3);
@@ -276,19 +276,16 @@ void FDTDSimulation::run_1D(int num_iters){
 
 		// update D field
 		for (auto i=1; i<_mesh->reg_num_nodes_x()-1; i++){ // cols
-			for (auto j=1; j<_mesh->reg_num_nodes_y()-1; j++){
 
-				cind = _mesh->reg_inds_to_glob_ind(i, j);
-				lind = _mesh->reg_inds_to_glob_ind(i-1, j);
-				rind = _mesh->reg_inds_to_glob_ind(i+1, j);
+			cind = _mesh->reg_inds_to_glob_ind(i);
+			lind = _mesh->reg_inds_to_glob_ind(i-1);
+			rind = _mesh->reg_inds_to_glob_ind(i+1);
 
-				
-				_Dn_z[cind] = gi3[i]*gj3[j]*_Dn_z[cind]
-						  + gi2[i]*gj2[j]*_CourantFactor*(_H_y[cind] - _H_y[lind])
-						  - _CourantFactor*_dx*_current_density_z_fn(cind)*sourcemodval;
+			
+			_Dn_z[cind] = gi3[i]*_Dn_z[cind]
+					  + gi2[i]*_CourantFactor*(_H_y[cind] - _H_y[lind])
+					  - _CourantFactor*_dx*_current_density_z_fn(cind)*sourcemodval;
 
-				
-			}
 		}
 
 		//cout << "about to impose source" << endl;
@@ -302,51 +299,44 @@ void FDTDSimulation::run_1D(int num_iters){
 		
 		// calculate Ez field
 		for (auto i=0; i<_mesh->reg_num_nodes_x(); i++){ // cols
-			for (auto j=0; j<_mesh->reg_num_nodes_y(); j++){
-				cind = _mesh->reg_inds_to_glob_ind(i, j);
+			cind = _mesh->reg_inds_to_glob_ind(i);
 
-				// with pml, conductivity, and single pole
-				_En_z[cind] = (_Dn_z[cind] - _I_Ez[cind] - exp(-_dt*_permittivity_single_pole_freq_fn(cind))*_S_nm1[cind])/
-							  (_rel_permittivity_fn(cind) + _conductivity_fn(cind)*_dt/_eps0 + _permittivity_single_pole_numerator_fn(cind)*_dt);
+			// with pml, conductivity, and single pole
+			_En_z[cind] = (_Dn_z[cind] - _I_Ez[cind] - exp(-_dt*_permittivity_single_pole_freq_fn(cind))*_S_nm1[cind])/
+						  (_rel_permittivity_fn(cind) + _conductivity_fn(cind)*_dt/_eps0 + _permittivity_single_pole_numerator_fn(cind)*_dt);
 
-				
-				_I_Ez[cind] = _I_Ez[cind] + _conductivity_fn(cind)*_dt/_eps0*_En_z[cind];
-				_S_n[cind] = exp(-_permittivity_single_pole_freq_fn(cind)*_dt)*_S_nm1[cind] + _permittivity_single_pole_numerator_fn(cind)*_dt*_En_z[cind];
-				_S_nm1[cind] = _S_n[cind];
-
-				_E_z[cind] = _En_z[cind] * sqrt(_mu0/_eps0); // this can be made faster
 			
-			}
+			_I_Ez[cind] = _I_Ez[cind] + _conductivity_fn(cind)*_dt/_eps0*_En_z[cind];
+			_S_n[cind] = exp(-_permittivity_single_pole_freq_fn(cind)*_dt)*_S_nm1[cind] + _permittivity_single_pole_numerator_fn(cind)*_dt*_En_z[cind];
+			_S_nm1[cind] = _S_n[cind];
+
+			_E_z[cind] = _En_z[cind] * sqrt(_mu0/_eps0); // this can be made faster
 		}
 
 		// need generalized boundary conditions here
 		// set Ez at edges to zero for pml
-		for (auto j=0; j<_mesh->reg_num_nodes_y(); j++){
-			lind = _mesh->reg_inds_to_glob_ind(0, j);
-			rind = _mesh->reg_inds_to_glob_ind(_mesh->reg_num_nodes_x()-1, j);
-			_En_z[lind] = 0.0;
-			_En_z[rind] = 0.0;
-		}
+		lind = _mesh->reg_inds_to_glob_ind(0);
+		rind = _mesh->reg_inds_to_glob_ind(_mesh->reg_num_nodes_x()-1);
+		_En_z[lind] = 0.0;
+		_En_z[rind] = 0.0;
 		
 
 		// Calculate Hy
-		for (auto j=0; j< _mesh->reg_num_nodes_y(); j++){
-			for (auto i=0; i<_mesh->reg_num_nodes_x()-1; i++){
-				cind = _mesh->reg_inds_to_glob_ind(i, j);
-				rind = _mesh->reg_inds_to_glob_ind(i+1, j);
+		for (auto i=0; i<_mesh->reg_num_nodes_x()-1; i++){
+			cind = _mesh->reg_inds_to_glob_ind(i);
+			rind = _mesh->reg_inds_to_glob_ind(i+1);
 
-				curle = _En_z[rind] - _En_z[cind];
-				_I_Hy[cind] = _I_Hy[cind] + fj1[j]*curle;
-				_H_y[cind] = fi3[i]*_H_y[cind]
-						  + fi2[i]*_CourantFactor*(curle + _I_Hy[cind]);
+			curle = _En_z[rind] - _En_z[cind];
+			_I_Hy[cind] = _I_Hy[cind] + curle;
+			_H_y[cind] = fi3[i]*_H_y[cind]
+					  + fi2[i]*_CourantFactor*(curle + _I_Hy[cind]);
 
-			}
 		}
 		
 
 		// fill in the simdata for this time step
 		_simdata.add_data_at_index(n, "E_z", _E_z[0]);
-		_simdata.add_data_at_index(n, "H_y", _H_y[0]);
+		//_simdata.add_data_at_index(n, "H_y", _H_y[0]);
 
 		// update iteration count
 		_current_iter++;
@@ -449,10 +439,16 @@ void FDTDSimulation::run_2D(int num_iters){
 				uind = _mesh->reg_inds_to_glob_ind(i, j+1);
 
 				curle = _En_z[cind] - _En_z[uind];
+				/*
 				_I_Hx[cind] = _I_Hx[cind] + fi1[i]*curle;
 				_H_x[cind] = fj3[j]*_H_x[cind]
 						  + fj2[j]*_CourantFactor*(curle + _I_Hx[cind]);
-
+				*/
+				
+				_I_Hx[cind] = _I_Hx[cind] + curle;
+				_H_x[cind] = fj3[j]*_H_x[cind]
+						  + fj2[j]*_CourantFactor*curle + fi1[i]*_I_Hx[cind];
+  				
 			}
 		}
 		// Calculate Hy
@@ -462,17 +458,23 @@ void FDTDSimulation::run_2D(int num_iters){
 				rind = _mesh->reg_inds_to_glob_ind(i+1, j);
 
 				curle = _En_z[rind] - _En_z[cind];
+				/*
 				_I_Hy[cind] = _I_Hy[cind] + fj1[j]*curle;
 				_H_y[cind] = fi3[i]*_H_y[cind]
 						  + fi2[i]*_CourantFactor*(curle + _I_Hy[cind]);
-
+				*/
+				
+				_I_Hy[cind] = _I_Hy[cind] + curle;
+				_H_y[cind] = fi3[i]*_H_y[cind]
+						  + fi2[i]*_CourantFactor*curle + fj1[j]*_I_Hy[cind];
+				
 			}
 		}
 		
 
 		// fill in the simdata for this time step
 		_simdata.add_data_at_index(n, "E_z", _E_z[0]);
-		//_simdata.add_data_at_index(n, "H_y", _H_y[0]);
+		_simdata.add_data_at_index(n, "H_y", _H_y[0]);
 
 		// update iteration count
 		_current_iter++;
@@ -935,7 +937,7 @@ void FDTDSimulation::allocate_simdata(){
 	// set up the simulation data holder
 	_simdata.bind_mesh(*_mesh);
 	_simdata.add_field("E_z");
-	//_simdata.add_field("H_y");
+	_simdata.add_field("H_y");
 	_simdata.set_time_span(0.0, _dt, _num_iters*_dt);
 	_simdata.print_summary();
 }

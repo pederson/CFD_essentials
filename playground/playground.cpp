@@ -15,7 +15,7 @@ int main(int argc, char * argv[]){
 	//double dt = 0.5*dx/c0;
 
 	// empty space model
-	/*
+	
 	srcfreq = 1.0e+9;
 	srclocx = 0.5; 
 	srclocy = 0.5;
@@ -78,7 +78,7 @@ int main(int argc, char * argv[]){
 
 
 	// holey waveguide defect model
-	
+	/*
 	ParametricModel2D paramodel;
 	paramodel.set_model_name("Holey Defect");
 	paramodel.add_physical_property("eps_rel");
@@ -207,6 +207,15 @@ int main(int argc, char * argv[]){
 	paramesh.print_summary();
 	//*/
 
+	// 1D free space
+	/*
+	dx = 0.0005;
+	srcfreq = 1.0e+9;
+	srclocx = 0.4;
+	RegularMesh paramesh;
+	paramesh = RegularMesh::create_regular_grid_b(dx, 0.0, 1.0);
+	//*/
+
 
 	
 
@@ -214,14 +223,14 @@ int main(int argc, char * argv[]){
 	mesh_visualixer paravis;
 	paravis.bind_mesh(paramesh);
 	paravis.set_color_ramp(CRamp::DIVERGENT_9);
-	paravis.set_colorby(&paramesh.data("eps_rel"));
+	//paravis.set_colorby(&paramesh.data("eps_rel"));
 	//paravis.run();
 
 
 	// initialize the simulation
 	FDTDSimulation fsim;
 	fsim.bind_mesh(paramesh);
-	fsim.bind_rel_permittivity(&paramesh.data("eps_rel"));
+	//fsim.bind_rel_permittivity(&paramesh.data("eps_rel"));
 	//fsim.bind_conductivity(&paramesh.data("conductivity"));
 	//fsim.bind_single_pole(&paramesh.data("polenumerator"), &paramesh.data("polefreq"));
 	//fsim.bind_current_density_z(&paramesh.data("current_density"));
