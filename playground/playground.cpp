@@ -188,7 +188,7 @@ int main(int argc, char * argv[]){
 	//*/
 
 	// 1D free space
-	
+	/*
 	dx = 0.005;
 	srcfreq = 1.0e+9;
 	srclocx = 0.3;
@@ -217,25 +217,26 @@ int main(int argc, char * argv[]){
 	//*/
 
 	// 3D free space
-	/*
-	dx = 0.01;
+	
+	dx = 0.02;
 	srcfreq = 1.0e+9;
 	srclocx = 0.4;
 	srclocy = 0.4;
-	srclocz = 0.4;
+	srclocz = 0.3;
 	RegularMesh paramesh;
-	paramesh = RegularMesh::create_regular_grid_b(dx, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0);
+	paramesh = RegularMesh::create_regular_grid_b(dx, 0.0, 1.0, 0.0, 0.8, 0.0, 0.6);
 	//*/
 
 
 	
-
+	/*
 	// view the mesh
 	mesh_visualixer paravis;
 	paravis.bind_mesh(paramesh);
 	paravis.set_color_ramp(CRamp::DIVERGENT_9);
-	//paravis.set_colorby(&paramesh.data("eps_rel"));
-	//paravis.run();
+	paravis.set_colorby(&paramesh.data("eps_rel"));
+	paravis.run();
+	*/
 
 
 	// initialize the simulation
@@ -245,11 +246,11 @@ int main(int argc, char * argv[]){
 	//fsim.bind_conductivity(&paramesh.data("conductivity"));
 	//fsim.bind_single_pole(&paramesh.data("polenumerator"), &paramesh.data("polefreq"));
 	//fsim.bind_current_density_z(&paramesh.data("current_density"));
-	fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy);
+	fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy, srclocz);
 	//fsim.add_sinusoidal_source(15.0e+13, 0.0, 1.5e-6, 7.5e-6);
 	//fsim.add_sinusoidal_source(15.0e+13, 0.0, 1.5e-6, 2.5e-6);
 	//fsim.add_gaussian_source(10.0, 10.0, 4.5e-6, 4.0e-6);
-	fsim.set_num_iters(600);
+	fsim.set_num_iters(100);
 	fsim.run();
 	fsim.view_results();
 	fsim.output_HDF5("plasmaslab.h5");

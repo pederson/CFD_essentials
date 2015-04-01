@@ -120,27 +120,41 @@ private:
 
 		// field stuff
 		// Electric polarization field
-		double * _Dn_z;	// note that this is not the real D field, but it is normalized
+		double * _Dn_x;	// note that this is the normalized D field
+		double * _Dn_y;
+		double * _Dn_z;	
 		
 		// integrated quantities
 		double * _I_Hx;
 		double * _I_Hy;
 		double * _I_Hz;
+		double * _I_Dnx;
+		double * _I_Dny;
 		double * _I_Dnz;
 
 		// Electric fields
-		double * _En_z;	// note that this is not the real E field, but it is normalized
-		double * _E_z;	// this is the real E field
+		double * _En_x;	// note that this is the normalized E field
+		double * _En_y;
+		double * _En_z;	
+		double * _E_x;	// real E fields
+		double * _E_y;
+		double * _E_z;
 		
 		// Magnetic fields
-		double * _H_x;
+		double * _H_x;	// real H fields
 		double * _H_y;
 		double * _H_z;
 
 		// used for frequency dependent materials
-		double * _I_Ez;	// non-zero for non-zero conductivity
-		double * _S_n;	// non-zero for non-zero single pole permittivity
-		double * _S_nm1;// non-zero for non-zero single pole permittivity
+		double * _I_Ex;	// non-zero for non-zero conductivity
+		double * _I_Ey;
+		double * _I_Ez;
+		double * _S_n_x;	// non-zero for non-zero single pole permittivity
+		double * _S_n_y;
+		double * _S_n_z;
+		double * _S_nm1_x;// non-zero for non-zero single pole permittivity
+		double * _S_nm1_y;
+		double * _S_nm1_z;
 
 		// PML stuff only used internally
 		double * gi1;
