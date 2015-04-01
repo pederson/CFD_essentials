@@ -554,19 +554,17 @@ void FDTDSimulation::run_3D(int num_iters){
 			for (auto j=1; j<_mesh->reg_num_nodes_y()-1; j++){
 				for (auto k=1; k<_mesh->reg_num_nodes_z()-1; k++){
 					cind = _mesh->reg_inds_to_glob_ind(i, j, k);
-					//lind = _mesh->reg_inds_to_glob_ind(i-1, j, k);
-					//rind = _mesh->reg_inds_to_glob_ind(i+1, j, k);
-					//uind = _mesh->reg_inds_to_glob_ind(i, j+1, k);
 					dind = _mesh->reg_inds_to_glob_ind(i, j-1, k);
-					//chind = _mesh->reg_inds_to_glob_ind(i, j, k+1);
 					stind = _mesh->reg_inds_to_glob_ind(i, j, k-1);
 					
 
 					curlh = (_H_z[cind] - _H_z[dind] - _H_y[cind] + _H_y[stind]);
+					
 					_I_Dnx[cind] = _I_Dnx[cind] + curlh;
 					_Dn_x[cind] = gj3[j]*gk3[k]*_Dn_x[cind]
 							  + gj2[j]*gk2[k]*_CourantFactor*(curlh + gi1[i]*_I_Dnx[cind])
 							  - _CourantFactor*_dx*_current_density_x_fn(cind)*sourcemodval;
+					
 				}
 			}
 		}
@@ -577,18 +575,16 @@ void FDTDSimulation::run_3D(int num_iters){
 				for (auto k=1; k<_mesh->reg_num_nodes_z()-1; k++){
 					cind = _mesh->reg_inds_to_glob_ind(i, j, k);
 					lind = _mesh->reg_inds_to_glob_ind(i-1, j, k);
-					//rind = _mesh->reg_inds_to_glob_ind(i+1, j, k);
-					//uind = _mesh->reg_inds_to_glob_ind(i, j+1, k);
-					//dind = _mesh->reg_inds_to_glob_ind(i, j-1, k);
-					//chind = _mesh->reg_inds_to_glob_ind(i, j, k+1);
 					stind = _mesh->reg_inds_to_glob_ind(i, j, k-1);
 					
 
 					curlh = (_H_x[cind] - _H_x[stind] - _H_z[cind] + _H_z[lind]);
+					
 					_I_Dny[cind] = _I_Dny[cind] + curlh;
 					_Dn_y[cind] = gi3[i]*gk3[k]*_Dn_y[cind]
 							  + gi2[i]*gk2[k]*_CourantFactor*(curlh + gj1[j]*_I_Dny[cind])
 							  - _CourantFactor*_dx*_current_density_y_fn(cind)*sourcemodval;
+					
 				}
 			}
 		}
@@ -599,18 +595,15 @@ void FDTDSimulation::run_3D(int num_iters){
 				for (auto k=1; k<_mesh->reg_num_nodes_z()-1; k++){
 					cind = _mesh->reg_inds_to_glob_ind(i, j, k);
 					lind = _mesh->reg_inds_to_glob_ind(i-1, j, k);
-					//rind = _mesh->reg_inds_to_glob_ind(i+1, j, k);
-					//uind = _mesh->reg_inds_to_glob_ind(i, j+1, k);
 					dind = _mesh->reg_inds_to_glob_ind(i, j-1, k);
-					//chind = _mesh->reg_inds_to_glob_ind(i, j, k+1);
-					//stind = _mesh->reg_inds_to_glob_ind(i, j, k-1);
-					
 
 					curlh = (_H_y[cind] - _H_y[lind] - _H_x[cind] + _H_x[dind]);
+					
 					_I_Dnz[cind] = _I_Dnz[cind] + curlh;
 					_Dn_z[cind] = gi3[i]*gj3[j]*_Dn_z[cind]
 							  + gi2[i]*gj2[j]*_CourantFactor*(curlh + gk1[k]*_I_Dnz[cind])
 							  - _CourantFactor*_dx*_current_density_z_fn(cind)*sourcemodval;
+					
 				}
 			}
 		}
@@ -622,10 +615,8 @@ void FDTDSimulation::run_3D(int num_iters){
 			_srcx = _signals.at(i).xloc();
 			_srcy = _signals.at(i).yloc();
 			_srcz = _signals.at(i).zloc();
-			//for (auto j=-5; j<6; j++) _Dn_z[_mesh->nearest_node(_srcx, _srcy, _srcz+j*_dx)] = 0;
+			for (auto j=-5; j<6; j++) _Dn_z[_mesh->nearest_node(_srcx, _srcy, _srcz+j*_dx)] = 0;
 			_Dn_z[_mesh->nearest_node(_srcx, _srcy, _srcz)] = pulse;
-			//cout << "Got here. res is " << _mesh->res() << endl;
-			//cout << "Got here. source location: " << _srcx << ", " << _srcy << ", " << _srcz << " src value: " << pulse << endl;
 		}
 		//cout << "imposed source" << endl;
 		
@@ -662,7 +653,6 @@ void FDTDSimulation::run_3D(int num_iters){
 				}
 			}
 		}
-		//cout << "data: " << _Dn_z[_mesh->nearest_node(_srcx, _srcy, _srcz)] << endl;
 
 		
 		// set E at boundaries to zero for pml
@@ -714,12 +704,8 @@ void FDTDSimulation::run_3D(int num_iters){
 			for (auto j=0; j<_mesh->reg_num_nodes_y()-1; j++){
 				for (auto i=0; i<_mesh->reg_num_nodes_x(); i++){
 					cind = _mesh->reg_inds_to_glob_ind(i, j, k);
-					//lind = _mesh->reg_inds_to_glob_ind(i-1, j, k);
-					//rind = _mesh->reg_inds_to_glob_ind(i+1, j, k);
 					uind = _mesh->reg_inds_to_glob_ind(i, j+1, k);
-					//dind = _mesh->reg_inds_to_glob_ind(i, j-1, k);
 					chind = _mesh->reg_inds_to_glob_ind(i, j, k+1);
-					//stind = _mesh->reg_inds_to_glob_ind(i, j, k-1);
 
 					curle = _En_y[chind] - _En_y[cind] - _En_z[uind] + _En_z[cind];
 					_I_Hx[cind] = _I_Hx[cind] + curle;
@@ -733,12 +719,8 @@ void FDTDSimulation::run_3D(int num_iters){
 			for (auto j=0; j< _mesh->reg_num_nodes_y(); j++){
 				for (auto i=0; i<_mesh->reg_num_nodes_x()-1; i++){
 					cind = _mesh->reg_inds_to_glob_ind(i, j, k);
-					//lind = _mesh->reg_inds_to_glob_ind(i-1, j, k);
 					rind = _mesh->reg_inds_to_glob_ind(i+1, j, k);
-					//uind = _mesh->reg_inds_to_glob_ind(i, j+1, k);
-					//dind = _mesh->reg_inds_to_glob_ind(i, j-1, k);
 					chind = _mesh->reg_inds_to_glob_ind(i, j, k+1);
-					//stind = _mesh->reg_inds_to_glob_ind(i, j, k-1);
 
 					curle = _En_z[rind] - _En_z[cind] - _En_x[chind] + _En_x[cind];
 					_I_Hy[cind] = _I_Hy[cind] + curle;
@@ -752,12 +734,8 @@ void FDTDSimulation::run_3D(int num_iters){
 			for (auto j=0; j< _mesh->reg_num_nodes_y()-1; j++){
 				for (auto i=0; i<_mesh->reg_num_nodes_x()-1; i++){
 					cind = _mesh->reg_inds_to_glob_ind(i, j, k);
-					//lind = _mesh->reg_inds_to_glob_ind(i-1, j, k);
 					rind = _mesh->reg_inds_to_glob_ind(i+1, j, k);
 					uind = _mesh->reg_inds_to_glob_ind(i, j+1, k);
-					//dind = _mesh->reg_inds_to_glob_ind(i, j-1, k);
-					//chind = _mesh->reg_inds_to_glob_ind(i, j, k+1);
-					//stind = _mesh->reg_inds_to_glob_ind(i, j, k-1);
 
 
 					curle = _En_x[uind] - _En_x[cind] - _En_y[rind] + _En_y[cind];
@@ -772,7 +750,7 @@ void FDTDSimulation::run_3D(int num_iters){
 		// fill in the simdata for this time step
 		_simdata.add_data_at_index(n, "E_z", _E_z[0]);
 		//if (_E_z == nullptr) cout << "Ruh roh nullptr" << endl;
-		cout << "near source : En_z:" << _En_z[_mesh->nearest_node(_srcx+_dx, _srcy, _srcz)] << "\tDn_z:" << _Dn_z[_mesh->nearest_node(_srcx+_dx, _srcy, _srcz)] << endl;
+		//cout << "near source : En_z:" << _En_z[_mesh->nearest_node(_srcx+_dx, _srcy, _srcz)] << "\tDn_z:" << _Dn_z[_mesh->nearest_node(_srcx+_dx, _srcy, _srcz)] << endl;
 
 		//_simdata.add_data_at_index(n, "H_y", _H_y[0]);
 
@@ -981,6 +959,7 @@ void FDTDSimulation::allocate_PML(){
 		fi2 = new double[_mesh->reg_num_nodes_x()];
 		fi3 = new double[_mesh->reg_num_nodes_x()];
 		for (auto i=0; i<_mesh->reg_num_nodes_x(); i++){
+			gi1[i] = 0.0;
 			gi2[i] = 1.0;
 			gi3[i] = 1.0;
 			fi1[i] = 0.0;
@@ -1032,7 +1011,7 @@ void FDTDSimulation::allocate_PML(){
 		fj2 = new double[_mesh->reg_num_nodes_y()];
 		fj3 = new double[_mesh->reg_num_nodes_y()];
 		for (auto i=0; i<_mesh->reg_num_nodes_x(); i++){
-			gi1[i] = 1.0;
+			gi1[i] = 0.0;
 			gi2[i] = 1.0;
 			gi3[i] = 1.0;
 			fi1[i] = 0.0;
@@ -1040,7 +1019,7 @@ void FDTDSimulation::allocate_PML(){
 			fi3[i] = 1.0;
 		}
 		for (auto i=0; i<_mesh->reg_num_nodes_y(); i++){
-			gj1[i] = 1.0;
+			gj1[i] = 0.0;
 			gj2[i] = 1.0;
 			gj3[i] = 1.0;
 			fj1[i] = 0.0;
@@ -1119,7 +1098,7 @@ void FDTDSimulation::allocate_PML(){
 		fk2 = new double[_mesh->reg_num_nodes_z()];
 		fk3 = new double[_mesh->reg_num_nodes_z()];
 		for (auto i=0; i<_mesh->reg_num_nodes_x(); i++){
-			gi1[i] = 1.0;
+			gi1[i] = 0.0;
 			gi2[i] = 1.0;
 			gi3[i] = 1.0;
 			fi1[i] = 0.0;
@@ -1127,7 +1106,7 @@ void FDTDSimulation::allocate_PML(){
 			fi3[i] = 1.0;
 		}
 		for (auto i=0; i<_mesh->reg_num_nodes_y(); i++){
-			gj1[i] = 1.0;
+			gj1[i] = 0.0;
 			gj2[i] = 1.0;
 			gj3[i] = 1.0;
 			fj1[i] = 0.0;
@@ -1135,7 +1114,7 @@ void FDTDSimulation::allocate_PML(){
 			fj3[i] = 1.0;
 		}
 		for (auto i=0; i<_mesh->reg_num_nodes_z(); i++){
-			gk1[i] = 1.0;
+			gk1[i] = 0.0;
 			gk2[i] = 1.0;
 			gk3[i] = 1.0;
 			fk1[i] = 0.0;
