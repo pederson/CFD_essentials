@@ -10,29 +10,9 @@ using namespace std;
 int main(int argc, char * argv[]){
 	// constants
 	double dx = 5.0e-4, srcfreq = 15.0e+13;
-	double srclocx = 1.5e-6, srclocy = 5.0e-6;
+	double srclocx = 1.5e-6, srclocy = 5.0e-6, srclocz = 1.5e-6;
 	
 	//double dt = 0.5*dx/c0;
-
-	// empty space model
-	
-	srcfreq = 1.0e+9;
-	srclocx = 0.5; 
-	srclocy = 0.5;
-	ParametricModel2D paramodel;
-	paramodel.set_model_name("EmptySpace");
-	paramodel.add_physical_property("eps_rel");
-	paramodel.add_material("Vacuum", {1.0});
-	paramodel.add_material("Dielectric", {1.0});
-	Circle c1 = Circle(0.1, {0.5, 0.5}, paramodel.get_material("Vacuum"));
-	paramodel.add_object(&c1);
-	// convert the model into a mesh
-	cout << "about to make mesh" << endl;
-	dx = 0.005;
-	RegularMesh paramesh;
-	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, paramodel.get_material("Vacuum"));
-	paramesh.print_summary();
-	//*/
 
 	// ring model
 	/*
@@ -208,12 +188,43 @@ int main(int argc, char * argv[]){
 	//*/
 
 	// 1D free space
-	/*
-	dx = 0.0005;
+	
+	dx = 0.005;
 	srcfreq = 1.0e+9;
-	srclocx = 0.4;
+	srclocx = 0.3;
 	RegularMesh paramesh;
 	paramesh = RegularMesh::create_regular_grid_b(dx, 0.0, 1.0);
+	//*/
+
+	// 2D free space model
+	/*
+	srcfreq = 1.0e+9;
+	srclocx = 0.5; 
+	srclocy = 0.5;
+	ParametricModel2D paramodel;
+	paramodel.set_model_name("EmptySpace");
+	paramodel.add_physical_property("eps_rel");
+	paramodel.add_material("Vacuum", {1.0});
+	paramodel.add_material("Dielectric", {1.0});
+	Circle c1 = Circle(0.1, {0.5, 0.5}, paramodel.get_material("Vacuum"));
+	paramodel.add_object(&c1);
+	// convert the model into a mesh
+	cout << "about to make mesh" << endl;
+	dx = 0.005;
+	RegularMesh paramesh;
+	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, paramodel.get_material("Vacuum"));
+	paramesh.print_summary();
+	//*/
+
+	// 3D free space
+	/*
+	dx = 0.01;
+	srcfreq = 1.0e+9;
+	srclocx = 0.4;
+	srclocy = 0.4;
+	srclocz = 0.4;
+	RegularMesh paramesh;
+	paramesh = RegularMesh::create_regular_grid_b(dx, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0);
 	//*/
 
 

@@ -208,7 +208,7 @@ void FDTDSimulation::view_results(){
 		simvis.bind_simulation(_simdata);
 		simvis.set_color_ramp(CRamp::MATLAB_PARULA);
 		simvis.set_colorby_field("E_z");
-		simvis.set_colorby_field("H_y");
+		//simvis.set_colorby_field("H_y");
 		simvis.set_color_alpha(_rel_permittivity);
 		simvis.set_color_interpolation(false);
 		simvis.set_snapshot_increment(3);
@@ -285,6 +285,8 @@ void FDTDSimulation::run_1D(int num_iters){
 			_Dn_z[cind] = gi3[i]*_Dn_z[cind]
 					  + gi2[i]*_CourantFactor*(_H_y[cind] - _H_y[lind])
 					  - _CourantFactor*_dx*_current_density_z_fn(cind)*sourcemodval;
+			//_Dn_z[cind] = _Dn_z[cind]
+			//		  + _CourantFactor*(_H_y[cind] - _H_y[lind]);
 
 		}
 
@@ -294,6 +296,7 @@ void FDTDSimulation::run_1D(int num_iters){
 			pulse = _signals.at(i).value(_tcur)*_modulators.at(i).value(_tcur) * sourcemodval;
 			_srcx = _signals.at(i).xloc();
 			_Dn_z[_mesh->nearest_node(_srcx)] = pulse;
+			//cout << "source value: " << pulse << endl;
 		}
 		//cout << "imposed source" << endl;
 		
@@ -329,7 +332,9 @@ void FDTDSimulation::run_1D(int num_iters){
 			curle = _En_z[rind] - _En_z[cind];
 			_I_Hy[cind] = _I_Hy[cind] + curle;
 			_H_y[cind] = fi3[i]*_H_y[cind]
-					  + fi2[i]*_CourantFactor*(curle + _I_Hy[cind]);
+					  + fi2[i]*_CourantFactor*curle;// + fi1[i]*_I_Hy[cind];
+			//_H_y[cind] = _H_y[cind]
+			//		  + _CourantFactor*(_En_z[rind] - _En_z[cind]);
 
 		}
 		
@@ -737,6 +742,7 @@ void FDTDSimulation::allocate_PML(){
 	if (_mesh->num_dims() == 1){
 
 		float xnum, xd, xxn, xn;
+		gi1 = new double[_mesh->reg_num_nodes_x()];
 		gi2 = new double[_mesh->reg_num_nodes_x()];
 		gi3 = new double[_mesh->reg_num_nodes_x()];
 		fi1 = new double[_mesh->reg_num_nodes_x()];
@@ -761,8 +767,10 @@ void FDTDSimulation::allocate_PML(){
 			// left and right boundaries
 			xxn = xnum/xd;
 			xn = 0.33*xxn*xxn*xxn;
+			gi1[i] = xn;
 			gi2[i] = 1.0/(1.0+xn);
 			gi3[i] = (1.0-xn)/(1.0+xn);
+			gi1[_mesh->reg_num_nodes_x()-1-i] = xn;
 			gi2[_mesh->reg_num_nodes_x()-1-i] = 1.0/(1.0+xn);
 			gi3[_mesh->reg_num_nodes_x()-1-i] = (1.0-xn)/(1.0+xn);
 
