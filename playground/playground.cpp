@@ -254,8 +254,10 @@ int main(int argc, char * argv[]){
 	paravis.bind_mesh(paramesh);
 	paravis.set_color_ramp(CRamp::DIVERGENT_9);
 	paravis.set_colorby(&paramesh.data("eps_rel"));
+	//paravis.set_colorby(epsrel);
 	paravis.run();
 	*/
+	
 
 
 	// initialize the simulation
