@@ -217,7 +217,7 @@ int main(int argc, char * argv[]){
 	//*/
 
 	// 3D free space
-	
+	/*
 	dx = 0.02;
 	srcfreq = 1.0e+9;
 	srclocx = 0.4;
@@ -225,6 +225,25 @@ int main(int argc, char * argv[]){
 	srclocz = 0.3;
 	RegularMesh paramesh;
 	paramesh = RegularMesh::create_regular_grid_b(dx, 0.0, 1.0, 0.0, 0.8, 0.0, 0.6);
+	//*/
+
+	// 3D dielectric sphere
+	
+	dx = 0.02;
+	srcfreq = 1.0e+9;
+	srclocx = 0.2;
+	srclocy = 0.2;
+	srclocz = 0.2;
+	RegularMesh paramesh;
+	paramesh = RegularMesh::create_regular_grid_b(dx, 0.0, 1.0, 0.0, 0.8, 0.0, 0.6);
+	double * epsrel = new double[paramesh.nodecount()];
+	double scenx=0.5, sceny=0.4, scenz=0.3, srad=0.15;
+	for (auto i=0; i<paramesh.nodecount(); i++){
+		const MeshNode * node;
+		node = &paramesh.node(i);
+		if ((node->x()-scenx)*(node->x()-scenx) + (node->y()-sceny)*(node->y()-sceny) + (node->z()-scenz)*(node->z()-scenz) <= srad*srad) epsrel[i] = 3.0;
+		else epsrel[i] = 1.0;
+	}
 	//*/
 
 
@@ -242,6 +261,7 @@ int main(int argc, char * argv[]){
 	// initialize the simulation
 	FDTDSimulation fsim;
 	fsim.bind_mesh(paramesh);
+	fsim.bind_rel_permittivity(epsrel);
 	//fsim.bind_rel_permittivity(&paramesh.data("eps_rel"));
 	//fsim.bind_conductivity(&paramesh.data("conductivity"));
 	//fsim.bind_single_pole(&paramesh.data("polenumerator"), &paramesh.data("polefreq"));

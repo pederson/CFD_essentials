@@ -27,6 +27,14 @@ struct vertex_2d{
 	double y;
 };
 
+struct vertex3{
+	vertex3(){};
+	vertex3(double _x, double _y, double _z):x(_x), y(_y), z(_z){};
+	double x;
+	double y;
+	double z;
+};
+
 //********************************** 2D GEOMETRIES ***************************
 class GeometricObject2D{
 public:
@@ -223,8 +231,30 @@ private:
 //********************************* 3D GEOMETRIES ****************************
 class GeometricObject3D{
 public:
+	/*
+	GeometricObject3D();
+	//~GeometricObject3D();
+
+	// inspectors
+	virtual void print_summary() const;
+	std::string get_object_name() const {return _object_name;};
+	std::vector<double> get_phys_properties() const {return phys_properties;};
+	vertex3 get_center() const {return _center;};
+
+	// mutators
+	//void rotate(vertex_2d point, double deg);
+	virtual void translate(float delta_x, float delta_y);
+	//void mirror(LineSegment blah);
+	//void set_phys_property(std::string property_name, double value);
 
 protected:
+	// common data for all derived classes
+	std::string _object_name;
+	vertex3 _center;
+	std::vector<double> phys_properties;
+	//double m_xmax, m_xmin, m_ymax, m_ymin, m_zmax, m_zmin;
+	*/
+
 
 };
 
@@ -233,6 +263,8 @@ class Cylinder: public GeometricObject3D{
 public:
 
 private:
+	double m_radius;
+	double m_height;
 
 };
 
@@ -240,12 +272,16 @@ class Sphere: public GeometricObject3D{
 public:
 
 private:
+	double m_radius;
 };
 
 class Box: public GeometricObject3D{
 public:
 
 private:
+	double m_width;
+	double m_height;
+	double m_depth;
 
 };
 
@@ -259,6 +295,9 @@ class Cone: public GeometricObject3D{
 public:
 
 private:
+	double m_angle;
+	double m_radius;
+	vertex3 m_zeropoint;
 };
 
 class Pyramid: public GeometricObject3D{
@@ -271,6 +310,8 @@ class Torus: public GeometricObject3D{
 public:
 
 private:
+	double m_major_radius;
+	double m_minor_radius;
 };
 
 class TriangleMesh : public GeometricObject3D{
@@ -319,14 +360,39 @@ struct stl_tri{
 
 class ParametricModel3D: public GeometricObject3D{
 public:
+
+	ParametricModel3D();
+	//~ParametricModel3D();
+
+	void print_summary() const;
+
+	void set_model_name(std::string mname);
+	std::vector<double> get_material(std::string material_name) const;
+	
+	void add_physical_property(std::string property_name);
+	void add_material(std::string material_name, std::vector<double> phys_props);
+	void add_object(GeometricObject3D * new_object);
+
+	void create_lattice(GeometricObject3D * new_object, vertex3 x_basis, vertex3 y_basis, vertex3 z_basis, unsigned int xcount, unsigned int ycount, unsigned int zcount);
+
+	//std::vector<geometric_object_2d> get_object_tree(){return ordered_object_tree;};
+	std::vector<void *> get_object_tree() const {return ordered_object_tree;};
+	std::vector<std::string> get_phys_property_names() const {return phys_property_names;};
+
 	//void union();
 	//void intersection();
 	//void subtraction();
 	// other possible 3d combinations...?
 
-protected:
-
 private:
+	std::string model_name;
+	//std::vector<geometric_object_2d> ordered_object_tree;
+	std::vector<void *> ordered_object_tree;
+	std::vector<std::string> object_tree_names;
+	std::vector<std::string> phys_property_names;
+	std::map<std::string, std::vector<double> > materials;
+
+	void add_object(void * new_object, std::string object_name);
 
 };
 
