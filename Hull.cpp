@@ -6,32 +6,13 @@ using namespace std;
 
 Point p0;
 
-/*
-Point::Point(){
-
-}
-
-Point::Point(double _x, double _y){
-  x = _x;
-  y = _y;
-  z = 0.0;
-  ndims = 2;
-}
-
-Point::Point(double _x, double _y, double _z){
-  x = _x;
-  y = _y;
-  z = _z;
-  ndims = 3;
-}
-*/
 
 // destructor
 Point::~Point(){
 
 }
 
-int Point::dist(Point p1, Point p2){
+int Point::dist(const Point & p1, const Point & p2){
   return (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y) + (p1.z-p2.z)*(p1.z-p2.z);
 }
 

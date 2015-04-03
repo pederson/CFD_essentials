@@ -3,6 +3,7 @@
 
 #include "SimulationData.hpp"
 #include "Visualixer.hpp"
+#include "Hull.hpp"
 
 
 #include <iostream>
@@ -41,12 +42,19 @@ private:
 	void increment_time_step();
 
 	void onPrepareData();
+	void onColors();
+	void onAlpha();
 	bool MainLoop();
 
 	const SimulationData * _simdata;
 
 	std::string _colorby_field, _alpha_field;
 	unsigned int _freq_Hz, _cur_time_step, _increment_val; // frequency at which the simulation plays
+
+	const Mesh * _mesh;
+	std::vector<bool> m_subset;
+	double m_xwidth, m_ywidth, m_zwidth;
+	double m_xslice, m_yslice, m_zslice;
 };
 
 #endif

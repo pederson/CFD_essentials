@@ -229,7 +229,7 @@ int main(int argc, char * argv[]){
 
 	// 3D dielectric sphere
 	
-	dx = 0.02;
+	dx = 0.015;
 	srcfreq = 1.0e+9;
 	srclocx = 0.2;
 	srclocy = 0.2;
@@ -248,15 +248,15 @@ int main(int argc, char * argv[]){
 
 
 	
-	/*
+	
 	// view the mesh
 	mesh_visualixer paravis;
 	paravis.bind_mesh(paramesh);
 	paravis.set_color_ramp(CRamp::DIVERGENT_9);
-	paravis.set_colorby(&paramesh.data("eps_rel"));
-	//paravis.set_colorby(epsrel);
+	//paravis.set_colorby(&paramesh.data("eps_rel"));
+	paravis.set_colorby(epsrel);
 	paravis.run();
-	*/
+	//*/
 	
 
 

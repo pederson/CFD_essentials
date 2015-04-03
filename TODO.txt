@@ -1,8 +1,10 @@
 TODO:
 
-- work on 3D Geometric models and 3D parametric modelling. 
+- Simulation of wave on a plasma sheath
 
-- work on 3D RegularMesh visualization. 3 slice wireframe. Can this be extended to any general Mesh? Maybe by using Hull? 
+- Simulation Visualizer should inherit from Mesh visualizer
+
+- work on 3D Geometric models and 3D parametric modelling. 
 
 - make gaussian pulse specified by central frequency, frequency spread, and t0
 

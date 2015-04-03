@@ -129,65 +129,253 @@ void mesh_visualixer::set_test_case(){
 }
 
 void mesh_visualixer::onPrepareData(){
+	if (_mesh->num_dims() == 1 || _mesh->num_dims() == 2){
+		MeshNode nd;
+		MeshElement elem;
 
-	MeshNode nd;
-	MeshElement elem;
+		vertices = new GLfloat[num_vertices*num_per_vertex];
+		for (unsigned int i=0; i<num_vertices; i++){
+			nd = _mesh->node(i);
 
-	vertices = new GLfloat[num_vertices*num_per_vertex];
-	for (unsigned int i=0; i<num_vertices; i++){
-		nd = _mesh->node(i);
-
-		vertices[i*num_per_vertex] = nd.x();
-		vertices[i*num_per_vertex + 1] = nd.y();
-		vertices[i*num_per_vertex + 2] = nd.z();
-		if (nd.boundary()){
-			vertices[i*num_per_vertex + 3] = 1.0f;
-			vertices[i*num_per_vertex + 4] = 0.0f;
-			vertices[i*num_per_vertex + 5] = 0.0f;
+			vertices[i*num_per_vertex] = nd.x();
+			vertices[i*num_per_vertex + 1] = nd.y();
+			vertices[i*num_per_vertex + 2] = nd.z();
+			if (nd.boundary()){
+				vertices[i*num_per_vertex + 3] = 1.0f;
+				vertices[i*num_per_vertex + 4] = 0.0f;
+				vertices[i*num_per_vertex + 5] = 0.0f;
+			}
+			else {
+				vertices[i*num_per_vertex + 3] = 1.0f;
+				vertices[i*num_per_vertex + 4] = 1.0f;
+				vertices[i*num_per_vertex + 5] = 1.0f;
+			}
+			vertices[i*num_per_vertex + 6] = 1.0f;
 		}
-		else {
-			vertices[i*num_per_vertex + 3] = 1.0f;
-			vertices[i*num_per_vertex + 4] = 1.0f;
-			vertices[i*num_per_vertex + 5] = 1.0f;
+
+		// figure out how many line elements are needed
+		// DYLAN_TODO: this should really be more rigorous and count for each element
+		//				in the mesh
+		_num_line_elements = 0;
+		for (unsigned int i=0; i<_mesh->elementcount(); i++){
+			elem = _mesh->element(i);
+			_num_line_elements += elem.num_vertices();
 		}
-		vertices[i*num_per_vertex + 6] = 1.0f;
+
+		_num_point_elements = num_vertices;
+
+		elements = new GLuint[_num_point_elements*_num_per_point_element + _num_line_elements*_num_per_line_element];
+		unsigned int line_element_offset = _num_point_elements*_num_per_point_element;
+		// set the point elements
+		for (unsigned int i=0; i<num_vertices; i++){
+			elements[i] = i;
+		}
+
+		
+		unsigned int jp1, elements_added=0;
+		for (unsigned int i=0; i<_mesh->elementcount(); i++){
+			elem = _mesh->element(i);
+			for (unsigned int j=0; j<elem.num_vertices(); j++){
+				jp1 = (j+1)%elem.num_vertices();
+				elements[line_element_offset + elements_added*_num_per_line_element] = elem.vertex_ind(j);
+				elements[line_element_offset + elements_added*_num_per_line_element + 1] = elem.vertex_ind(jp1);
+
+				elements_added++;
+			}
+		}
+
+
+		model_centroid[0] = (xmax + xmin)/2.0;
+		model_centroid[1] = (ymax + ymin)/2.0;
+		model_centroid[2] = (zmax + zmin)/2.0;
+	}
+	else if (_mesh->num_dims() == 3){
+		//cout << "STARTING 3 DIMS" << endl;
+
+		model_centroid[0] = (xmax + xmin)/2.0;
+		model_centroid[1] = (ymax + ymin)/2.0;
+		model_centroid[2] = (zmax + zmin)/2.0;
+
+		MeshNode nd;
+		MeshElement elem;
+
+		m_xslice = model_centroid[0];
+		m_yslice = model_centroid[1];
+		m_zslice = model_centroid[2];
+		/*
+		const RegularMesh * rmesh = dynamic_cast<const RegularMesh *>(_mesh);
+		m_xwidth = rmesh->res();
+		m_ywidth = rmesh->res();
+		m_zwidth = rmesh->res();
+		*/
+		// heuristic calculation
+		double nx, ny, nz, rho, xvol, yvol, zvol;
+		xvol = xmax-xmin;
+		yvol = ymax-ymin;
+		zvol = zmax-zmin;
+		rho = _mesh->nodecount()/(xvol*yvol*zvol);
+
+		m_xwidth = xvol/(rho*yvol*zvol);
+		m_ywidth = yvol/(rho*xvol*zvol);
+		m_zwidth = zvol/(rho*xvol*yvol);
+
+		m_xwidth = 1.5*pow(1.0/rho, 1.0/3.0);
+		m_ywidth = 1.5*m_xwidth;
+		m_zwidth = 1.5*m_xwidth;
+		//m_xwidth = pow(m_xwidth, 1.0/3.0);
+		//m_ywidth = pow(m_ywidth, 1.0/3.0);
+		//m_zwidth = pow(m_zwidth, 1.0/3.0);
+		
+		//cout << "CALCULATED THE WIDTHS: ";
+		//cout << "xw: " << m_xwidth << endl;
+		//cout << "yw: " << m_ywidth << endl;
+		//cout << "zw: " << m_zwidth << endl;
+
+		// find which points in the x, y plane
+		m_subset.assign(_mesh->nodecount(), false);
+		Point a1(m_xslice-m_xwidth/2, ymax);
+		Point a2(m_xslice+m_xwidth/2, ymax);
+		Point a3(m_xslice+m_xwidth/2, ymin);
+		Point a4(m_xslice-m_xwidth/2, ymin);
+		Hull hxy({a1, a2, a3, a4});
+		for (auto i=0; i<_mesh->nodecount(); i++){
+			nd = _mesh->node(i);
+			if (hxy.contains_point(Point(nd.x(), nd.y()))) m_subset.at(i) = true;
+		}
+		//cout << "FINISHED XY plane" << endl;
+
+		
+		// find which points in the y, z plane
+		Point b1(m_zslice-m_zwidth/2, ymax);
+		Point b2(m_zslice+m_zwidth/2, ymax);
+		Point b3(m_zslice+m_zwidth/2, ymin);
+		Point b4(m_zslice-m_zwidth/2, ymin);
+		Hull hyz({b1, b2, b3, b4});
+		for (auto i=0; i<_mesh->nodecount(); i++){
+			nd = _mesh->node(i);
+			if (hyz.contains_point(Point(nd.z(), nd.y()))) m_subset.at(i) = true;
+		}
+		//cout << "FINISHED YZ plane" << endl;
+		
+
+		// find which points in the y, x plane
+		Point c1(m_yslice+m_ywidth/2, xmax);
+		Point c2(m_yslice-m_ywidth/2, xmax);
+		Point c3(m_yslice-m_ywidth/2, xmin);
+		Point c4(m_yslice+m_ywidth/2, xmin);
+		Hull hyx({c1, c2, c3, c4});
+		for (auto i=0; i<_mesh->nodecount(); i++){
+			nd = _mesh->node(i);
+			if (hyx.contains_point(Point(nd.y(), nd.x()))) m_subset.at(i) = true;
+		}
+		//cout << "FINISHED YX plane" << endl;
+		
+
+		// find the number of true points
+		num_vertices = 0;
+		for (auto i=0; i<_mesh->nodecount(); i++){
+			if (m_subset.at(i)) num_vertices++;
+		}
+		vertices = new GLfloat[num_vertices*num_per_vertex];
+		unsigned int vct=0;
+		for (unsigned int i=0; i<_mesh->nodecount(); i++){
+			if (!m_subset.at(i)) continue;
+			nd = _mesh->node(i);
+
+			vertices[vct*num_per_vertex] = nd.x();
+			vertices[vct*num_per_vertex + 1] = nd.y();
+			vertices[vct*num_per_vertex + 2] = nd.z();
+			if (nd.boundary()){
+				vertices[vct*num_per_vertex + 3] = 1.0f;
+				vertices[vct*num_per_vertex + 4] = 0.0f;
+				vertices[vct*num_per_vertex + 5] = 0.0f;
+			}
+			else {
+				vertices[vct*num_per_vertex + 3] = 1.0f;
+				vertices[vct*num_per_vertex + 4] = 1.0f;
+				vertices[vct*num_per_vertex + 5] = 1.0f;
+			}
+			vertices[vct*num_per_vertex + 6] = 1.0f;
+			vct++;
+		}
+		//cout << "FINISHED FILLING VERTICES" << endl;
+
+		// figure out how many line elements are needed
+		// DYLAN_TODO: this should really be more rigorous and count for each element
+		//				in the mesh
+		_num_line_elements = 0;
+		/*
+		for (unsigned int i=0; i<_mesh->elementcount(); i++){
+			elem = _mesh->element(i);
+			_num_line_elements += elem.num_vertices();
+		}
+		*/
+
+		_num_point_elements = num_vertices;
+
+		elements = new GLuint[_num_point_elements*_num_per_point_element + _num_line_elements*_num_per_line_element];
+		unsigned int line_element_offset = _num_point_elements*_num_per_point_element;
+		// set the point elements
+		for (unsigned int i=0; i<num_vertices; i++){
+			elements[i] = i;
+		}
+		//cout << "FINISHED POINT ELEMENTS" << endl;
+
+		/*
+		unsigned int jp1, elements_added=0;
+		for (unsigned int i=0; i<_mesh->elementcount(); i++){
+			elem = _mesh->element(i);
+			for (unsigned int j=0; j<elem.num_vertices(); j++){
+				jp1 = (j+1)%elem.num_vertices();
+				elements[line_element_offset + elements_added*_num_per_line_element] = elem.vertex_ind(j);
+				elements[line_element_offset + elements_added*_num_per_line_element + 1] = elem.vertex_ind(jp1);
+
+				elements_added++;
+			}
+		}
+		*/
 	}
 
-	// figure out how many line elements are needed
-	// DYLAN_TODO: this should really be more rigorous and count for each element
-	//				in the mesh
-	_num_line_elements = 0;
-	for (unsigned int i=0; i<_mesh->elementcount(); i++){
-		elem = _mesh->element(i);
-		_num_line_elements += elem.num_vertices();
+}
+
+void mesh_visualixer::onColors(){
+	if (_colorby == nullptr) return;
+	if (_colorby_max - _colorby_min == 0.0) return;
+	// modify the vertex array to incorporate user-defined colors
+
+
+	rgb ptcolor;
+	if (m_subset.size() > 0){
+		unsigned int vct = 0;
+		for (auto i=0; i<_mesh->nodecount(); i++){
+			if (! m_subset.at(i)) continue;
+			ptcolor = color_ramp.get_ramp_color(float((_colorby[i])/(_colorby_max - _colorby_min)));
+			vertices[(vct+1)*num_per_vertex - 4] = ptcolor.R;
+			vertices[(vct+1)*num_per_vertex - 3] = ptcolor.G;
+			vertices[(vct+1)*num_per_vertex - 2] = ptcolor.B;
+			vct++;
+		}
+	}
+	else{
+		for (auto i=0; i<num_vertices; i++){
+			ptcolor = color_ramp.get_ramp_color(float((_colorby[i])/(_colorby_max - _colorby_min)));
+			vertices[(i+1)*num_per_vertex - 4] = ptcolor.R;
+			vertices[(i+1)*num_per_vertex - 3] = ptcolor.G;
+			vertices[(i+1)*num_per_vertex - 2] = ptcolor.B;
+		}
 	}
 
-	_num_point_elements = num_vertices;
+	return;
+}
 
-	elements = new GLuint[_num_point_elements*_num_per_point_element + _num_line_elements*_num_per_line_element];
-	unsigned int line_element_offset = _num_point_elements*_num_per_point_element;
-	// set the point elements
-	for (unsigned int i=0; i<num_vertices; i++){
-		elements[i] = i;
-	}
+
+void mesh_visualixer::onAlpha(){
+	if (_color_alpha == nullptr) return;
 
 	
-	unsigned int jp1, elements_added=0;
-	for (unsigned int i=0; i<_mesh->elementcount(); i++){
-		elem = _mesh->element(i);
-		for (unsigned int j=0; j<elem.num_vertices(); j++){
-			jp1 = (j+1)%elem.num_vertices();
-			elements[line_element_offset + elements_added*_num_per_line_element] = elem.vertex_ind(j);
-			elements[line_element_offset + elements_added*_num_per_line_element + 1] = elem.vertex_ind(jp1);
-
-			elements_added++;
-		}
+	for (auto i=0; i<num_vertices; i++){
+		vertices[(i+1)*num_per_vertex - 1] = _color_alpha[i];
 	}
-
-
-	model_centroid[0] = (xmax + xmin)/2.0;
-	model_centroid[1] = (ymax + ymin)/2.0;
-	model_centroid[2] = (zmax + zmin)/2.0;
 
 }
 

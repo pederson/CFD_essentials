@@ -32,7 +32,7 @@ public:
   // mutators
 
 
-  static int dist(Point p1, Point p2);
+  static int dist(const Point & p1, const Point & p2);
 
   
 
