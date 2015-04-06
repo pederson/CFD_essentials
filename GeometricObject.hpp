@@ -191,6 +191,9 @@ public:
 
 
 private:
+	unsigned int m_nsides;
+	double m_cent_to_vert_len; // distance from center to vertex
+	//alternately do center to side length
 
 };
 
