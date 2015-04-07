@@ -234,29 +234,29 @@ private:
 //********************************* 3D GEOMETRIES ****************************
 class GeometricObject3D{
 public:
-	/*
+	
 	GeometricObject3D();
 	//~GeometricObject3D();
 
 	// inspectors
 	virtual void print_summary() const;
-	std::string get_object_name() const {return _object_name;};
-	std::vector<double> get_phys_properties() const {return phys_properties;};
-	vertex3 get_center() const {return _center;};
+	std::string get_object_name() const {return m_object_name;};
+	std::vector<double> get_phys_properties() const {return m_phys_properties;};
+	vertex3 get_center() const {return m_center;};
 
 	// mutators
-	//void rotate(vertex_2d point, double deg);
-	virtual void translate(float delta_x, float delta_y);
-	//void mirror(LineSegment blah);
+	//virtual void rotate(vertex_2d point, double deg);
+	//virtual void translate(float delta_x, float delta_y);
+	//virtual void mirror(LineSegment blah);
 	//void set_phys_property(std::string property_name, double value);
 
 protected:
 	// common data for all derived classes
-	std::string _object_name;
-	vertex3 _center;
-	std::vector<double> phys_properties;
+	std::string m_object_name;
+	vertex3 m_center;
+	std::vector<double> m_phys_properties;
 	//double m_xmax, m_xmin, m_ymax, m_ymin, m_zmax, m_zmin;
-	*/
+	
 
 
 };
@@ -265,14 +265,23 @@ protected:
 class Cylinder: public GeometricObject3D{
 public:
 
+	Cylinder(double radius, double height, vertex3 extrude_dir, vertex3 center, std::vector<double> properties);
+
+	void print_summary() const;
+
 private:
 	double m_radius;
 	double m_height;
+	vertex3 m_extrude_dir;
 
 };
 
 class Sphere: public GeometricObject3D{
 public:
+
+	Sphere(double radius, vertex3 center, std::vector<double> properties);
+
+	void print_summary() const;
 
 private:
 	double m_radius;
@@ -280,6 +289,10 @@ private:
 
 class Box: public GeometricObject3D{
 public:
+
+	Box(double width, double height, double depth, vertex3 center, std::vector<double> properties);
+
+	void print_summary() const;
 
 private:
 	double m_width;
@@ -291,30 +304,55 @@ private:
 class Prism: public GeometricObject3D{
 public:
 
+	Prism(GeometricObject2D base, double depth, vertex3 extrude_dir, vertex3 center, std::vector<double> properties);
+
+	void print_summary() const;
+
 private:
+
+	GeometricObject2D m_base;
+	double m_depth;
+	vertex3 m_extrude_dir;
 };
 
 class Cone: public GeometricObject3D{
 public:
 
+	Prism(double radius, double angle, vertex3 extrude_dir, vertex3 center, std::vector<double> properties);
+
+	void print_summary() const;
+
 private:
 	double m_angle;
 	double m_radius;
-	vertex3 m_zeropoint;
+	vertex3 m_extrude_dir;
 };
 
 class Pyramid: public GeometricObject3D{
 public:
 
+	Pyramid(GeometricObject2D base, double angle, vertex3 extrude_dir, vertex3 center, std::vector<double> properties);
+
+	void print_summary() const;
+
 private:
+
+	GeometricObject2D m_base;
+	double m_angle;
+	vertex3 m_extrude_dir;
 };
 
 class Torus: public GeometricObject3D{
 public:
 
+	Torus(double major_radius, double minor_radius, vertex3 normal, vertex3 center, std::vector<double> properties);
+
+	void print_summary() const;
+
 private:
 	double m_major_radius;
 	double m_minor_radius;
+	vertex3 m_normal;
 };
 
 class TriangleMesh : public GeometricObject3D{
@@ -323,6 +361,7 @@ public:
 	TriangleMesh();
 	~TriangleMesh();
 
+	void print_summary() const;
 	static TriangleMesh * read_STL(std::string filename, unsigned int byte_offset=0);
 
 
@@ -334,10 +373,12 @@ public:
 private:
 
 
-
+	//void read_STL_internal(std::string filename, unsigned int byte_offset=0);
 	//float[4] model_color;
 
 };
+
+
 
 #pragma pack(push,1)
 struct stl_tri{
@@ -361,6 +402,8 @@ struct stl_tri{
 };
 #pragma pack(pop)
 
+
+
 class ParametricModel3D: public GeometricObject3D{
 public:
 
@@ -376,11 +419,11 @@ public:
 	void add_material(std::string material_name, std::vector<double> phys_props);
 	void add_object(GeometricObject3D * new_object);
 
-	void create_lattice(GeometricObject3D * new_object, vertex3 x_basis, vertex3 y_basis, vertex3 z_basis, unsigned int xcount, unsigned int ycount, unsigned int zcount);
+	//void create_lattice(GeometricObject3D * new_object, vertex3 x_basis, vertex3 y_basis, vertex3 z_basis, unsigned int xcount, unsigned int ycount, unsigned int zcount);
 
 	//std::vector<geometric_object_2d> get_object_tree(){return ordered_object_tree;};
-	std::vector<void *> get_object_tree() const {return ordered_object_tree;};
-	std::vector<std::string> get_phys_property_names() const {return phys_property_names;};
+	std::vector<void *> get_object_tree() const {return m_ordered_object_tree;};
+	std::vector<std::string> get_phys_property_names() const {return m_phys_property_names;};
 
 	//void union();
 	//void intersection();
@@ -388,12 +431,11 @@ public:
 	// other possible 3d combinations...?
 
 private:
-	std::string model_name;
-	//std::vector<geometric_object_2d> ordered_object_tree;
-	std::vector<void *> ordered_object_tree;
-	std::vector<std::string> object_tree_names;
-	std::vector<std::string> phys_property_names;
-	std::map<std::string, std::vector<double> > materials;
+	std::string m_model_name;
+	std::vector<void *> m_ordered_object_tree;
+	std::vector<std::string> m_object_tree_names;
+	std::vector<std::string> m_phys_property_names;
+	std::map<std::string, std::vector<double> > m_materials;
 
 	void add_object(void * new_object, std::string object_name);
 

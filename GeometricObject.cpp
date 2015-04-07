@@ -311,6 +311,32 @@ void ParametricModel2D::create_lattice(GeometricObject2D * new_object, vertex_2d
 
 
 //************************************************************************
+
+Cylinder::Cylinder(double radius, double height, vertex3 extrude_dir, vertex3 center, std::vector<double> properties){
+	m_object_name = "Cylinder";
+	m_radius = radius;
+	m_height = height;
+	m_extrude_dir = extrude_dir;
+	m_center = center;
+	m_phys_properties = properties;
+}
+
+void Cylinder::print_summary() const{
+	cout << "\tCYLINDER: radius: " << m_radius << " height: " << m_height << " center: " << m_center.x << ", " << m_center.y << ", " << m_center.z << endl;
+}
+
+Sphere::Sphere(double radius, vertex3 center, std::vector<double> properties){
+	m_object_name = "Sphere";
+	m_radius = radius;
+	m_center = center;
+	m_phys_properties = properties;
+}
+
+void Sphere::print_summary() const{
+	cout << "\tSPHERE: radius: " << m_radius << " height: " << m_height << " center: " << m_center.x << ", " << m_center.y << ", " << m_center.z << endl;
+}
+
+
 TriangleMesh::TriangleMesh(){
 	vertices = NULL;
 	normals = NULL;
@@ -402,6 +428,42 @@ TriangleMesh * TriangleMesh::read_STL(string filename, unsigned int byte_offset)
 
 	return outmesh;
 }
+
+
+ParametricModel3D::ParametricModel3D(){
+	m_model_name = "DefaultModelName3D";
+}
+
+void ParametricModel3D::print_summary() const{
+	cout << " " << endl;
+	cout << "********* Parametric Model 3D Summary **********" << endl;
+	cout << "Model Name: " << model_name << endl;
+	for (auto i=0; i<ordered_object_tree.size(); i++){
+		if (object_tree_names.at(i).compare("Cylinder") == 0){
+			((Cylinder *)ordered_object_tree.at(i))->print_summary();
+		}
+		else if(object_tree_names.at(i).compare("Sphere") == 0){
+			((Sphere *)ordered_object_tree.at(i))->print_summary();
+		}
+		else {
+			((GeometricObject2D *) ordered_object_tree.at(i))->print_summary();
+		}
+	}
+	cout << "*********************************************" << endl;
+	cout << " " << endl;
+	return;
+}
+}
+
+void ParametricModel3D::set_model_name(std::string mname);
+std::vector<double> ParametricModel3D::get_material(std::string material_name) const;
+
+void ParametricModel3D::add_physical_property(std::string property_name);
+void ParametricModel3D::add_material(std::string material_name, std::vector<double> phys_props);
+void ParametricModel3D::add_object(GeometricObject3D * new_object);
+
+void ParametricModel3D::add_object(void * new_object, std::string object_name);
+
 
 
 

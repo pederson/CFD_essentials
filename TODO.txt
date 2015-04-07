@@ -16,7 +16,7 @@ TODO:
 
 - do time analysis for std::function vs. raw arrays. DONE: std::function is 5-10 times slower than raw arrays in terms of the pure call. This might not be too bad if reassignment is an added time cost for raw arrays. Also less memory is good
 
-- combine simdata without doubling the memory requirement
+- combine simdata without doubling the memory requirement. Probably a good idea to use HDF5 file as an intermediary to store and fetch data during simulations. May slow down the simulation, but it will decrease the memory required
 
 - change prefix for member variables. It has come to my attention that an underscore as a prefix may be a bad idea. possibly use "m_"... instead
 
