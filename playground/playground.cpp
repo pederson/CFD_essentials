@@ -270,7 +270,7 @@ int main(int argc, char * argv[]){
 	//*/
 
 	// 3D dielectric box
-	
+	/*
 	srcfreq = 1.0e+9;
 	srclocx = 0.2;
 	srclocy = 0.2;
@@ -282,6 +282,29 @@ int main(int argc, char * argv[]){
 	paramodel.add_material("Dielectric", {3.0});
 	Box s1 = Box(0.5, 0.2, 0.3, {0.0, 0.0, 1.0}, {0.5, 0.5, 0.5}, paramodel.get_material("Dielectric"));
 	paramodel.add_object(&s1);
+	// convert the model into a mesh
+	cout << "about to make mesh" << endl;
+	dx = 0.015;
+	RegularMesh paramesh;
+	paramesh = build_simple_mesh_3d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, paramodel.get_material("Vacuum"));
+	paramesh.print_summary();
+	//*/
+
+	// 3D dielectric lens
+	
+	srcfreq = 5.0e+9;
+	srclocx = 0.1;
+	srclocy = 0.5;
+	srclocz = 0.5;
+	ParametricModel3D paramodel;
+	paramodel.set_model_name("DielectricSphere");
+	paramodel.add_physical_property("eps_rel");
+	paramodel.add_material("Vacuum", {1.0});
+	paramodel.add_material("Dielectric", {3.0});
+	ParabolicDish s1 = ParabolicDish({0.35, 0.5, 0.5}, {0.55, 0.5, 0.5}, 0.15, paramodel.get_material("Dielectric"));
+	paramodel.add_object(&s1);
+	ParabolicDish s2 = ParabolicDish({0.65, 0.5, 0.5}, {0.45, 0.5, 0.5}, 0.15, paramodel.get_material("Dielectric"));
+	paramodel.add_object(&s2);
 	// convert the model into a mesh
 	cout << "about to make mesh" << endl;
 	dx = 0.015;
@@ -311,7 +334,8 @@ int main(int argc, char * argv[]){
 	//fsim.bind_single_pole(&paramesh.data("polenumerator"), &paramesh.data("polefreq"));
 	//fsim.bind_current_density_z(&paramesh.data("current_density"));
 	fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy, srclocz);
-	//fsim.add_sinusoidal_source(15.0e+13, 0.0, 1.5e-6, 7.5e-6);
+	fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy + 0.2, srclocz);
+	fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy - 0.2, srclocz);
 	//fsim.add_sinusoidal_source(15.0e+13, 0.0, 1.5e-6, 2.5e-6);
 	//fsim.add_gaussian_source(10.0, 10.0, 4.5e-6, 4.0e-6);
 	fsim.set_num_iters(300);

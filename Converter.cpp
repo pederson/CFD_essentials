@@ -140,7 +140,42 @@ void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject3D * shape, cons
 			}
 		}
 		
+	}
+	else if (shape->object_name().compare("ParabolicDish") == 0){
 
+		const ParabolicDish * par = dynamic_cast<const ParabolicDish *>(shape);
+
+		double dist;
+		vertex3 vertex, focus, normal, v2p;
+		vector<double> shapeprops;
+		const double * x, *y, *z;
+
+		x = &mesh.x();
+		y = &mesh.y();
+		z = &mesh.z();
+		dist = par->dist();;
+		vertex = par->vertex();
+		focus = par->focus();
+		shapeprops = par->phys_properties();
+
+		normal = focus-vertex;
+		double d, r, fnr, v2fdist;
+		v2fdist = normal.norm();
+		normal.normalize();
+		cout << "vertex to focus dir: " << normal.x << ", " << normal.y << ", " << normal.z << endl;
+		for (auto i=0; i<nnodes; i++){
+			vertex3 pt(x[i], y[i], z[i]);
+			v2p = pt - vertex;
+			d = vertex3::dot(v2p, normal);
+			r = vertex3::cross(vertex-pt, normal).norm();
+			fnr = 0.5*sqrt(d/v2fdist);
+			if (r <= fnr && d <= dist && d >= 0){
+				for (unsigned int j=0; j<propnames.size(); j++){
+					mesh.set_phys_property(propnames.at(j), i, shapeprops.at(j));
+				}
+			}
+		}
+		
 	}
 	else{
 		cout << "THAT SHAPE ISNT YET IMPLEMENTED" << endl;

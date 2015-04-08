@@ -377,6 +377,18 @@ void Box::print_summary() const{
 	cout << "\tShape: " << m_object_name << "\twidth: " << m_width << "\theight: " << m_height << "\tdepth: " << m_depth << "\tcenter: (" << m_center.x << ", " << m_center.y << ", " << m_center.z << ")" << endl;
 }
 
+ParabolicDish::ParabolicDish(vertex3 vertex, vertex3 focus, double dist_, std::vector<double> properties){
+	m_object_name = "ParabolicDish";
+	m_vertex = vertex;
+	m_focus = focus;
+	m_dist = dist_;
+	m_phys_properties = properties;
+}
+
+void ParabolicDish::print_summary() const{
+	cout << "\tShape: " << m_object_name << "\tvertex: (" << m_vertex.x << ", " << m_vertex.y << ", " << m_vertex.z << ")\tfocus " << m_focus.x << ", " << m_focus.y << ", " << m_focus.z << ")\tdist: " << m_dist << endl;
+}
+
 TriangleMesh::TriangleMesh(){
 	vertices = NULL;
 	normals = NULL;
@@ -522,6 +534,10 @@ void ParametricModel3D::add_object(GeometricObject3D * new_object){
 	else if(new_object->object_name().compare("Box") == 0){
 		Box * obj = dynamic_cast<Box *> (new_object);
 		add_object((void *)obj, "Box");
+	}
+	else if(new_object->object_name().compare("ParabolicDish") == 0){
+		ParabolicDish * obj = dynamic_cast<ParabolicDish *> (new_object);
+		add_object((void *)obj, "ParabolicDish");
 	}
 	else {
 		add_object((void *) new_object, new_object->object_name());

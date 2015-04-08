@@ -385,7 +385,7 @@ private:
 class ParabolicDish : public GeometricObject3D{
 public:
 
-	ParabolicDish(vertex3 vertex, vertex3 focus, double m_dist, std::vector<double> properties);
+	ParabolicDish(vertex3 vertex, vertex3 focus, double dist_, std::vector<double> properties);
 
 	vertex3 vertex() const {return m_vertex;};
 	vertex3 focus() const {return m_focus;};
