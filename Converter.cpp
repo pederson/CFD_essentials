@@ -27,6 +27,129 @@ RegularMesh build_simple_mesh_2d(const ParametricModel2D & model,  double res, d
 	return outmesh;
 }
 
+RegularMesh build_simple_mesh_3d(const ParametricModel3D & model, double res, double xmin, double xmax, double ymin, double ymax, double zmin, double zmax, vector<double> bg_properties){
+	// first create a regular grid
+	RegularMesh outmesh = RegularMesh::create_regular_grid_b(res, xmin, xmax, ymin, ymax, zmin, zmax);
+
+	// transfer background properties to the mesh
+	vector<string> prop_names = model.phys_property_names();
+	for (auto i=0; i<prop_names.size(); i++){
+		outmesh.add_phys_property(prop_names.at(i), bg_properties.at(i));
+	}
+
+	vector<void *> shape_tree = model.object_tree();
+	// perform point-in-polygon queries for each part of the parametric model
+	GeometricObject3D * obj;
+	for (auto i=0; i<shape_tree.size(); i++){
+		obj = (GeometricObject3D *)shape_tree.at(i);
+		add_shape_to_mesh(outmesh, obj, model, res);
+	}
+
+	return outmesh;
+}
+
+void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject3D * shape, const ParametricModel3D & model, double res){
+	vector<string> propnames = model.phys_property_names();
+
+	unsigned int nnodes = mesh.nodecount();
+	if (shape->object_name().compare("Cylinder") == 0){
+
+		const Cylinder * cyl = dynamic_cast<const Cylinder *>(shape);
+		double rad, height;
+		vertex3 center, normal;
+		vector<double> shapeprops;
+		const double * x, *y, *z;
+		x = &mesh.x();
+		y = &mesh.y();
+		z = &mesh.z();
+
+		rad = cyl->radius();
+		height = cyl->height();
+		center = cyl->center();
+		normal = cyl->normal();
+		shapeprops = cyl->phys_properties();
+
+		double ldist, cdist;
+		for (auto i=0; i<nnodes; i++){
+			vertex3 pt(x[i], y[i], z[i]);
+			ldist = (vertex3::cross((center-pt),normal)).norm();
+			cdist = fabs(vertex3::dot((pt-center), normal));
+			if (ldist <= rad && cdist <= height/2.0){
+				for (unsigned int j=0; j<propnames.size(); j++){
+					mesh.set_phys_property(propnames.at(j), i, shapeprops.at(j));
+				}
+			}
+		}
+
+	}
+	else if (shape->object_name().compare("Sphere") == 0){
+
+		const Sphere * sph = dynamic_cast<const Sphere *>(shape);
+
+		double rad;
+		vertex3 center;
+		vector<double> shapeprops;
+		const double * x, *y, *z;
+
+		x = &mesh.x();
+		y = &mesh.y();
+		z = &mesh.z();
+		rad = sph->radius();
+		center = sph->center();
+		shapeprops = sph->phys_properties();
+
+
+		for (auto i=0; i<nnodes; i++){
+			if (vertex3::distsq(center, {x[i], y[i], z[i]}) <= rad*rad){
+				for (unsigned int j=0; j<propnames.size(); j++){
+					mesh.set_phys_property(propnames.at(j), i, shapeprops.at(j));
+				}
+			}
+		}
+
+	}
+	else if (shape->object_name().compare("Box") == 0){
+
+		const Box * box = dynamic_cast<const Box *>(shape);
+
+		double width, height, depth;
+		vertex3 center, normal;
+		vector<double> shapeprops;
+		const double * x, *y, *z;
+
+		x = &mesh.x();
+		y = &mesh.y();
+		z = &mesh.z();
+		width = box->width();
+		height = box->height();
+		depth = box->depth();
+		normal = box->normal();
+		center = box->center();
+		shapeprops = box->phys_properties();
+
+		vertex3 sec, rel;
+		for (auto i=0; i<nnodes; i++){
+			vertex3 pt(x[i], y[i], z[i]);
+			rel = pt-center;
+			sec = rel - normal*vertex3::dot(normal, rel);
+			if (sqrt(vertex3::dot(rel, normal)) <= height/2.0
+				&& fabs(sec.x) <= depth/2.0 && fabs(sec.y) <= width/2.0){
+				for (unsigned int j=0; j<propnames.size(); j++){
+					mesh.set_phys_property(propnames.at(j), i, shapeprops.at(j));
+				}
+			}
+		}
+		
+
+	}
+	else{
+		cout << "THAT SHAPE ISNT YET IMPLEMENTED" << endl;
+	}
+
+	
+	return;
+}
+
 void add_shape_to_mesh(RegularMesh & mesh, const GeometricObject2D * shape, const ParametricModel2D & model, double res){
 	// convert the shape to a hull
 	vector<string> propnames = model.get_phys_property_names();

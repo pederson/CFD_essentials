@@ -25,6 +25,10 @@ struct vertex_2d{
 	vertex_2d(double _x, double _y){x = _x; y = _y; return;};
 	double x;
 	double y;
+
+	static double distsq(vertex_2d & v1, vertex_2d & v2){
+		return (v1.x-v2.x)*(v1.x-v2.x) + (v1.y-v2.y)*(v1.y-v2.y);
+	}
 };
 
 struct vertex3{
@@ -33,6 +37,57 @@ struct vertex3{
 	double x;
 	double y;
 	double z;
+
+	void normalize(){
+		double nval = norm();
+		x = x/nval;
+		y = y/nval;
+		z = z/nval;
+	}
+
+	double norm(){
+		return sqrt(distsq({0.0, 0.0, 0.0}, *this));
+	}
+
+	vertex3 operator-(const vertex3 & v1) const{
+		vertex3 vout;
+		vout.x = x-v1.x;
+		vout.y = y-v1.y;
+		vout.z = z-v1.z;
+		return vout;
+	}
+
+	vertex3 operator+(const vertex3 & v1) const{
+		vertex3 vout;
+		vout.x = x+v1.x;
+		vout.y = y+v1.y;
+		vout.z = z+v1.z;
+		return vout;
+	}
+
+	vertex3 operator*(const double mult) const{
+		vertex3 vout;
+		vout.x = x*mult;
+		vout.y = y*mult;
+		vout.z = z*mult;
+		return vout;
+	}
+
+	static double distsq(const vertex3 & v1, const vertex3 & v2){
+		return (v1.x-v2.x)*(v1.x-v2.x) + (v1.y-v2.y)*(v1.y-v2.y) + (v1.z-v2.z)*(v1.z-v2.z);
+	}
+
+	static vertex3 cross(const vertex3 & v1, const vertex3 & v2){
+		vertex3 vout;
+		vout.x = v1.y*v2.z - v1.z*v2.y;
+		vout.y = v2.x*v1.z - v2.z*v1.x;
+		vout.z = v1.x*v2.y - v1.y*v2.x;
+		return vout;
+	}
+
+	static double dot(const vertex3 & v1, const vertex3 & v2){
+		return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
+	}
 };
 
 //********************************** 2D GEOMETRIES ***************************
@@ -257,9 +312,9 @@ public:
 
 	// inspectors
 	virtual void print_summary() const;
-	std::string get_object_name() const {return m_object_name;};
-	std::vector<double> get_phys_properties() const {return m_phys_properties;};
-	vertex3 get_center() const {return m_center;};
+	std::string object_name() const {return m_object_name;};
+	std::vector<double> phys_properties() const {return m_phys_properties;};
+	vertex3 center() const {return m_center;};
 
 	// mutators
 	//virtual void rotate(vertex3 point, vertex3 normal, double deg);
@@ -278,18 +333,21 @@ protected:
 
 };
 
-
 class Cylinder : public GeometricObject3D{
 public:
 
-	Cylinder(double radius, double height, vertex3 extrude_dir, vertex3 center, std::vector<double> properties);
+	Cylinder(double radius, double height, vertex3 normal, vertex3 center, std::vector<double> properties);
+
+	double radius() const {return m_radius;};
+	double height() const {return m_height;};
+	vertex3 normal() const {return m_normal;};
 
 	void print_summary() const;
 
 private:
 	double m_radius;
 	double m_height;
-	vertex3 m_extrude_dir;
+	vertex3 m_normal;
 
 };
 
@@ -297,6 +355,8 @@ class Sphere : public GeometricObject3D{
 public:
 
 	Sphere(double radius, vertex3 center, std::vector<double> properties);
+
+	double radius() const {return m_radius;};
 
 	void print_summary() const;
 
@@ -307,25 +367,47 @@ private:
 class Ellipsoid : public GeometricObject3D{
 public:
 
+	Ellipsoid(double axis1, double axis2, double axis3, vertex3 axis1_dir, vertex3 center, std::vector<double> properties);
+
+	double axis1() const {return m_axis1;};
+	double axis2() const {return m_axis2;};
+	double axis3() const {return m_axis3;};
+	vertex3 axis1_dir() const {return m_axis1_dir;};
+
 	void print_summary() const;
 
 private:
+	double m_axis1, m_axis2, m_axis3;
+	vertex3 m_axis1_dir;
 
 };
 
 class ParabolicDish : public GeometricObject3D{
 public:
 
+	ParabolicDish(vertex3 vertex, vertex3 focus, double m_dist, std::vector<double> properties);
+
+	vertex3 vertex() const {return m_vertex;};
+	vertex3 focus() const {return m_focus;};
+	double dist() const {return m_dist;};
+
 	void print_summary() const;
 
 private:
+	vertex3 m_vertex, m_focus;
+	double m_dist;
 
 };
 
 class Box : public GeometricObject3D{
 public:
 
-	Box(double width, double height, double depth, vertex3 center, std::vector<double> properties);
+	Box(double width, double height, double depth, vertex3 normal, vertex3 center, std::vector<double> properties);
+
+	double width() const {return m_width;};
+	double height() const {return m_height;};
+	double depth() const {return m_depth;};
+	vertex3 normal() const {return m_normal;};
 
 	void print_summary() const;
 
@@ -333,54 +415,71 @@ private:
 	double m_width;
 	double m_height;
 	double m_depth;
+	vertex3 m_normal;
 
 };
 
 class Prism : public GeometricObject3D{
 public:
 
-	Prism(GeometricObject2D base, double depth, vertex3 extrude_dir, vertex3 center, std::vector<double> properties);
+	Prism(GeometricObject2D base, double height, vertex3 normal, vertex3 center, std::vector<double> properties);
+
+	GeometricObject2D base() const {return m_base;};
+	double height() const {return m_height;};
+	vertex3 normal() const {return m_normal;};
 
 	void print_summary() const;
 
 private:
 
 	GeometricObject2D m_base;
-	double m_depth;
-	vertex3 m_extrude_dir;
+	double m_height;
+	vertex3 m_normal;
 };
 
 class Cone: public GeometricObject3D{
 public:
 
-	Cone(double radius, double angle, vertex3 extrude_dir, vertex3 center, std::vector<double> properties);
+	Cone(double radius, double height, vertex3 normal, vertex3 center, std::vector<double> properties);
+
+	double radius() const {return m_radius;};
+	double height() const {return m_height;};
+	vertex3 normal() const {return m_normal;};
 
 	void print_summary() const;
 
 private:
-	double m_angle;
+	double m_height;
 	double m_radius;
-	vertex3 m_extrude_dir;
+	vertex3 m_normal;
 };
 
 class Pyramid: public GeometricObject3D{
 public:
 
-	Pyramid(GeometricObject2D base, double angle, vertex3 extrude_dir, vertex3 center, std::vector<double> properties);
+	Pyramid(GeometricObject2D base, double height, vertex3 normal, vertex3 center, std::vector<double> properties);
+
+	GeometricObject2D base() const {return m_base;};
+	double height() const {return m_height;};
+	vertex3 normal() const {return m_normal;};
 
 	void print_summary() const;
 
 private:
 
 	GeometricObject2D m_base;
-	double m_angle;
-	vertex3 m_extrude_dir;
+	double m_height;
+	vertex3 m_normal;
 };
 
 class Torus: public GeometricObject3D{
 public:
 
 	Torus(double major_radius, double minor_radius, vertex3 normal, vertex3 center, std::vector<double> properties);
+
+	double major_radius() const {return m_major_radius;};
+	double minor_radius() const {return m_minor_radius;};
+	vertex3 normal() const {return m_normal;};
 
 	void print_summary() const;
 
@@ -456,8 +555,8 @@ public:
 
 	//void create_lattice(GeometricObject3D * new_object, vertex3 x_basis, vertex3 y_basis, vertex3 z_basis, unsigned int xcount, unsigned int ycount, unsigned int zcount);
 
-	std::vector<void *> get_object_tree() const {return m_ordered_object_tree;};
-	std::vector<std::string> get_phys_property_names() const {return m_phys_property_names;};
+	std::vector<void *> object_tree() const {return m_ordered_object_tree;};
+	std::vector<std::string> phys_property_names() const {return m_phys_property_names;};
 
 	//void union();
 	//void intersection();

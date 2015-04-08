@@ -9,7 +9,7 @@ GeometricObject2D::GeometricObject2D(){
 
 void GeometricObject2D::print_summary() const{
 	//cout << "printing summary" << flush;
-	cout << "\tShape: " << _object_name << "   Center: (" << _center.x << ", " << _center.y << ")" ;
+	cout << "\tShape: " << _object_name << "\tCenter: (" << _center.x << ", " << _center.y << ")" ;
 	cout << " base print summary" << endl;
 	for (auto i=0; i<parameters.size(); i++) cout << "   " << parameter_names.at(i) << ": " << parameters.at(parameter_names.at(i));
 	cout << endl;
@@ -32,7 +32,7 @@ Gaussian2D::Gaussian2D(double sigma_x, double sigma_y, double amplitude, double 
 }
 
 void Gaussian2D::print_summary() const{
-	cout << "\tShape: " << _object_name << " sigma_x: " << _sigma_x << " sigma_y: " << _sigma_y << " amplitude: " << _amplitude << " center: " << _center.x << ", " << _center.y << endl;
+	cout << "\tShape: " << _object_name << "\tsigma_x: " << _sigma_x << "\tsigma_y: " << _sigma_y << "\tamplitude: " << _amplitude << "\tcenter: (" << _center.x << ", " << _center.y << ")" << endl;
 
 }
 
@@ -54,7 +54,7 @@ Rectangle::Rectangle(double width_, double height_, vertex_2d center_, std::vect
 }
 
 void Rectangle::print_summary() const{
-	cout << "\tShape: " << _object_name << " width: " << _width << " height: " << _height << " center: " << _center.x << ", " << _center.y << endl;
+	cout << "\tShape: " << _object_name << "\twidth: " << _width << "\theight: " << _height << "\tcenter: (" << _center.x << ", " << _center.y << ")" << endl;
 }
 
 Circle::Circle(double radius_, vertex_2d center_, std::vector<double> properties){
@@ -71,7 +71,7 @@ Circle::Circle(double radius_, vertex_2d center_, std::vector<double> properties
 }
 
 void Circle::print_summary() const{
-	cout << "\tShape: " << _object_name << " radius: " << _radius << " center: " << _center.x << ", " << _center.y << endl;
+	cout << "\tShape: " << _object_name << "\tradius: " << _radius << "\tcenter: (" << _center.x << ", " << _center.y << ")" << endl;
 }
 
 Ellipse::Ellipse(double axis_major, double axis_minor, double rot_angle, vertex_2d center_, std::vector<double> properties){
@@ -93,7 +93,7 @@ Ellipse::Ellipse(double axis_major, double axis_minor, double rot_angle, vertex_
 }
 
 void Ellipse::print_summary() const{
-	cout << "\tShape: " << _object_name << " major axis: " << _axis_maj << " minor axis: " << _axis_min << " rotation angle: " << _rotation_angle << " center: " << _center.x << ", " << _center.y << endl;
+	cout << "\tShape: " << _object_name << "\tmajor axis: " << _axis_maj << "\tminor axis: " << _axis_min << "\trotation angle: " << _rotation_angle << "\tcenter: (" << _center.x << ", " << _center.y << ")" << endl;
 }
 
 Parabola::Parabola(vertex_2d vertex, vertex_2d focus, double dist, std::vector<double> properties){
@@ -108,7 +108,7 @@ Parabola::Parabola(vertex_2d vertex, vertex_2d focus, double dist, std::vector<d
 }
 
 void Parabola::print_summary() const{
-	cout << "\tShape: " << _object_name << " vertex: " << m_vertex.x << ", " << m_vertex.y << " fpcus: " << m_focus.x << ", " << m_focus.y << " dist: " << m_dist << " center: " << _center.x << ", " << _center.y << endl;
+	cout << "\tShape: " << _object_name << "\tvertex: (" << m_vertex.x << ", " << m_vertex.y << ")\tfocus: (" << m_focus.x << ", " << m_focus.y << ")\tdist: " << m_dist << "\tcenter: (" << _center.x << ", " << _center.y << ")" << endl;
 
 }
 
@@ -130,7 +130,7 @@ Triangle::Triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, std::vecto
 }
 
 void Triangle::print_summary() const{
-	cout << "\tShape: " << _object_name << " vertex1: " << v1.x << ", " << v1.y << " vertex2: " << v2.x << ", " << v2.y << " vertex3: " << v3.x << ", " << v3.y << " center: " << _center.x << ", " << _center.y << endl;
+	cout << "\tShape: " << _object_name << "\tvertex1: (" << v1.x << ", " << v1.y << ")\tvertex2: (" << v2.x << ", " << v2.y << ")\tvertex3: (" << v3.x << ", " << v3.y << ")\tcenter: (" << _center.x << ", " << _center.y << ")" << endl;
 }
 
 Polygon::Polygon(std::vector<vertex_2d> verts, std::vector<double> properties){
@@ -153,7 +153,7 @@ Polygon::Polygon(std::vector<vertex_2d> verts, std::vector<double> properties){
 }
 
 void Polygon::print_summary() const{
-	cout << "\tShape: " << _object_name << " # vertices: " << vertices.size() << endl;
+	cout << "\tShape: " << _object_name << "\t#vertices: " << vertices.size() << endl;
 }
 
 ParametricModel2D::ParametricModel2D(){
@@ -332,22 +332,24 @@ GeometricObject3D::GeometricObject3D(){
 
 void GeometricObject3D::print_summary() const{
 	//cout << "printing summary" << flush;
-	cout << "\tShape: " << m_object_name << "   Center: (" << m_center.x << ", " << m_center.y << ")" ;
+	cout << "\tShape: " << m_object_name << "\tCenter: (" << m_center.x << ", " << m_center.y << ")" ;
 	cout << " base print summary" << endl;
 
 }
 
-Cylinder::Cylinder(double radius, double height, vertex3 extrude_dir, vertex3 center, std::vector<double> properties){
+Cylinder::Cylinder(double radius, double height, vertex3 normal, vertex3 center, std::vector<double> properties){
 	m_object_name = "Cylinder";
 	m_radius = radius;
 	m_height = height;
-	m_extrude_dir = extrude_dir;
+	m_normal = normal;
 	m_center = center;
 	m_phys_properties = properties;
+
+	m_normal.normalize();
 }
 
 void Cylinder::print_summary() const{
-	cout << "\tCYLINDER: radius: " << m_radius << " height: " << m_height << " center: " << m_center.x << ", " << m_center.y << ", " << m_center.z << endl;
+	cout << "\tShape: " << m_object_name << "\tradius: " << m_radius << "\theight: " << m_height << "\tcenter: (" << m_center.x << ", " << m_center.y << ", " << m_center.z << ")" << endl;
 }
 
 Sphere::Sphere(double radius, vertex3 center, std::vector<double> properties){
@@ -358,9 +360,22 @@ Sphere::Sphere(double radius, vertex3 center, std::vector<double> properties){
 }
 
 void Sphere::print_summary() const{
-	cout << "\tSPHERE: radius: " << m_radius << " center: " << m_center.x << ", " << m_center.y << ", " << m_center.z << endl;
+	cout << "\tShape: " << m_object_name << "\tradius: " << m_radius << "\tcenter: (" << m_center.x << ", " << m_center.y << ", " << m_center.z << ")" << endl;
 }
 
+Box::Box(double width, double height, double depth, vertex3 normal, vertex3 center, std::vector<double> properties){
+	m_object_name = "Box";
+	m_width = width;
+	m_height = height;
+	m_depth = depth;
+	m_normal = normal;
+	m_center = center;
+	m_phys_properties = properties;
+}
+
+void Box::print_summary() const{
+	cout << "\tShape: " << m_object_name << "\twidth: " << m_width << "\theight: " << m_height << "\tdepth: " << m_depth << "\tcenter: (" << m_center.x << ", " << m_center.y << ", " << m_center.z << ")" << endl;
+}
 
 TriangleMesh::TriangleMesh(){
 	vertices = NULL;
@@ -496,16 +511,20 @@ void ParametricModel3D::add_material(std::string material_name, std::vector<doub
 }
 
 void ParametricModel3D::add_object(GeometricObject3D * new_object){
-	if (new_object->get_object_name().compare("Cylinder") == 0){
+	if (new_object->object_name().compare("Cylinder") == 0){
 		Cylinder * obj = dynamic_cast<Cylinder *> (new_object);
 		add_object((void *)(obj), "Cylinder");
 	}
-	else if(new_object->get_object_name().compare("Sphere") == 0){
+	else if(new_object->object_name().compare("Sphere") == 0){
 		Sphere * obj = dynamic_cast<Sphere *> (new_object);
 		add_object((void *)obj, "Sphere");
 	}
+	else if(new_object->object_name().compare("Box") == 0){
+		Box * obj = dynamic_cast<Box *> (new_object);
+		add_object((void *)obj, "Box");
+	}
 	else {
-		add_object((void *) new_object, new_object->get_object_name());
+		add_object((void *) new_object, new_object->object_name());
 	}
 }
 
@@ -526,7 +545,7 @@ int main(int argc, char * argv[]){
 
 	// test 2D parametric builder
 	ParametricModel2D my_param2;
-	my_param2.set_model_name("Dylan Test Model");
+	my_param2.set_model_name("Dylan Test Model 2D");
 	my_param2.add_physical_property("Epsilon_rel");
 	my_param2.add_physical_property("Mu_rel");
 	my_param2.add_material("Air", {1.0, 1.0});
@@ -537,27 +556,78 @@ int main(int argc, char * argv[]){
 	cout << "Testing rectangle..." ;
 	Rectangle newrect = Rectangle(1.0, 2.0, vertex_2d(0.0, 0.0), my_param2.get_material("Air"));
 	my_param2.add_object(&newrect);
+	newrect.print_summary();
 	cout << "Success!" << endl;
 	// test circle
 	cout << "Testing circle..." ;
 	Circle newcirc = Circle(0.75, vertex_2d(0.5, 1.0), my_param2.get_material("Dielectric"));
 	my_param2.add_object(&newcirc);
+	newcirc.print_summary();
 	cout << "Success!" << endl;
 	// test ellipse
 	cout << "Testing ellipse..." ;
 	Ellipse newell = Ellipse(0.3, 0.2, 0.0, vertex_2d(-1.0, -1.0), my_param2.get_material("Dielectric"));
 	my_param2.add_object(&newell);
+	newell.print_summary();
 	cout << "Success!" << endl;
 	// test triangle
 	cout << "Testing triangle..." ;
 	Triangle newtri = Triangle(vertex_2d(3.0, 1.0), vertex_2d(4.0, 0.0), vertex_2d(2.0, 0.0), my_param2.get_material("Air"));
 	my_param2.add_object(&newtri);
+	newtri.print_summary();
+	cout << "Success!" << endl;
+	// test gaussian 2D
+	cout <<"Testing gaussian2D..." ;
+	Gaussian2D newgau = Gaussian2D(0.1, 0.4, 3.5, 0.0, {0.0, 1.0});
+	my_param2.add_object(&newgau);
+	newgau.print_summary();
+	cout << "Success!" << endl;
+	// test parabola
+	cout <<"Testing parabola..." ;
+	Parabola newpar = Parabola({0.0, 0.2}, {0.0, 0.0}, 1.0, my_param2.get_material("Dielectric"));
+	my_param2.add_object(&newpar);
+	newpar.print_summary();
+	cout << "Success!" << endl;
+	// test polygon
+	cout <<"Testing polygon..." ;
+	Polygon newpol = Polygon({{3.3, 2.2}, {0.0, 2.0}, {1.0, 1.0}, {0.0, 1.0}}, my_param2.get_material("Dielectric"));
+	my_param2.add_object(&newpol);
+	newpol.print_summary();
 	cout << "Success!" << endl;
 
 	my_param2.print_summary();
 
 
+	// test 2D parametric builder
+	cout << "\n\nTesting 3D Parametric Model Builder" << endl;
+	ParametricModel3D my_param3;
+	my_param3.set_model_name("Dylan Test Model 3D");
+	my_param3.add_physical_property("Epsilon_rel");
+	my_param3.add_physical_property("Mu_rel");
+	my_param3.add_material("Air", {1.0, 1.0});
+	my_param3.add_material("Dielectric", {5.0, 2.0});
 
+	// test cylinder
+	cout << "Testing cylinder..." ;
+	Cylinder newcyl = Cylinder(0.3, 1.0, {0.0, 1.0, 0.0}, {0.0, 0.0, 0.0}, my_param3.get_material("Dielectric"));
+	my_param3.add_object(&newcyl);
+	newcyl.print_summary();
+	cout << "Success!" << endl;
+	// test sphere
+	cout << "Testing sphere..." ;
+	Sphere newsph = Sphere(0.4, {1.0, 1.0, 1.0}, my_param3.get_material("Dielectric"));
+	my_param3.add_object(&newsph);
+	newsph.print_summary();
+	cout << "Success!" << endl;
+	// test ellipsoid
+	// test parabolic dish
+	// test box
+	// test prism
+	// test cone
+	// test pyramid
+	// test torus
+
+	my_param3.print_summary();
 
 	// test stl reader
 	TriangleMesh * mytri = TriangleMesh::read_STL("./testfiles/brain-gear.stl");

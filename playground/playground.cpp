@@ -228,22 +228,66 @@ int main(int argc, char * argv[]){
 	//*/
 
 	// 3D dielectric sphere
-	
-	dx = 0.015;
+	/*
 	srcfreq = 1.0e+9;
 	srclocx = 0.2;
 	srclocy = 0.2;
 	srclocz = 0.2;
+	ParametricModel3D paramodel;
+	paramodel.set_model_name("DielectricSphere");
+	paramodel.add_physical_property("eps_rel");
+	paramodel.add_material("Vacuum", {1.0});
+	paramodel.add_material("Dielectric", {3.0});
+	Sphere s1 = Sphere(0.2, {0.5, 0.5, 0.5}, paramodel.get_material("Dielectric"));
+	paramodel.add_object(&s1);
+	// convert the model into a mesh
+	cout << "about to make mesh" << endl;
+	dx = 0.015;
 	RegularMesh paramesh;
-	paramesh = RegularMesh::create_regular_grid_b(dx, 0.0, 1.0, 0.0, 0.8, 0.0, 0.6);
-	double * epsrel = new double[paramesh.nodecount()];
-	double scenx=0.5, sceny=0.4, scenz=0.3, srad=0.15;
-	for (auto i=0; i<paramesh.nodecount(); i++){
-		const MeshNode * node;
-		node = &paramesh.node(i);
-		if ((node->x()-scenx)*(node->x()-scenx) + (node->y()-sceny)*(node->y()-sceny) + (node->z()-scenz)*(node->z()-scenz) <= srad*srad) epsrel[i] = 3.0;
-		else epsrel[i] = 1.0;
-	}
+	paramesh = build_simple_mesh_3d(paramodel, dx, 0.0, 1.0, 0.0, 0.8, 0.0, 0.6, paramodel.get_material("Vacuum"));
+	paramesh.print_summary();
+	//*/
+
+	// 3D dielectric cylinder
+	/*
+	srcfreq = 1.0e+9;
+	srclocx = 0.2;
+	srclocy = 0.2;
+	srclocz = 0.2;
+	ParametricModel3D paramodel;
+	paramodel.set_model_name("DielectricSphere");
+	paramodel.add_physical_property("eps_rel");
+	paramodel.add_material("Vacuum", {1.0});
+	paramodel.add_material("Dielectric", {3.0});
+	Cylinder s1 = Cylinder(0.2, 0.5, {1.0, 1.0, 0.0}, {0.5, 0.5, 0.5}, paramodel.get_material("Dielectric"));
+	paramodel.add_object(&s1);
+	// convert the model into a mesh
+	cout << "about to make mesh" << endl;
+	dx = 0.015;
+	RegularMesh paramesh;
+	paramesh = build_simple_mesh_3d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, paramodel.get_material("Vacuum"));
+	paramesh.print_summary();
+	//*/
+
+	// 3D dielectric box
+	
+	srcfreq = 1.0e+9;
+	srclocx = 0.2;
+	srclocy = 0.2;
+	srclocz = 0.2;
+	ParametricModel3D paramodel;
+	paramodel.set_model_name("DielectricSphere");
+	paramodel.add_physical_property("eps_rel");
+	paramodel.add_material("Vacuum", {1.0});
+	paramodel.add_material("Dielectric", {3.0});
+	Box s1 = Box(0.5, 0.2, 0.3, {0.0, 0.0, 1.0}, {0.5, 0.5, 0.5}, paramodel.get_material("Dielectric"));
+	paramodel.add_object(&s1);
+	// convert the model into a mesh
+	cout << "about to make mesh" << endl;
+	dx = 0.015;
+	RegularMesh paramesh;
+	paramesh = build_simple_mesh_3d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, paramodel.get_material("Vacuum"));
+	paramesh.print_summary();
 	//*/
 
 
@@ -253,8 +297,7 @@ int main(int argc, char * argv[]){
 	mesh_visualixer paravis;
 	paravis.bind_mesh(paramesh);
 	paravis.set_color_ramp(CRamp::DIVERGENT_9);
-	//paravis.set_colorby(&paramesh.data("eps_rel"));
-	paravis.set_colorby(epsrel);
+	paravis.set_colorby(&paramesh.data("eps_rel"));
 	paravis.run();
 	//*/
 	
@@ -263,8 +306,7 @@ int main(int argc, char * argv[]){
 	// initialize the simulation
 	FDTDSimulation fsim;
 	fsim.bind_mesh(paramesh);
-	fsim.bind_rel_permittivity(epsrel);
-	//fsim.bind_rel_permittivity(&paramesh.data("eps_rel"));
+	fsim.bind_rel_permittivity(&paramesh.data("eps_rel"));
 	//fsim.bind_conductivity(&paramesh.data("conductivity"));
 	//fsim.bind_single_pole(&paramesh.data("polenumerator"), &paramesh.data("polefreq"));
 	//fsim.bind_current_density_z(&paramesh.data("current_density"));

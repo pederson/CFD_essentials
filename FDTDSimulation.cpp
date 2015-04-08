@@ -774,8 +774,6 @@ void FDTDSimulation::prepareModulator(){
 
 void FDTDSimulation::allocate_fields(){
 
-	cout << "allocating fields" << endl;
-
 	if (_mesh->num_dims() == 1){
 
 		_Dn_z = new double[_mesh->nodecount()];
