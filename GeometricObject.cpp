@@ -96,6 +96,22 @@ void Ellipse::print_summary() const{
 	cout << "\tShape: " << _object_name << " major axis: " << _axis_maj << " minor axis: " << _axis_min << " rotation angle: " << _rotation_angle << " center: " << _center.x << ", " << _center.y << endl;
 }
 
+Parabola::Parabola(vertex_2d vertex, vertex_2d focus, double dist, std::vector<double> properties){
+	_object_name = "Parabola";
+	_center	= vertex;
+	phys_properties = properties;
+
+	m_vertex = vertex;
+	m_focus = focus;
+	m_dist = dist;
+	
+}
+
+void Parabola::print_summary() const{
+	cout << "\tShape: " << _object_name << " vertex: " << m_vertex.x << ", " << m_vertex.y << " fpcus: " << m_focus.x << ", " << m_focus.y << " dist: " << m_dist << " center: " << _center.x << ", " << _center.y << endl;
+
+}
+
 Triangle::Triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3, std::vector<double> properties){
 	// common parameters
 	_object_name = "Triangle";
@@ -229,7 +245,6 @@ void ParametricModel2D::add_object(GeometricObject2D * new_object){
 void ParametricModel2D::add_object(void * new_object, string object_name){
 	object_tree_names.push_back(object_name);
 	ordered_object_tree.push_back(new_object);
-	
 }
 
 // this leaks memory... but it's not a lot. And the current solution is an easy one that was hastily implemented
@@ -311,6 +326,16 @@ void ParametricModel2D::create_lattice(GeometricObject2D * new_object, vertex_2d
 
 
 //************************************************************************
+GeometricObject3D::GeometricObject3D(){
+	m_object_name = "GeometricObject3D";
+}
+
+void GeometricObject3D::print_summary() const{
+	//cout << "printing summary" << flush;
+	cout << "\tShape: " << m_object_name << "   Center: (" << m_center.x << ", " << m_center.y << ")" ;
+	cout << " base print summary" << endl;
+
+}
 
 Cylinder::Cylinder(double radius, double height, vertex3 extrude_dir, vertex3 center, std::vector<double> properties){
 	m_object_name = "Cylinder";
@@ -333,7 +358,7 @@ Sphere::Sphere(double radius, vertex3 center, std::vector<double> properties){
 }
 
 void Sphere::print_summary() const{
-	cout << "\tSPHERE: radius: " << m_radius << " height: " << m_height << " center: " << m_center.x << ", " << m_center.y << ", " << m_center.z << endl;
+	cout << "\tSPHERE: radius: " << m_radius << " center: " << m_center.x << ", " << m_center.y << ", " << m_center.z << endl;
 }
 
 
@@ -347,6 +372,10 @@ TriangleMesh::~TriangleMesh(){
 	if(vertices != NULL) delete[] vertices;
 	if(normals != NULL) delete[] normals;
 	if(vertex_inds != NULL) delete[] vertex_inds;
+}
+
+void TriangleMesh::print_summary() const{
+	cout <<"\tTRIANGLE MESH" << endl;
 }
 
 TriangleMesh * TriangleMesh::read_STL(string filename, unsigned int byte_offset){
@@ -437,32 +466,53 @@ ParametricModel3D::ParametricModel3D(){
 void ParametricModel3D::print_summary() const{
 	cout << " " << endl;
 	cout << "********* Parametric Model 3D Summary **********" << endl;
-	cout << "Model Name: " << model_name << endl;
-	for (auto i=0; i<ordered_object_tree.size(); i++){
-		if (object_tree_names.at(i).compare("Cylinder") == 0){
-			((Cylinder *)ordered_object_tree.at(i))->print_summary();
+	cout << "Model Name: " << m_model_name << endl;
+	for (auto i=0; i<m_ordered_object_tree.size(); i++){
+		if (m_object_tree_names.at(i).compare("Cylinder") == 0){
+			((Cylinder *)m_ordered_object_tree.at(i))->print_summary();
 		}
-		else if(object_tree_names.at(i).compare("Sphere") == 0){
-			((Sphere *)ordered_object_tree.at(i))->print_summary();
+		else if(m_object_tree_names.at(i).compare("Sphere") == 0){
+			((Sphere *)m_ordered_object_tree.at(i))->print_summary();
 		}
 		else {
-			((GeometricObject2D *) ordered_object_tree.at(i))->print_summary();
+			((GeometricObject3D *) m_ordered_object_tree.at(i))->print_summary();
 		}
 	}
 	cout << "*********************************************" << endl;
 	cout << " " << endl;
 	return;
 }
+
+void ParametricModel3D::set_model_name(std::string mname){
+	m_model_name = mname;
 }
 
-void ParametricModel3D::set_model_name(std::string mname);
-std::vector<double> ParametricModel3D::get_material(std::string material_name) const;
+void ParametricModel3D::add_physical_property(std::string property_name){
+	m_phys_property_names.push_back(property_name);
+}
 
-void ParametricModel3D::add_physical_property(std::string property_name);
-void ParametricModel3D::add_material(std::string material_name, std::vector<double> phys_props);
-void ParametricModel3D::add_object(GeometricObject3D * new_object);
+void ParametricModel3D::add_material(std::string material_name, std::vector<double> phys_props){
+	m_materials[material_name] = phys_props;
+}
 
-void ParametricModel3D::add_object(void * new_object, std::string object_name);
+void ParametricModel3D::add_object(GeometricObject3D * new_object){
+	if (new_object->get_object_name().compare("Cylinder") == 0){
+		Cylinder * obj = dynamic_cast<Cylinder *> (new_object);
+		add_object((void *)(obj), "Cylinder");
+	}
+	else if(new_object->get_object_name().compare("Sphere") == 0){
+		Sphere * obj = dynamic_cast<Sphere *> (new_object);
+		add_object((void *)obj, "Sphere");
+	}
+	else {
+		add_object((void *) new_object, new_object->get_object_name());
+	}
+}
+
+void ParametricModel3D::add_object(void * new_object, std::string object_name){
+	m_object_tree_names.push_back(object_name);
+	m_ordered_object_tree.push_back(new_object);
+}
 
 
 

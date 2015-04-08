@@ -151,6 +151,23 @@ private:
 
 };
 
+class Parabola : public GeometricObject2D{
+public:
+
+	Parabola(vertex_2d vertex, vertex_2d focus, double dist, std::vector<double> properties);
+
+	double dist() const {return m_dist;};
+	vertex_2d vertex() const {return m_vertex;};
+	vertex_2d focus() const {return m_focus;};
+
+	void print_summary() const;
+
+private:
+	double m_dist;
+	vertex_2d m_vertex, m_focus;
+
+};
+
 class Triangle : public GeometricObject2D{
 public:
 	//Triangle(vertex_2d vert1, vertex_2d vert2, vertex_2d vert3);
@@ -245,8 +262,8 @@ public:
 	vertex3 get_center() const {return m_center;};
 
 	// mutators
-	//virtual void rotate(vertex_2d point, double deg);
-	//virtual void translate(float delta_x, float delta_y);
+	//virtual void rotate(vertex3 point, vertex3 normal, double deg);
+	//virtual void translate(float delta_x, float delta_y, float delta_z);
 	//virtual void mirror(LineSegment blah);
 	//void set_phys_property(std::string property_name, double value);
 
@@ -262,7 +279,7 @@ protected:
 };
 
 
-class Cylinder: public GeometricObject3D{
+class Cylinder : public GeometricObject3D{
 public:
 
 	Cylinder(double radius, double height, vertex3 extrude_dir, vertex3 center, std::vector<double> properties);
@@ -276,7 +293,7 @@ private:
 
 };
 
-class Sphere: public GeometricObject3D{
+class Sphere : public GeometricObject3D{
 public:
 
 	Sphere(double radius, vertex3 center, std::vector<double> properties);
@@ -287,7 +304,25 @@ private:
 	double m_radius;
 };
 
-class Box: public GeometricObject3D{
+class Ellipsoid : public GeometricObject3D{
+public:
+
+	void print_summary() const;
+
+private:
+
+};
+
+class ParabolicDish : public GeometricObject3D{
+public:
+
+	void print_summary() const;
+
+private:
+
+};
+
+class Box : public GeometricObject3D{
 public:
 
 	Box(double width, double height, double depth, vertex3 center, std::vector<double> properties);
@@ -301,7 +336,7 @@ private:
 
 };
 
-class Prism: public GeometricObject3D{
+class Prism : public GeometricObject3D{
 public:
 
 	Prism(GeometricObject2D base, double depth, vertex3 extrude_dir, vertex3 center, std::vector<double> properties);
@@ -318,7 +353,7 @@ private:
 class Cone: public GeometricObject3D{
 public:
 
-	Prism(double radius, double angle, vertex3 extrude_dir, vertex3 center, std::vector<double> properties);
+	Cone(double radius, double angle, vertex3 extrude_dir, vertex3 center, std::vector<double> properties);
 
 	void print_summary() const;
 
@@ -413,7 +448,7 @@ public:
 	void print_summary() const;
 
 	void set_model_name(std::string mname);
-	std::vector<double> get_material(std::string material_name) const;
+	std::vector<double> get_material(std::string material_name) const {return m_materials.at(material_name);};
 	
 	void add_physical_property(std::string property_name);
 	void add_material(std::string material_name, std::vector<double> phys_props);
@@ -421,7 +456,6 @@ public:
 
 	//void create_lattice(GeometricObject3D * new_object, vertex3 x_basis, vertex3 y_basis, vertex3 z_basis, unsigned int xcount, unsigned int ycount, unsigned int zcount);
 
-	//std::vector<geometric_object_2d> get_object_tree(){return ordered_object_tree;};
 	std::vector<void *> get_object_tree() const {return m_ordered_object_tree;};
 	std::vector<std::string> get_phys_property_names() const {return m_phys_property_names;};
 
