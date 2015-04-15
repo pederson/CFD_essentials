@@ -30,10 +30,36 @@ int main(int argc, char * argv[]){
 	paramodel.add_object(&c2);
 	// convert the model into a mesh
 	cout << "about to make mesh" << endl;
-	dx = 0.005;
+	dx = 0.004;
 	RegularMesh paramesh;
 	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, paramodel.material("Vacuum"));
 	paramesh.print_summary();
+	numiters = 600;
+	//*/
+
+	// split ring model
+	/*
+	srcfreq = 3.0e+9;
+	srclocx = 0.1; 
+	srclocy = 0.5;
+	ParametricModel2D paramodel;
+	paramodel.set_model_name("SplitRing");
+	paramodel.add_physical_property("eps_rel");
+	paramodel.add_material("Vacuum", {1.0});
+	paramodel.add_material("Dielectric", {6.0});
+	Circle c1 = Circle(0.1, {0.5, 0.5}, paramodel.material("Dielectric"));
+	Circle c2 = Circle(0.06, {0.5, 0.5}, paramodel.material("Vacuum"));
+	Rectangle r1 = Rectangle(0.04, 0.1, {0.5, 0.6}, paramodel.material("Vacuum"));
+	paramodel.add_object(&c1);
+	paramodel.add_object(&c2);
+	paramodel.add_object(&r1);
+	// convert the model into a mesh
+	cout << "about to make mesh" << endl;
+	dx = 0.004;
+	RegularMesh paramesh;
+	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, paramodel.material("Vacuum"));
+	paramesh.print_summary();
+	numiters = 600;
 	//*/
 	
 
@@ -217,7 +243,7 @@ int main(int argc, char * argv[]){
 	//*/
 
 	// 2D lens
-	
+	/*
 	srcfreq = 6.0e+9;
 	srclocx = 0.1; 
 	srclocy = 0.5;
@@ -237,6 +263,57 @@ int main(int argc, char * argv[]){
 	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, paramodel.material("Vacuum"));
 	paramesh.print_summary();
 	numiters = 800;
+	//*/
+
+	// 2D surface plasmon (two tries, no cigar)
+	/*
+	srcfreq = 3.0e+9;
+	srclocx = 0.2; 
+	srclocy = 0.2;
+	ParametricModel2D paramodel;
+	paramodel.set_model_name("Lens2D");
+	paramodel.add_physical_property("eps_rel");
+	paramodel.add_material("Vacuum", {1.0});
+	paramodel.add_material("Dielectric", {2.0});
+	paramodel.add_material("Metal", {-1.0});
+	Rectangle r1 = Rectangle(0.3, 1.0, {0.15, 0.5}, paramodel.material("Dielectric"));
+	paramodel.add_object(&r1);
+	Rectangle r2 = Rectangle(0.7, 1.0, {0.7, 0.5}, paramodel.material("Metal"));
+	paramodel.add_object(&r2);
+	// convert the model into a mesh
+	cout << "about to make mesh" << endl;
+	dx = 0.005;
+	RegularMesh paramesh;
+	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 1.0, 0.0, 1.0, paramodel.material("Vacuum"));
+	paramesh.print_summary();
+	numiters = 400;
+	/*
+	dx = 0.5e-6;
+	srcfreq = 3.0e+12;	// should be reflected
+	//srcfreq = 3.0e+13;	// should pass right through
+	srclocx = 40*dx;
+	srclocy = 40*dx;
+	ParametricModel2D paramodel;
+	paramodel.add_physical_property("eps_rel");
+	paramodel.add_physical_property("conductivity");
+	paramodel.add_physical_property("polenumerator");
+	paramodel.add_physical_property("polefreq");
+	paramodel.add_material("Vacuum", {1.0, 0.0, 0.0, 0.0});
+	paramodel.add_material("Dielectric", {2.0, 0, 0, 0});
+	paramodel.add_material("Metal", {1.0, 349.5e+3, -39.47e+15, 1.0e+11});
+	Rectangle r1 = Rectangle(0.3*200*dx, 1.0*200*dx, {0.15*200*dx, 0.5*200*dx}, paramodel.material("Dielectric"));
+	paramodel.add_object(&r1);
+	Rectangle r2 = Rectangle(0.65*200*dx, 1.0*200*dx, {0.65*200*dx, 0.5*200*dx}, paramodel.material("Metal"));
+	paramodel.add_object(&r2);
+	Rectangle r3 = Rectangle(1.0*200*dx, 0.3*200*dx, {0.5*200*dx, 0.15*200*dx}, paramodel.material("Dielectric"));
+	paramodel.add_object(&r3);
+	paramodel.print_summary();
+	// convert the model into a mesh
+	cout << "about to make mesh" << endl;
+	RegularMesh paramesh;
+	paramesh = build_simple_mesh_2d(paramodel, dx, 0.0, 200*dx, 0.0, 200*dx, paramodel.material("Vacuum"));
+	paramesh.print_summary();
+	numiters = 500;
 	//*/
 
 	// 3D free space
@@ -357,12 +434,12 @@ int main(int argc, char * argv[]){
 	//fsim.bind_single_pole(&paramesh.data("polenumerator"), &paramesh.data("polefreq"));
 	//fsim.bind_current_density_z(&paramesh.data("current_density"));
 	fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy, srclocz);
-	fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy + 0.1, srclocz);
-	fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy - 0.1, srclocz);
-	fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy + 0.2, srclocz);
-	fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy - 0.2, srclocz);
-	fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy + 0.3, srclocz);
-	fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy - 0.3, srclocz);
+	//fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy + 0.1, srclocz);
+	//fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy - 0.1, srclocz);
+	//fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy + 0.2, srclocz);
+	//fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy - 0.2, srclocz);
+	//fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy + 0.3, srclocz);
+	//fsim.add_sinusoidal_source(srcfreq, 0.0, srclocx, srclocy - 0.3, srclocz);
 
 	//fsim.add_sinusoidal_source(15.0e+13, 0.0, 1.5e-6, 2.5e-6);
 	//fsim.add_gaussian_source(10.0, 10.0, 4.5e-6, 4.0e-6);

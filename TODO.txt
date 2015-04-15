@@ -1,5 +1,17 @@
 TODO:
 
+- general wave polarizations need to be supported
+
+- TE and TM options for 2D FDTD simulation
+
+- TFSF formulation for FDTD
+
+- Better method for saving fields in FDTD and other simulations
+
+- Support drude model materials (for metals)
+
+- plane wave source option by setting center point and normal vector
+
 - multithreaded writing of simulationData to HDF5 files
 
 - Simulation of wave on a plasma sheath
@@ -10,7 +22,7 @@ TODO:
 
 - make gaussian pulse specified by central frequency, frequency spread, and t0
 
-- support more general frequency dependent materials with multiple possible resonances... will be important for multi-component plasmas. http://ab-initio.mit.edu/wiki/index.php/Dielectric_materials_in_Meep
+- support more general frequency dependent materials with multiple possible resonances... may be important for multi-component plasmas. http://ab-initio.mit.edu/wiki/index.php/Dielectric_materials_in_Meep
 
 - writing HDF5 with ~1000 time steps is excruciatingly slow... why? It's just fine for 500 time steps
 
