@@ -1,4 +1,4 @@
 # specify files to exclude 
 *~
-*/build/*
+build/
 Makefile
